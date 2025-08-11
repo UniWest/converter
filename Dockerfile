@@ -54,9 +54,8 @@ COPY . .
 # Устанавливаем права на выполнение скриптов
 RUN chmod +x manage.py
 
-# Копируем скрипт запуска для Docker-платформ (Railway) и даём права до смены пользователя
-COPY scripts/start.sh /app/scripts/start.sh
-RUN chmod +x /app/scripts/start.sh
+# Копируем скрипт запуска для Docker-платформ (Railway) с правами исполнения (Dockerfile v1.2)
+COPY --chmod=0755 scripts/start.sh /app/scripts/start.sh
 
 # Создаем пользователя для безопасности
 RUN useradd --create-home --shell /bin/bash app_user && \
