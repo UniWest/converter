@@ -28,7 +28,21 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-pil_my+-p)h2j$x_d4k2b
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # ALLOWED_HOSTS configuration
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
+# Default to allow all hosts in development, specific hosts in production
+if DEBUG:
+    ALLOWED_HOSTS = ['*']  # Allow all hosts in debug mode
+else:
+    # Production hosts - add your deployment URLs here
+    ALLOWED_HOSTS = [
+        'converter-ptzm.onrender.com',  # Your Render URL
+        '127.0.0.1',
+        'localhost',
+    ]
+    # Also accept hosts from environment variable
+    env_hosts = config('ALLOWED_HOSTS', default='', cast=str)
+    if env_hosts:
+        additional_hosts = [s.strip() for s in env_hosts.split(',') if s.strip()]
+        ALLOWED_HOSTS.extend(additional_hosts)
 
 # Production security settings
 if not DEBUG:
@@ -49,6 +63,7 @@ if not DEBUG:
 # CORS settings for external origins
 CORS_ALLOWED_ORIGINS = [
     "https://user740764150-wdjyqhj4.tunnel.vk-apps.com",
+    "https://converter-ptzm.onrender.com",  # Add Render URL
 ]
 
 # Alternative: Allow all subdomains with regex (uncomment if needed)
@@ -57,11 +72,16 @@ CORS_ALLOWED_ORIGINS = [
 # ]
 
 # CSRF trusted origins - configurable for different environments
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default="https://user740764150-wdjyqhj4.tunnel.vk-apps.com",
-    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
-)
+CSRF_TRUSTED_ORIGINS = [
+    "https://user740764150-wdjyqhj4.tunnel.vk-apps.com",
+    "https://converter-ptzm.onrender.com",  # Add Render URL
+    "http://converter-ptzm.onrender.com",   # Add HTTP version for initial setup
+]
+# Also accept from environment variable
+env_csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='', cast=str)
+if env_csrf_origins:
+    additional_csrf_origins = [s.strip() for s in env_csrf_origins.split(',') if s.strip()]
+    CSRF_TRUSTED_ORIGINS.extend(additional_csrf_origins)
 
 # CORS headers for websockets (if needed)
 CORS_ALLOW_HEADERS = [
