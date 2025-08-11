@@ -54,6 +54,10 @@ COPY . .
 # Устанавливаем права на выполнение скриптов
 RUN chmod +x manage.py
 
+# Копируем скрипт запуска для Docker-платформ (Railway) и даём права до смены пользователя
+COPY scripts/start.sh /app/scripts/start.sh
+RUN chmod +x /app/scripts/start.sh
+
 # Создаем пользователя для безопасности
 RUN useradd --create-home --shell /bin/bash app_user && \
     chown -R app_user:app_user /app
@@ -61,10 +65,6 @@ USER app_user
 
 # Экспонируем порт
 EXPOSE 8000
-
-# Копируем скрипт запуска для Docker-платформ (Railway)
-COPY scripts/start.sh /app/scripts/start.sh
-RUN chmod +x /app/scripts/start.sh
 
 # Команда по умолчанию (Railway будет передавать $PORT)
 CMD ["/bin/bash", "-lc", "/app/scripts/start.sh"]
