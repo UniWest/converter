@@ -1,63 +1,19 @@
-from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse
+from forms import VideoUploadForm
 
 def home_view(request):
-    html = """
-    <html>
-    <head><title>Converter App</title></head>
-    <body>
-        <h1><ج Converter App is Running!</h1>
-        <p>Your application has been successfully deployed.</p>
-        <p><a href="/app/convert/">Go to Converter</a></p>
-    </body>
-    </html>
-    """
-    return HttpResponse(html)
+    if request.method == 'POST':
+        form = VideoUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            return HttpResponse('<h1>Conversion Started!</h1><p>Your video is being processed...</p>')
+    else:
+        form = VideoUploadForm()
+    
+    return render(request, 'converter/home.html', {'form': form})
 
 def convert_video_view(request):
-    return HttpResponse("<h1>Converter Feature</h1><p>Upload functionality will be added soon.</p>")
-
-def conversion_interface(request):
-    return HttpResponse("<h1>Conversion Interface</h1><p>Interface coming soon.</p>")
-
-def conversion_results(request):
-    return HttpResponse("<h1>Conversion Results</h1><p>Results will appear here.</p>")
-
-def quick_convert_view(request):
-    return HttpResponse("<h1>Quick Convert</h1><p>Quick convert feature coming soon.</p>")
-
-def ajax_convert_view(request):
-    return JsonResponse({"status": "ok", "message": "AJAX endpoint working"})
-
-def video_info_view(request):
-    return JsonResponse({"status": "ok", "message": "Video info endpoint working"})
-
-def download_gif_view(request, filename):
-    return HttpResponse(f"<h1>Download: {filename}</h1><p>Download feature coming soon.</p>")
+    return render(request, 'converter/index.html', {'form': VideoUploadForm()})
 
 def converter_status_view(request):
-    return JsonResponse({"status": "operational", "version": "1.0.0"})
-
-def test_gif_view(request, filename):
-    return HttpResponse(f"<h1>Test GIF: {filename}</h1>")
-
-def engine_status(request):
-    return JsonResponse({"engine_status": "ok"})
-
-def audio_to_text_page(request):
-    return HttpResponse("<h1>Audio to Text</h1><p>STT feature coming soon.</p>")
-
-def audio_to_text_api(request):
-    return JsonResponse({"status": "ok", "message": "Audio to text API ready"})
-
-def photos_to_gif_page(request):
-    return HttpResponse("<h1>Photos to GIF</h1><p>Photo GIF feature coming soon.</p>")
-
-def photos_to_gif_api(request):
-    return JsonResponse({"status": "ok", "message": "Photos to GIF API ready"})
-
-def task_status_api(request, task_id):
-    return JsonResponse({"task_id": task_id, "status": "pending"})
-
-def cancel_task_api(request, task_id):
-    return JsonResponse({"task_id": task_id, "cancelled": True})
+    return JsonResponse({'status': 'operational', 'version': '1.0.0'})
