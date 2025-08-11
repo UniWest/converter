@@ -6,7 +6,7 @@ import math
 import json
 from pathlib import Path
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404, StreamingHttpResponse
 from django.conf import settings
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
@@ -537,10 +537,77 @@ def convert_video_view(request):
 def converter_status_view(request):
     return JsonResponse({'status': 'operational', 'version': '1.0.0'})
 
+def health(request):
+    return JsonResponse({'ok': True})
+
 # Additional placeholder views for navigation links
 def photos_to_gif_view(request):
     """View for photos to GIF conversion."""
     return render(request, 'converter/photos_to_gif.html')
+
+
+def safe_join_media(category: str, filename: str) -> Path:
+    """Safely join MEDIA_ROOT with a known category subfolder and filename."""
+    allowed = {
+        'gifs': 'gifs',
+        'images': 'images',
+        'videos': 'videos',
+        'audio': 'audio'
+    }
+    sub = allowed.get(category)
+    if not sub:
+        raise Http404("Invalid download category")
+    base = Path(settings.MEDIA_ROOT) / sub
+    # Prevent path traversal
+    fpath = (base / filename).resolve()
+    if not str(fpath).startswith(str(base.resolve())):
+        raise Http404("Invalid path")
+    return fpath
+
+
+def download_and_delete(request, category: str, filename: str):
+    """
+    Stream a file to the user and delete it from disk right after sending.
+    """
+    file_path = safe_join_media(category, filename)
+    if not file_path.exists() or not file_path.is_file():
+        raise Http404("File not found")
+
+    def file_iterator(path: Path, chunk_size: int = 8192):
+        try:
+            with open(path, 'rb') as f:
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
+        finally:
+            # After streaming finishes (or client disconnects), try to delete the file
+            try:
+                path.unlink(missing_ok=True)
+            except Exception as e:
+                logger.warning(f"Failed to delete file after download: {path} -> {e}")
+
+    content_type = 'application/octet-stream'
+    # Set some common types
+    if file_path.suffix.lower() == '.gif':
+        content_type = 'image/gif'
+    elif file_path.suffix.lower() in {'.jpg', '.jpeg'}:
+        content_type = 'image/jpeg'
+    elif file_path.suffix.lower() == '.png':
+        content_type = 'image/png'
+    elif file_path.suffix.lower() == '.mp3':
+        content_type = 'audio/mpeg'
+    elif file_path.suffix.lower() == '.mp4':
+        content_type = 'video/mp4'
+
+    response = StreamingHttpResponse(file_iterator(file_path), content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename="{file_path.name}"'
+    try:
+        response['Content-Length'] = file_path.stat().st_size
+    except Exception:
+        pass
+    return response
 
 def audio_to_text_view(request):
     """View for audio to text conversion."""

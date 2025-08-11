@@ -651,10 +651,18 @@ function clearHistory() {
 
 // Скачивание файла
 function downloadFile(url) {
+    // Переписываем URL на одноразовую загрузку, чтобы удалить файл после скачивания
+    let dl = url;
+    if (url.includes('/media/gifs/')) dl = url.replace('/media/gifs/', '/converter/download/gifs/');
+    else if (url.includes('/media/images/')) dl = url.replace('/media/images/', '/converter/download/images/');
+    else if (url.includes('/media/videos/')) dl = url.replace('/media/videos/', '/converter/download/videos/');
+    else if (url.includes('/media/audio/')) dl = url.replace('/media/audio/', '/converter/download/audio/');
     const link = document.createElement('a');
-    link.href = url;
+    link.href = dl;
     link.download = url.split('/').pop();
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 }
 
 // Повторить конвертацию

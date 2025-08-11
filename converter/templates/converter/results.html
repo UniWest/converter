@@ -619,8 +619,13 @@ function closeLightbox() {
 }
 
 function downloadFile(url, filename) {
+    let dl = url;
+    if (url.includes('/media/gifs/')) dl = url.replace('/media/gifs/', '/converter/download/gifs/');
+    else if (url.includes('/media/images/')) dl = url.replace('/media/images/', '/converter/download/images/');
+    else if (url.includes('/media/videos/')) dl = url.replace('/media/videos/', '/converter/download/videos/');
+    else if (url.includes('/media/audio/')) dl = url.replace('/media/audio/', '/converter/download/audio/');
     const a = document.createElement('a');
-    a.href = url;
+    a.href = dl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();

@@ -167,7 +167,9 @@ function downloadGif() {
     
     // Создать ссылку для скачивания
     const a = document.createElement('a');
-    a.href = '{{ gif_url }}';
+    // Направляем через одноразовый эндпоинт для автоудаления
+    const downloadUrl = '{{ gif_url }}'.replace(/\/media\/gifs\//, '/converter/download/gifs/');
+    a.href = downloadUrl;
     a.download = '{{ original_filename }}'.replace(/\.[^/.]+$/, "") + '.gif';
     
     // Симуляция прогресса загрузки

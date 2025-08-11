@@ -33,4 +33,8 @@ urlpatterns = [
     
     # Новый универсальный API endpoint
     path("api/universal-convert/", views.api_universal_convert, name="api_universal_convert"),
+    path("health/", views.health, name="health"),
+
+    # Одноразовая загрузка (скачать и удалить)
+    path("download/<str:category>/<str:filename>/", views.download_and_delete, name="download_once"),
 ]
