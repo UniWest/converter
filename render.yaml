@@ -3,7 +3,7 @@ services:
     name: django-video-converter
     runtime: python3
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput || true
-    startCommand: python render_start.py
+    startCommand: gunicorn converter_site.wsgi --bind 0.0.0.0:$PORT --log-file -
     plan: free
     envVars:
       - key: DEBUG
@@ -12,6 +12,8 @@ services:
         value: 3.11.0
       - key: FFMPEG_BINARY
         value: ffmpeg
+      - key: ALLOWED_HOSTS
+        value: converter-ptzm.onrender.com
     healthCheckPath: /health/
     postDeployCommand: python manage.py migrate --noinput
     autoDeploy: true
