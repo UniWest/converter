@@ -41,8 +41,8 @@ class VideoUploadView(View):
                     messages.error(request, 'Ошибка валидации настроек конвертации')
                     return render(request, 'converter/home.html', {'form': form})
                 
-                # Save uploaded file to MEDIA_ROOT/tmp
-                uploaded_file = conversion_settings['video_file']
+                # Extract uploaded file separately (can't be JSON serialized)
+                uploaded_file = conversion_settings.pop('video_file')
                 tmp_dir = Path(settings.MEDIA_ROOT) / 'tmp'
                 tmp_dir.mkdir(exist_ok=True)
                 

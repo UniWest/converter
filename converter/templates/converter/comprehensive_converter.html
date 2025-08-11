@@ -4,13 +4,15 @@
 
 {% block extra_css %}
 <style>
-    /* Основные стили для интерфейса (компактнее) */
+    /* Основные стили для интерфейса с поддержкой темной темы */
     .converter-card {
         transition: all 0.2s ease;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--bs-border-color);
         border-radius: 12px;
         padding: 1rem 1rem;
         height: 100%;
+        background: var(--bs-body-bg);
+        color: white;
     }
 
     .converter-card:hover {
@@ -32,12 +34,13 @@
     }
 
     .upload-zone {
-        border: 2px dashed #dee2e6;
+        border: 2px dashed var(--bs-border-color);
         border-radius: 12px;
         padding: 1.25rem;
         text-align: center;
         transition: all 0.2s ease;
-        background: #f8f9fa;
+        background: var(--bs-secondary-bg);
+        color: white;
         min-height: 140px;
         display: flex;
         flex-direction: column;
@@ -48,11 +51,13 @@
     .upload-zone.dragover {
         border-color: var(--bs-primary);
         background: rgba(13, 110, 253, 0.1);
+        color: white;
     }
 
     .upload-zone.has-files {
         border-color: var(--bs-success);
         background: rgba(25, 135, 84, 0.1);
+        color: white;
     }
 
     .conversion-progress {
@@ -66,7 +71,9 @@
         margin: 1rem 0;
         padding: 1rem;
         border-radius: 10px;
-        background: #f8f9fa;
+        background: var(--bs-secondary-bg);
+        color: white;
+        border: 1px solid var(--bs-border-color);
     }
 
     .progress-step.active {
@@ -80,10 +87,12 @@
     }
 
     .settings-panel {
-        background: white;
+        background: var(--bs-body-bg);
+        color: white;
+        border: 1px solid var(--bs-border-color);
         border-radius: 12px;
         padding: 1rem 1rem;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         margin-top: 1rem;
         display: none;
     }
@@ -114,10 +123,11 @@
         align-items: center;
         justify-content: space-between;
         padding: 1rem;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-border-color);
         border-radius: 10px;
         margin-bottom: 0.5rem;
-        background: white;
+        background: var(--bs-body-bg);
+        color: white;
     }
 
     .file-info {
@@ -168,17 +178,18 @@
     }
 
     .result-card {
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-border-color);
         border-radius: 15px;
         padding: 1rem;
         text-align: center;
-        background: white;
+        background: var(--bs-body-bg);
+        color: white;
         transition: transform 0.3s ease;
     }
 
     .result-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .result-preview {
@@ -187,19 +198,22 @@
         object-fit: cover;
         border-radius: 10px;
         margin-bottom: 1rem;
-        background: #f8f9fa;
+        background: var(--bs-secondary-bg);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         font-size: 3rem;
+        border: 1px solid var(--bs-border-color);
     }
 
     .adapter-status {
         margin-top: 2rem;
         padding: 1rem;
         border-radius: 10px;
-        background: #f8f9fa;
+        background: var(--bs-secondary-bg);
+        border: 1px solid var(--bs-border-color);
+        color: white;
     }
 
     .engine-status {
