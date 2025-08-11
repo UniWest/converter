@@ -4,7 +4,7 @@ Set these environment variables in your Render service dashboard:
 
 ## Required Variables:
 ```
-SECRET_KEY=django-insecure-pil_my+-p)h2j$x_d4k2bas!1af0#hyucn12rso=#ka$iiv$b(
+SECRET_KEY=your-secret-key-here-generate-new-one
 DEBUG=False
 ALLOWED_HOSTS=*
 DATABASE_URL=sqlite:///tmp/db.sqlite3
@@ -44,7 +44,7 @@ X_FRAME_OPTIONS=DENY
 - **18013** - Reserved by Render  
 - **19099** - Reserved by Render
 
-⚠️ **Important:** If you try to bind to reserved ports, your deployment will fail with "No open ports detected" error.
+Warning: If you try to bind to reserved ports, your deployment will fail with "No open ports detected" error.
 
 ## How to set in Render:
 1. Go to your service dashboard
@@ -54,7 +54,7 @@ X_FRAME_OPTIONS=DENY
 5. Your service will automatically redeploy
 
 ## Troubleshooting Port Issues:
-- ✅ Use PORT environment variable: `--bind 0.0.0.0:$PORT`
-- ✅ Default port 10000 works automatically
-- ❌ Avoid reserved ports: 18012, 18013, 19099
-- ❌ Don't hardcode ports in your application
+- Use PORT environment variable: `--bind 0.0.0.0:$PORT`
+- Default port 10000 works automatically
+- Avoid reserved ports: 18012, 18013, 19099
+- Don't hardcode ports in your application
