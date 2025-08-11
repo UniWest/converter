@@ -1,3 +1,4 @@
+# Core Django Dependencies
 Django==5.2.5
 Pillow>=10.4.0
 gunicorn>=21.2.0
@@ -6,3 +7,38 @@ python-decouple>=3.8
 requests>=2.31.0
 django-cors-headers==4.6.0
 psutil>=5.9.0
+
+# Celery and Task Queue
+celery>=5.4.0
+redis>=5.0.0
+django-celery-beat>=2.6.0
+django-celery-results>=2.5.0
+flower>=2.0.1
+
+# Media Processing
+moviepy>=1.0.3
+Pillow>=10.4.0
+
+# Audio Processing (STT)
+# faster-whisper>=1.0.0  # Uncomment if using Whisper STT
+# speechrecognition>=3.10.0  # Uncomment if using Google STT
+# pydub>=0.25.1  # For audio preprocessing
+# noisereduce>=3.0.0  # For noise reduction
+
+# Development and Testing Dependencies
+pytest>=7.4.0
+pytest-django>=4.7.0
+pytest-cov>=4.1.0
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.5.0
+bandit>=1.7.5
+safety>=3.0.0
+
+# Database
+psycopg2-binary>=2.9.0  # PostgreSQL adapter (optional)
+
+# Production Utilities
+sentry-sdk>=1.32.0  # Error tracking (optional)
+django-extensions>=3.2.0  # Development utilities (optional)

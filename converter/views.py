@@ -144,3 +144,20 @@ def convert_video_view(request):
 
 def converter_status_view(request):
     return JsonResponse({'status': 'operational', 'version': '1.0.0'})
+
+# Additional placeholder views for navigation links
+def photos_to_gif_view(request):
+    """View for photos to GIF conversion."""
+    return render(request, 'converter/photos_to_gif.html')
+
+def audio_to_text_view(request):
+    """View for audio to text conversion."""
+    return render(request, 'converter/audio_to_text.html')
+
+def conversion_interface_view(request):
+    """View for conversion interface."""
+    return render(request, 'converter/conversion_interface.html')
+
+def comprehensive_converter_view(request):
+    """View for comprehensive converter."""
+    return render(request, 'converter/comprehensive_converter.html')

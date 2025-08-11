@@ -1,0 +1,46 @@
+# Django Converter Site - Crontab Configuration
+# This file contains the cron job entries for automated maintenance
+#
+# To install these cron jobs, run:
+# crontab -e
+# Then copy and paste the entries below (adjust paths as needed)
+
+# Daily cleanup at 2:00 AM - Clean files older than 7 days
+0 2 * * * /var/www/your-app/scripts/cleanup_cron.sh >/dev/null 2>&1
+
+# Additional cleanup tasks (optional - uncomment as needed)
+
+# Every hour - Clean temporary files only
+# 0 * * * * /var/www/your-app/venv/bin/python /var/www/your-app/manage.py cleanup_old_files --temp-only >/dev/null 2>&1
+
+# Every 6 hours - Clean media files only
+# 0 */6 * * * /var/www/your-app/venv/bin/python /var/www/your-app/manage.py cleanup_old_files --media-only --days 1 >/dev/null 2>&1
+
+# Weekly on Sunday at 3:00 AM - Full cleanup including failed tasks
+# 0 3 * * 0 /var/www/your-app/venv/bin/python /var/www/your-app/manage.py cleanup_old_files --all-failed --days 30 >/dev/null 2>&1
+
+# Monthly on 1st day at 4:00 AM - Database maintenance (if using PostgreSQL)
+# 0 4 1 * * /var/www/your-app/venv/bin/python /var/www/your-app/manage.py dbshell -c "VACUUM ANALYZE;" >/dev/null 2>&1
+
+# Log rotation - Weekly on Sunday at 1:00 AM
+# 0 1 * * 0 /usr/sbin/logrotate -f /etc/logrotate.d/django-converter >/dev/null 2>&1
+
+# Disk space monitoring - Daily at 6:00 AM
+# 0 6 * * * /bin/bash -c 'USAGE=$(df /var/www/your-app | awk "NR==2 {print \$5}" | sed "s/%//"); if [ \$USAGE -gt 85 ]; then echo "Disk usage: \$USAGE%" | mail -s "High Disk Usage" admin@your-domain.com; fi' >/dev/null 2>&1
+
+# SSL Certificate renewal check (if using Let's Encrypt) - Daily at 5:00 AM
+# 0 5 * * * /usr/bin/certbot renew --quiet --no-self-upgrade >/dev/null 2>&1
+
+# Django collectstatic for production (if static files change) - Daily at 1:30 AM
+# 30 1 * * * /var/www/your-app/venv/bin/python /var/www/your-app/manage.py collectstatic --noinput >/dev/null 2>&1
+
+# Health check - Every 5 minutes (optional monitoring)
+# */5 * * * * /usr/bin/curl -f http://localhost:8000/health/ >/dev/null 2>&1 || echo "Health check failed" | mail -s "Health Check Alert" admin@your-domain.com
+
+# Notes:
+# - Adjust all paths (/var/www/your-app) to match your actual deployment
+# - Replace admin@your-domain.com with your actual admin email
+# - Ensure the cleanup_cron.sh script has execute permissions: chmod +x /var/www/your-app/scripts/cleanup_cron.sh
+# - Test commands manually before adding to cron
+# - Redirect output to /dev/null to avoid cron spam, or redirect to log files for debugging
+# - Consider using a centralized logging solution for production environments

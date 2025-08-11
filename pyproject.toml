@@ -1,0 +1,144 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 127
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 127
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_django = "django"
+known_first_party = ["converter", "converter_site"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "celery.*",
+    "redis.*",
+    "PIL.*",
+    "moviepy.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "converter_site.settings"
+python_files = ["test_*.py", "*_test.py", "tests/test_*.py"]
+python_classes = ["*Test*", "Test*"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "--strict-config", 
+    "--tb=short",
+    "--reuse-db",
+    "--nomigrations",
+    "-ra",
+    "--cov=converter",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+]
+markers = [
+    "unit: Unit tests for form validation and utility functions",
+    "integration: Integration tests for full workflow testing",
+    "slow: Tests that may take longer to run",
+    "django_db: Tests that require database access",
+    "celery: Tests that require Celery task queue",
+    "ffmpeg: Tests that require FFmpeg installation"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["converter", "converter_site"]
+omit = [
+    "*/migrations/*",
+    "*/venv/*", 
+    "*/env/*",
+    "*/tests/*",
+    "manage.py",
+    "*/settings/*",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+
+[tool.bandit]
+exclude_dirs = ["tests", "*/migrations/*", "venv", "env"]
+skips = ["B101", "B601"]
+
+[tool.flake8]
+max-line-length = 127
+max-complexity = 10
+exclude = [
+    ".git",
+    "__pycache__",
+    "*/migrations/*",
+    "venv",
+    "env",
+    ".tox",
+    ".eggs",
+    "*.egg",
+    "build",
+    "dist"
+]
+ignore = [
+    "E203",  # whitespace before ':'
+    "W503",  # line break before binary operator
+    "E501",  # line too long (handled by black)
+]
+per-file-ignores = [
+    "__init__.py:F401",
+    "settings.py:E501",
+]

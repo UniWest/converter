@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from decouple import config
 
@@ -26,7 +27,20 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-pil_my+-p)h2j$x_d4k2b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']  # Разрешить все хосты для разработки
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
+
+# Production security settings
+if not DEBUG:
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # ===================
 # CORS AND CSRF CONFIGURATION
@@ -42,10 +56,12 @@ CORS_ALLOWED_ORIGINS = [
 #     r"^https://.*\.tunnel\.vk-apps\.com$",
 # ]
 
-# CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = [
-    "https://user740764150-wdjyqhj4.tunnel.vk-apps.com",
-]
+# CSRF trusted origins - configurable for different environments
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default="https://user740764150-wdjyqhj4.tunnel.vk-apps.com",
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
 
 # CORS headers for websockets (if needed)
 CORS_ALLOW_HEADERS = [
@@ -162,20 +178,46 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# ===================
+# STATIC FILES CONFIGURATION
+# ===================
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = config('STATIC_URL', default='/static/')
+STATIC_ROOT = BASE_DIR / config('STATIC_ROOT', default='staticfiles')
 STATICFILES_DIRS = [BASE_DIR / 'static']
-
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 # WhiteNoise configuration for serving static files
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ===================
+# MEDIA FILES CONFIGURATION
+# ===================
+
+MEDIA_URL = config('MEDIA_URL', default='/media/')
+MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=10, cast=int) * 1024 * 1024  # 10MB default
+DATA_UPLOAD_MAX_MEMORY_SIZE = config('DATA_UPLOAD_MAX_MEMORY_SIZE', default=10, cast=int) * 1024 * 1024  # 10MB default
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
+# Secure media serving in production
+if not DEBUG:
+    # Use S3/CloudFlare/nginx for media in production
+    # Example S3 configuration (uncomment and configure when needed)
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
+    # AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
+    # AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
+    # AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
+    # AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='')
+    # AWS_DEFAULT_ACL = None
+    # AWS_S3_OBJECT_PARAMETERS = {
+    #     'CacheControl': 'max-age=86400',
+    # }
+    pass  # Media will be served by nginx/reverse proxy in production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -185,10 +227,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # FFmpeg configuration
 FFMPEG_BINARY = config('FFMPEG_BINARY', default=r'C:\ffmpeg\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe')
 
-# Дополнительные настройки для видео обработки
-MAX_UPLOAD_SIZE = config('MEDIA_MAX_SIZE', default=500, cast=int) * 1024 * 1024  # МБ в байты
-VIDEO_PROCESSING_TIMEOUT = 300  # 5 минут
-AUDIO_MAX_DURATION = config('AUDIO_MAX_DURATION', default=3600, cast=int)  # секунды
+# ===================
+# UPLOAD SIZE LIMITS
+# ===================
+
+# Maximum file upload sizes
+MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=500, cast=int) * 1024 * 1024  # MB to bytes
+VIDEO_PROCESSING_TIMEOUT = config('VIDEO_PROCESSING_TIMEOUT', default=300, cast=int)  # seconds
+AUDIO_MAX_DURATION = config('AUDIO_MAX_DURATION', default=3600, cast=int)  # seconds
+
+# Apply upload size limits to Django
+FILE_UPLOAD_MAX_MEMORY_SIZE = min(FILE_UPLOAD_MAX_MEMORY_SIZE, MAX_UPLOAD_SIZE)
+DATA_UPLOAD_MAX_MEMORY_SIZE = min(DATA_UPLOAD_MAX_MEMORY_SIZE, MAX_UPLOAD_SIZE)
 
 # ===================
 # STT НАСТРОЙКИ
@@ -265,7 +315,16 @@ CELERY_RESULT_BACKEND = None
 # Все остальные настройки Celery отключены в dev режиме
 # Периодические задачи, события, аннотации - все закомментировано
 
-#     CELERY_BEAT_SCHEDULE = {}
+#     CELERY_BEAT_SCHEDULE = {
+#         'cleanup-temp-files': {
+#             'task': 'converter.tasks.cleanup_temp_files',
+#             'schedule': crontab(minute=0, hour=2),  # Daily at 2:00 AM
+#         },
+#         'cleanup-old-media': {
+#             'task': 'converter.tasks.cleanup_old_media',
+#             'schedule': crontab(minute=30, hour=3),  # Daily at 3:30 AM
+#         },
+#     }
 #     CELERY_BEAT_SCHEDULER = None
 # 
 # CELERY_TASK_REJECT_ON_WORKER_LOST = True
@@ -285,3 +344,68 @@ CELERY_RESULT_BACKEND = None
 #         'soft_time_limit': 1500,
 #     },
 # }
+
+# ===================
+# TEMPORARY FILES & CLEANUP CONFIGURATION
+# ===================
+
+# Secure temporary directory
+TEMP_DIR = BASE_DIR / config('TEMP_DIR', default='temp')
+TEMP_FILE_MAX_AGE = config('TEMP_FILE_MAX_AGE', default=3600, cast=int)  # 1 hour in seconds
+MEDIA_FILE_MAX_AGE = config('MEDIA_FILE_MAX_AGE', default=86400, cast=int)  # 24 hours in seconds
+
+# Ensure temp directory exists and has proper permissions
+os.makedirs(TEMP_DIR, exist_ok=True)
+if hasattr(os, 'chmod'):
+    os.chmod(TEMP_DIR, 0o750)  # rwxr-x---
+
+# ===================
+# LOGGING CONFIGURATION
+# ===================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'converter': {
+            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Create logs directory if it doesn't exist
+if not DEBUG:
+    os.makedirs(BASE_DIR / 'logs', exist_ok=True)

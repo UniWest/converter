@@ -19,12 +19,15 @@
             --dark-purple: #5a4b9d;
             --extra-light-purple: #b3c0ff;
             
-            /* Фоновые цвета */
+            /* Фоновые цвета - светлая тема */
             --bg-light: rgba(255, 255, 255, 0.95);
             --bg-purple-light: #f8f9ff;
             --bg-purple-lighter: #f0f2ff;
             --bg-gradient-start: rgba(102, 126, 234, 0.1);
             --bg-gradient-end: rgba(118, 75, 162, 0.1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6c757d;
+            --surface-color: rgba(255, 255, 255, 0.9);
             
             /* Границы и обводки */
             --border-light: #e1e5f2;
@@ -55,6 +58,79 @@
             --transition-normal: all 0.3s ease;
             --transition-slow: all 0.5s ease;
             --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        /* Темная тема */
+        [data-theme="dark"] {
+            --bg-light: rgba(17, 24, 39, 0.95);
+            --bg-purple-light: rgba(17, 24, 39, 0.8);
+            --bg-purple-lighter: rgba(31, 41, 55, 0.8);
+            --bg-gradient-start: rgba(102, 126, 234, 0.15);
+            --bg-gradient-end: rgba(118, 75, 162, 0.15);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --surface-color: rgba(31, 41, 55, 0.9);
+            --border-light: rgba(55, 65, 81, 0.6);
+            --shadow-light: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 15px 35px rgba(102, 126, 234, 0.3);
+            --gradient-card: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        }
+        
+        /* Автоматическая темная тема при системных настройках */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-light: rgba(17, 24, 39, 0.95);
+                --bg-purple-light: rgba(17, 24, 39, 0.8);
+                --bg-purple-lighter: rgba(31, 41, 55, 0.8);
+                --bg-gradient-start: rgba(102, 126, 234, 0.15);
+                --bg-gradient-end: rgba(118, 75, 162, 0.15);
+                --text-primary: #f3f4f6;
+                --text-secondary: #9ca3af;
+                --surface-color: rgba(31, 41, 55, 0.9);
+                --border-light: rgba(55, 65, 81, 0.6);
+                --shadow-light: 0 20px 40px rgba(0, 0, 0, 0.3);
+                --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.4);
+                --shadow-hover: 0 15px 35px rgba(102, 126, 234, 0.3);
+                --gradient-card: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            }
+        }
+        
+        /* Accessibility improvements */
+        *:focus {
+            outline: 2px solid var(--primary-purple);
+            outline-offset: 2px;
+        }
+        
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* High contrast support */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-purple: #4338ca;
+                --secondary-purple: #581c87;
+                --border-light: #374151;
+            }
         }
         
         /* Переопределение Bootstrap переменных */
@@ -460,18 +536,45 @@
             <div class="col-lg-10 col-xl-8">
                 <div class="main-container">
                     <div class="header">
-                        <h1>🎬 ➡️ 📸</h1>
+                        <!-- Theme Toggle -->
+                        <button 
+                            id="theme-toggle" 
+                            class="btn btn-outline-light btn-sm position-absolute" 
+                            style="top: 1rem; right: 1rem; z-index: 10;"
+                            type="button"
+                            aria-label="Переключить тему"
+                            title="Переключить светлую/темную тему"
+                        >
+                            <i class="bi bi-sun-fill" id="theme-icon"></i>
+                        </button>
+                        
+                        <h1 role="banner">🎬 ➡️ 📸</h1>
                         <h2>Конвертер видео в GIF</h2>
                         <p class="mb-0">Быстро и легко превращайте ваши видео в анимированные GIF</p>
                         
                         <!-- Навигационное меню -->
-                        <nav class="mt-3">
+                        <nav class="mt-3" role="navigation" aria-label="Основная навигация">
                             <div class="nav nav-pills justify-content-center">
-                                <a class="nav-link text-white" href="{% url 'converter:home' %}">🏠 Главная</a>
-                                <a class="nav-link text-white" href="{% url 'converter:photos_to_gif' %}">📸 Фото в GIF</a>
-                                <a class="nav-link text-white" href="{% url 'converter:audio_to_text' %}">🎤 Speech-to-Text</a>
-                                <a class="nav-link text-white" href="{% url 'converter:conversion_interface' %}">🔧 Интерфейс</a>
-                                <a class="nav-link text-white" href="{% url 'converter:comprehensive_converter' %}">🔄 Универсальный</a>
+                                <a class="nav-link text-white" href="{% url 'converter:home' %}" tabindex="1">
+                                    <i class="bi bi-house-fill" aria-hidden="true"></i>
+                                    <span class="ms-1">Главная</span>
+                                </a>
+                                <a class="nav-link text-white" href="{% url 'converter:photos_to_gif' %}" tabindex="2">
+                                    <i class="bi bi-images" aria-hidden="true"></i>
+                                    <span class="ms-1">Фото в GIF</span>
+                                </a>
+                                <a class="nav-link text-white" href="{% url 'converter:audio_to_text' %}" tabindex="3">
+                                    <i class="bi bi-mic-fill" aria-hidden="true"></i>
+                                    <span class="ms-1">Speech-to-Text</span>
+                                </a>
+                                <a class="nav-link text-white" href="{% url 'converter:conversion_interface' %}" tabindex="4">
+                                    <i class="bi bi-tools" aria-hidden="true"></i>
+                                    <span class="ms-1">Интерфейс</span>
+                                </a>
+                                <a class="nav-link text-white" href="{% url 'converter:comprehensive_converter' %}" tabindex="5">
+                                    <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                                    <span class="ms-1">Универсальный</span>
+                                </a>
                             </div>
                         </nav>
                     </div>
@@ -487,6 +590,10 @@
                             {% endfor %}
                         {% endif %}
                         
+                        <!-- Aria-live region for announcements -->
+                        <div id="status-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+                        <div id="progress-announcements" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+                        
                         <!-- Основной контент -->
                         {% block content %}{% endblock %}
                     </div>
@@ -501,6 +608,9 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Icon Library -->
+    <script src="/static/js/icon-library.js"></script>
     
     <!-- Custom JS -->
     <script>
@@ -554,6 +664,258 @@
                 }
             });
         }, 5000);
+        
+        // ===== ACCESSIBILITY AND THEME MANAGEMENT =====
+        
+        // Theme management
+        class ThemeManager {
+            constructor() {
+                this.themeKey = 'preferred-theme';
+                this.currentTheme = this.getStoredTheme() || this.getSystemTheme();
+                this.themeToggle = document.getElementById('theme-toggle');
+                this.themeIcon = document.getElementById('theme-icon');
+                
+                this.init();
+            }
+            
+            init() {
+                this.applyTheme(this.currentTheme);
+                this.updateIcon();
+                this.attachEventListeners();
+                this.announceTheme();
+            }
+            
+            getStoredTheme() {
+                return localStorage.getItem(this.themeKey);
+            }
+            
+            getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            storeTheme(theme) {
+                localStorage.setItem(this.themeKey, theme);
+            }
+            
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.currentTheme = theme;
+            }
+            
+            updateIcon() {
+                if (this.themeIcon) {
+                    const isDark = this.currentTheme === 'dark';
+                    this.themeIcon.className = isDark ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+                    this.themeToggle.setAttribute('aria-label', 
+                        isDark ? 'Переключить на светлую тему' : 'Переключить на темную тему'
+                    );
+                }
+            }
+            
+            toggle() {
+                const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+                this.applyTheme(newTheme);
+                this.storeTheme(newTheme);
+                this.updateIcon();
+                this.announceThemeChange(newTheme);
+            }
+            
+            announceTheme() {
+                const message = `Текущая тема: ${this.currentTheme === 'dark' ? 'темная' : 'светлая'}`;
+                announceToScreenReader(message, 'status');
+            }
+            
+            announceThemeChange(newTheme) {
+                const message = `Переключено на ${newTheme === 'dark' ? 'темную' : 'светлую'} тему`;
+                announceToScreenReader(message, 'status');
+            }
+            
+            attachEventListeners() {
+                if (this.themeToggle) {
+                    this.themeToggle.addEventListener('click', () => this.toggle());
+                    
+                    // Keyboard support
+                    this.themeToggle.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.toggle();
+                        }
+                    });
+                }
+                
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addListener((e) => {
+                    if (!this.getStoredTheme()) {
+                        this.applyTheme(e.matches ? 'dark' : 'light');
+                        this.updateIcon();
+                    }
+                });
+            }
+        }
+        
+        // Accessibility utilities
+        function announceToScreenReader(message, type = 'status') {
+            const announcer = document.getElementById(type === 'progress' ? 'progress-announcements' : 'status-announcements');
+            if (announcer) {
+                announcer.textContent = message;
+                // Clear after announcement
+                setTimeout(() => {
+                    announcer.textContent = '';
+                }, 1000);
+            }
+        }
+        
+        // Progress announcement system
+        function announceProgress(percent, status) {
+            let message = '';
+            if (status) {
+                message = `Обработка: ${status}`;
+            }
+            if (percent !== undefined) {
+                message += ` Готово ${percent}%`;
+            }
+            announceToScreenReader(message, 'progress');
+        }
+        
+        // Enhanced keyboard navigation
+        class KeyboardNavigation {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.addSkipLink();
+                this.enhanceKeyboardSupport();
+                this.addKeyboardShortcuts();
+            }
+            
+            addSkipLink() {
+                const skipLink = document.createElement('a');
+                skipLink.href = '#main-content';
+                skipLink.textContent = 'Перейти к основному содержанию';
+                skipLink.className = 'sr-only';
+                skipLink.style.cssText = `
+                    position: absolute;
+                    top: -40px;
+                    left: 6px;
+                    background: var(--primary-purple);
+                    color: white;
+                    padding: 8px 16px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    z-index: 1000;
+                    transition: top 0.3s;
+                `;
+                
+                skipLink.addEventListener('focus', () => {
+                    skipLink.style.top = '6px';
+                    skipLink.classList.remove('sr-only');
+                });
+                
+                skipLink.addEventListener('blur', () => {
+                    skipLink.style.top = '-40px';
+                    skipLink.classList.add('sr-only');
+                });
+                
+                document.body.insertBefore(skipLink, document.body.firstChild);
+                
+                // Add main content ID
+                const mainContent = document.querySelector('.content-area');
+                if (mainContent) {
+                    mainContent.id = 'main-content';
+                    mainContent.setAttribute('tabindex', '-1');
+                }
+            }
+            
+            enhanceKeyboardSupport() {
+                // Ensure all interactive elements are keyboard accessible
+                const interactiveElements = document.querySelectorAll('button, a, input, select, textarea, [role="button"], [role="link"]');
+                
+                interactiveElements.forEach(element => {
+                    if (!element.hasAttribute('tabindex') && !element.disabled) {
+                        element.tabIndex = 0;
+                    }
+                    
+                    // Add keyboard event handlers for custom interactive elements
+                    if (element.hasAttribute('role') && (element.getAttribute('role') === 'button' || element.getAttribute('role') === 'link')) {
+                        element.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                element.click();
+                            }
+                        });
+                    }
+                });
+            }
+            
+            addKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Alt + T: Toggle theme
+                    if (e.altKey && e.key === 't') {
+                        e.preventDefault();
+                        const themeToggle = document.getElementById('theme-toggle');
+                        if (themeToggle) {
+                            themeToggle.click();
+                            announceToScreenReader('Клавиатурное сокращение: переключение темы');
+                        }
+                    }
+                    
+                    // Alt + H: Go to home
+                    if (e.altKey && e.key === 'h') {
+                        e.preventDefault();
+                        const homeLink = document.querySelector('a[href*="home"]');
+                        if (homeLink) {
+                            homeLink.click();
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Enhanced form validation and feedback
+        function enhanceFormAccessibility() {
+            const forms = document.querySelectorAll('form');
+            
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('input, select, textarea');
+                
+                inputs.forEach(input => {
+                    // Add proper labeling
+                    const label = form.querySelector(`label[for="${input.id}"]`);
+                    if (!label && input.id) {
+                        const associatedLabel = document.querySelector(`label[for="${input.id}"]`);
+                        if (!associatedLabel && input.previousElementSibling && input.previousElementSibling.tagName === 'LABEL') {
+                            input.previousElementSibling.setAttribute('for', input.id);
+                        }
+                    }
+                    
+                    // Add aria-describedby for help text
+                    const helpText = input.parentElement.querySelector('.help, .form-text, small');
+                    if (helpText && !helpText.id) {
+                        helpText.id = `${input.id}-help`;
+                        input.setAttribute('aria-describedby', helpText.id);
+                    }
+                    
+                    // Enhanced validation feedback
+                    input.addEventListener('invalid', (e) => {
+                        const message = `Ошибка валидации: ${e.target.validationMessage}`;
+                        announceToScreenReader(message, 'status');
+                    });
+                });
+            });
+        }
+        
+        // Initialize all accessibility features
+        document.addEventListener('DOMContentLoaded', () => {
+            new ThemeManager();
+            new KeyboardNavigation();
+            enhanceFormAccessibility();
+            
+            // Announce page load completion
+            setTimeout(() => {
+                announceToScreenReader('Страница загружена и готова для использования');
+            }, 500);
+        });
     </script>
     
     {% block extra_js %}{% endblock %}

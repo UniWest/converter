@@ -1,11 +1,18 @@
-# Используем официальный Python образ
+# Use official Python image
 FROM python:3.11-slim
 
-# Устанавливаем системные зависимости
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies with FFmpeg
 RUN apt-get update && apt-get install -y \
-    # FFmpeg для обработки аудио/видео
+    # FFmpeg for audio/video processing - REQUIRED
     ffmpeg \
-    # Библиотеки для обработки изображений
+    # Verify FFmpeg installation
+    && ffmpeg -version \
+    # Image processing libraries
     libjpeg-dev \
     zlib1g-dev \
     libfreetype6-dev \
@@ -13,18 +20,19 @@ RUN apt-get update && apt-get install -y \
     libopenjp2-7-dev \
     libtiff5-dev \
     libwebp-dev \
-    # Библиотеки для аудио обработки
+    # Audio processing libraries
     libsndfile1 \
     libsox-fmt-all \
     sox \
-    # Системные утилиты
+    # System utilities
     curl \
     wget \
     git \
     build-essential \
     pkg-config \
-    # Очистка кэша
-    && rm -rf /var/lib/apt/lists/*
+    # Clean up cache
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
