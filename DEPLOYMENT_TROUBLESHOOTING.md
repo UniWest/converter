@@ -39,29 +39,33 @@ We've added proper port binding configuration:
 
 ### For Render.com
 
+**IMPORTANT:** Use these exact settings to avoid port binding issues:
+
 1. **Build Command:**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Start Command (Development):**
+2. **Start Command:**
    ```bash
-   python start_server.py
+   python render_start.py
    ```
 
-3. **Start Command (Production):**
-   ```bash
-   python start_gunicorn.py
-   ```
-
-4. **Environment Variables:**
+3. **Environment Variables (REQUIRED):**
    ```bash
    DEBUG=False
    SECRET_KEY=your-secret-key-here
    ALLOWED_HOSTS=your-app-name.onrender.com
-   PORT=10000  # Render will set this automatically
-   FFMPEG_BINARY=ffmpeg  # Uses system ffmpeg
    ```
+
+4. **Optional Environment Variables:**
+   ```bash
+   FFMPEG_BINARY=ffmpeg  # Uses system ffmpeg
+   MAX_UPLOAD_SIZE=500   # MB
+   VIDEO_PROCESSING_TIMEOUT=300  # seconds
+   ```
+
+**Note:** Do NOT set the PORT variable manually - Render will set it automatically.
 
 ### For Heroku
 

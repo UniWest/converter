@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: django-video-converter
+    runtime: python3
+    buildCommand: pip install -r requirements.txt
+    startCommand: python render_start.py
+    plan: free
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FFMPEG_BINARY
+        value: ffmpeg
+    healthCheckPath: /health/
+    autoDeploy: true

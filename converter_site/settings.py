@@ -374,32 +374,26 @@ PORT = config('PORT', default=8000, cast=int)
 # LOGGING CONFIGURATION
 # ===================
 
-# Create logs directory if needed
-LOGS_DIR = BASE_DIR / 'logs'
-os.makedirs(LOGS_DIR, exist_ok=True)
-
+# Simple console-only logging configuration for deployment
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
         'simple': {
-            'format': '{levelname} {message}',
+            'format': '{levelname} {asctime} {name} {message}',
             'style': '{',
         },
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
     },
     'root': {
         'handlers': ['console'],
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
@@ -409,29 +403,13 @@ LOGGING = {
         },
         'converter': {
             'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'gunicorn': {
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
 }
-
-# Add file logging only in production if logs directory is writable
-if not DEBUG:
-    try:
-        # Test if we can write to logs directory
-        test_file = LOGS_DIR / '.write_test'
-        test_file.write_text('test')
-        test_file.unlink()
-        
-        # If successful, add file handler
-        LOGGING['handlers']['file'] = {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': LOGS_DIR / 'django.log',
-            'formatter': 'verbose',
-        }
-        LOGGING['loggers']['django']['handlers'].append('file')
-        LOGGING['loggers']['converter']['handlers'].append('file')
-    except (OSError, PermissionError):
-        # If can't write to logs directory, just use console logging
-        pass
