@@ -247,6 +247,9 @@
             </div>
         </form>
         
+        <!-- Невидимый iframe для отслеживания окончания скачивания -->
+        <iframe id="download-frame" name="download-frame" style="display:none;width:0;height:0;border:0" aria-hidden="true"></iframe>
+        
         <!-- Спиннер загрузки -->
         <div class="loading-spinner" id="loading-spinner">
             <div class="spinner-border" role="status">
@@ -450,6 +453,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Завершение/сброс индикаторов
+    function finishProgress(success = true) {
+        const progressBar = spinner ? spinner.querySelector('.progress') : null;
+        const progressBarFill = spinner ? spinner.querySelector('.progress-bar') : null;
+        if (progressBar && progressBarFill) {
+            progressBar.style.display = 'block';
+            progressBarFill.style.width = '100%';
+            progressBarFill.textContent = '100%';
+        }
+        // Скрыть спиннер и вернуть кнопку
+        spinner.style.display = 'none';
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i><span data-translate="convert-to-gif">Конвертировать в GIF</span>';
+    }
+
+    // Привязываем форму к скрытому iframe, чтобы ловить завершение скачивания
+    const downloadFrame = document.getElementById('download-frame');
+    if (downloadFrame) {
+        form.setAttribute('target', 'download-frame');
+        // Когда загрузка файла завершена и ответ пришел в iframe — завершаем индикаторыn        downloadFrame.addEventListener('load', function() {
+            // Небольшая задержка — на случай, если браузер еще инициализирует сохранение файла
+            setTimeout(() => finishProgress(true), 500);
+        });
+    }
+
     // Отправка формы
     form.addEventListener('submit', function(e) {
         const file = fileInput.files[0];
@@ -474,6 +502,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Симуляция прогресса (если нужно)
         simulateProgress();
+
+        // Безопасный таймаут на случай ответа без навигации (например, скачивание файла)
+        // Через 2 минуты принудительно завершим индикаторы
+        if (window.__finishProgressTimeout) clearTimeout(window.__finishProgressTimeout);
+        window.__finishProgressTimeout = setTimeout(() => finishProgress(true), 120000);
+    });
+
+    // Если вкладка снова активна после скачивания — завершим индикаторы
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && spinner && spinner.style.display !== 'none') {
+            finishProgress(true);
+        }
+    });
+    window.addEventListener('focus', function() {
+        if (spinner && spinner.style.display !== 'none') {
+            finishProgress(true);
+        }
+    });
+
+    // На всякий случай, если произошла навигация/перезагрузка
+    window.addEventListener('pageshow', function() {
+        // Сбросим состояние кнопки/спиннера при заходе на страницу
+        finishProgress(true);
     });
     
     // Получение информации о видео
@@ -563,10 +614,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Симуляция прогресса
     function simulateProgress() {
-        const progressBar = document.querySelector('.progress');
-        const progressBarFill = document.querySelector('.progress-bar');
+        // Берем прогресс-бар именно внутри блока спиннера, а не самый первый на странице
+        const progressBar = spinner ? spinner.querySelector('.progress') : document.querySelector('#loading-spinner .progress');
+        const progressBarFill = spinner ? spinner.querySelector('.progress-bar') : document.querySelector('#loading-spinner .progress-bar');
         
         if (progressBar && progressBarFill) {
+            // Убедимся, что сам блок прогресса видим
             progressBar.style.display = 'block';
             let progress = 0;
             
@@ -578,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBarFill.textContent = Math.round(progress) + '%';
             }, 1000);
             
-            // Остановить симуляцию через 30 секунд
+            // Остановить симуляцию через 30 секунд (страховка)
             setTimeout(() => {
                 clearInterval(interval);
             }, 30000);

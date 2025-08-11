@@ -453,11 +453,17 @@ class VideoUploadView(View):
                 # Create conversion task (best-effort, do not fail upload if DB is not available)
                 task = None
                 try:
+                    # Ensure we have a session to link the task for polling
+                    if not request.session.session_key:
+                        request.session.save()
+                    session_key = request.session.session_key
+
                     task = ConversionTask.objects.create(
                         status=ConversionTask.STATUS_QUEUED
                     )
                     # Set task metadata
                     task.set_metadata(
+                        session_key=session_key,
                         original_filename=uploaded_file.name,
                         input_path=str(tmp_file_path),
                         file_size=uploaded_file.size,
@@ -476,13 +482,16 @@ class VideoUploadView(View):
                 # Perform conversion (synchronous for now)
                 try:
                     result = conversion_service.convert_video_to_gif(
-                        task_id=task.id,
+                        task_id=(task.id if task else 0),
                         input_path=str(tmp_file_path),
                         **conversion_settings
                     )
                     
                     if result['success']:
                         # Return file download response
+                        # Attach request onto self for cookie access
+                        self.request = request
+                        self._download_token = request.POST.get('download_token')
                         return self._serve_converted_file(result['output_path'])
                     else:
                         # Handle conversion error
@@ -532,6 +541,16 @@ class VideoUploadView(View):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         response['Content-Length'] = os.path.getsize(file_path)
         
+        # If client sent a download token, reflect it in a cookie so front-end can detect completion
+        token = self.request.POST.get('download_token') if hasattr(self, 'request') else None
+        try:
+            if not token:
+                token = getattr(self, '_download_token', None)
+        except Exception:
+            token = None
+        if token:
+            response.set_cookie('download_token', token, max_age=120, samesite='Lax', path='/')
+        
         return response
 
 def home_view(request):
@@ -547,6 +566,37 @@ def converter_status_view(request):
 
 def health(request):
     return JsonResponse({'ok': True})
+
+@require_http_methods(["GET"])
+def latest_progress(request):
+    """Return latest running/queued task progress for current session."""
+    try:
+        # Ensure session exists
+        if not request.session.session_key:
+            request.session.save()
+        session_key = request.session.session_key
+        from django.db.models import Q
+        task = (ConversionTask.objects
+                .filter(Q(status__in=[ConversionTask.STATUS_RUNNING, ConversionTask.STATUS_QUEUED]),
+                        task_metadata__session_key=session_key)
+                .order_by('-created_at')
+                .first())
+        if not task:
+            return JsonResponse({'success': True, 'task': None})
+        metadata = task.task_metadata or {}
+        return JsonResponse({
+            'success': True,
+            'task': {
+                'id': task.id,
+                'status': task.status,
+                'progress': task.progress,
+                'message': metadata.get('last_message', ''),
+                'updated_at': task.updated_at.isoformat(),
+            }
+        })
+    except Exception as e:
+        logger.error(f"latest_progress error: {e}")
+        return JsonResponse({'success': False, 'error': 'progress_unavailable'})
 
 # Additional placeholder views for navigation links
 def photos_to_gif_view(request):

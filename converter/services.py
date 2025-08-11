@@ -73,9 +73,14 @@ class VideoConversionService:
         temp_files = []
         
         try:
-            # Get task from database
-            task = ConversionTask.objects.get(id=task_id)
-            task.start()
+            # Get task from database (best-effort). If not found, continue without DB tracking.
+            task = None
+            try:
+                if task_id:
+                    task = ConversionTask.objects.get(id=task_id)
+                    task.start()
+            except ConversionTask.DoesNotExist:
+                logger.warning(f"Conversion task {task_id} not found. Continuing without DB tracking.")
             
             # Validate input file
             if not os.path.exists(input_path):

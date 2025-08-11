@@ -221,6 +221,9 @@
                 {% endif %}
             </div>
             
+            <!-- Токен для отслеживания скачивания -->
+            <input type="hidden" name="download_token" id="download_token" value="">
+            
             <!-- Кнопка отправки -->
             <div class="text-center slide-in-right">
                 <button type="submit" class="btn btn-primary btn-lg" id="convert-btn">
@@ -228,18 +231,26 @@
                     <span data-translate="convert-to-gif">Конвертировать в GIF</span>
                 </button>
             </div>
-        </form>
+        	</form>
         
-        <!-- Спиннер загрузки -->
-        <div class="loading-spinner" id="loading-spinner">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden" data-translate="converting">Конвертация...</span>
-            </div>
-            <p class="mt-3" data-translate="video-conversion-in-progress">Конвертация видео... Пожалуйста, подождите.</p>
-            <p class="text-muted" data-translate="please-wait-video">Это может занять несколько минут в зависимости от размера видео.</p>
-        </div>
+        	<!-- Невидимый iframe для отслеживания окончания скачивания -->
+        	<iframe id="download-frame" name="download-frame" style="display:none;width:0;height:0;border:0" aria-hidden="true"></iframe>
+        
+        	<!-- Спиннер загрузки -->
+        	<div class="loading-spinner" id="loading-spinner">
+        		<div class="spinner-border" role="status">
+        			<span class="visually-hidden" data-translate="converting">Конвертация...</span>
+        		</div>
+        		<div id="completion-check" style="display:none; font-size:52px; color: #28a745; margin-top: 10px;">
+        			<i class="bi bi-check2-circle"></i>
+        		</div>
+        		<p class="mt-3" data-translate="video-conversion-in-progress">Конвертация видео... Пожалуйста, подождите.</p>
+        		<p class="text-muted" data-translate="please-wait-video">Это может занять несколько минут в зависимости от размера видео.</p>
+			<div class="progress mt-3" style="display: none;">
+        			<div class="progress-bar" role="progressbar" style="width: 0%"></div>
+        		</div>
+        	</div>
     </div>
-</div>
 
 <!-- Дополнительная информация -->
 <div class="row mt-5">
@@ -268,6 +279,18 @@
 {% endblock %}
 
 {% block extra_js %}
+<style>
+/* Анимация появления галочки завершения */
+@keyframes popIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+#completion-check.show {
+  display: block !important;
+  animation: popIn 500ms ease-out;
+}
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('upload-form');
@@ -385,6 +408,55 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Завершение/сброс индикаторов
+    function showCheckmarkThenReset() {
+        const progressBar = spinner ? spinner.querySelector('.progress') : null;
+        const progressBarFill = spinner ? spinner.querySelector('.progress-bar') : null;
+        const spinnerCircle = spinner ? spinner.querySelector('.spinner-border') : null;
+        const check = document.getElementById('completion-check');
+        if (progressBar && progressBarFill) {
+            progressBar.style.display = 'block';
+            progressBarFill.style.width = '100%';
+            progressBarFill.textContent = '100%';
+        }
+        if (spinnerCircle) spinnerCircle.style.display = 'none';
+        if (check) check.classList.add('show');
+        setTimeout(() => {
+            if (check) { check.classList.remove('show'); check.style.display = 'none'; }
+            if (spinnerCircle) spinnerCircle.style.display = '';
+            spinner.style.display = 'none';
+            convertBtn.disabled = false;
+            convertBtn.innerHTML = '<i class="bi bi-play-circle-fill"></i><span data-translate="convert-to-gif">Конвертировать в GIF</span>';
+        }, 2000);
+    }
+
+    // Привязываем форму к скрытому iframe, чтобы отловить окончание скачивания
+    const downloadFrame = document.getElementById('download-frame');
+    if (downloadFrame) {
+        form.setAttribute('target', 'download-frame');
+        downloadFrame.addEventListener('load', function() {
+            setTimeout(() => showCheckmarkThenReset(), 500);
+        });
+    }
+
+    // Генерация токена и опрос cookie на завершение скачивания
+    function startDownloadWatcher() {
+        const token = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const tokenInput = document.getElementById('download_token');
+        if (tokenInput) tokenInput.value = token;
+        // Опрос cookie раз в 500мс
+        if (window.__downloadWatcher) clearInterval(window.__downloadWatcher);
+        window.__downloadWatcher = setInterval(() => {
+            const m = document.cookie.match(/(?:^|; )download_token=([^;]+)/);
+            if (m && decodeURIComponent(m[1]) === token) {
+                clearInterval(window.__downloadWatcher);
+                // Стереть cookie
+                document.cookie = 'download_token=; Max-Age=0; path=/';
+                showCheckmarkThenReset();
+            }
+        }, 500);
+    }
+
     // Отправка формы
     form.addEventListener('submit', function(e) {
         const file = fileInput.files[0];
@@ -396,12 +468,75 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Показать спиннер
         convertBtn.disabled = true;
+        startDownloadWatcher();
         convertBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Конвертация...';
         spinner.style.display = 'block';
         
         // Прокрутка к спиннеру
         spinner.scrollIntoView({ behavior: 'smooth' });
+        
+        // Запускаем опрос прогресса с бэкенда и показываем прогресс
+        startBackendProgressPolling();
+        if (window.__finishProgressTimeout) clearTimeout(window.__finishProgressTimeout);
+        window.__finishProgressTimeout = setTimeout(() => showCheckmarkThenReset(), 120000);
     });
+
+    // Опрос прогресса по API
+    function startBackendProgressPolling() {
+        const progressBar = spinner ? spinner.querySelector('.progress') : null;
+        const progressBarFill = spinner ? spinner.querySelector('.progress-bar') : null;
+        if (progressBar) progressBar.style.display = 'block';
+        if (window.__progressPoller) clearInterval(window.__progressPoller);
+        window.__progressPoller = setInterval(async () => {
+            try {
+                const res = await fetch('/app/api/latest-progress/');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.task) {
+                    const p = Math.max(0, Math.min(99, data.task.progress || 0));
+                    if (progressBarFill) {
+                        progressBarFill.style.width = p + '%';
+                        progressBarFill.textContent = p + '%';
+                    }
+                    // Если статус завершен — показать галочку и остановить опрос
+                    if (data.task.status === 'done' || p >= 99) {
+                        clearInterval(window.__progressPoller);
+                        showCheckmarkThenReset();
+                    }
+                }
+            } catch (e) {
+                // Игнорируем ошибки сети
+            }
+        }, 800);
+    }
+
+    // Доп.предохранители: при возврате фокуса/вкладки завершаем индикаторы
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && spinner && spinner.style.display !== 'none') {
+            showCheckmarkThenReset();
+        }
+    });
+    window.addEventListener('focus', function() {
+        if (spinner && spinner.style.display !== 'none') {
+            showCheckmarkThenReset();
+        }
+    });
+
+    function simulateProgress() {
+        const progressBar = spinner ? spinner.querySelector('.progress') : null;
+        const progressBarFill = spinner ? spinner.querySelector('.progress-bar') : null;
+        if (progressBar && progressBarFill) {
+            progressBar.style.display = 'block';
+            let p = 0;
+            const interval = setInterval(() => {
+                p += Math.random() * 3;
+                if (p > 95) p = 95;
+                progressBarFill.style.width = p + '%';
+                progressBarFill.textContent = Math.round(p) + '%';
+            }, 1000);
+            setTimeout(() => clearInterval(interval), 30000);
+        }
+    }
     
     // Получение информации о видео
     function getVideoInfo(file) {
