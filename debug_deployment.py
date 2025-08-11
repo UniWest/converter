@@ -26,17 +26,38 @@ def main():
     print("Django Deployment Debug Check")
     print("=" * 40)
     
+    base_dir = Path(__file__).parent
+    
+    # Check all Python files recursively
+    print("Checking all Python files for null bytes:")
+    print("-" * 40)
+    python_files = list(base_dir.rglob('*.py'))
+    problematic_files = []
+    
+    for py_file in python_files:
+        if py_file.exists():
+            is_ok, message = check_file_encoding(py_file)
+            if not is_ok:
+                problematic_files.append((str(py_file.relative_to(base_dir)), message))
+                print(f"✗ {py_file.relative_to(base_dir)}: {message}")
+    
+    if not problematic_files:
+        print("✓ All Python files are clean")
+    
     # Check critical files
+    print("\nCritical Files Check:")
+    print("-" * 20)
     critical_files = [
         'manage.py',
         'converter_site/wsgi.py',
         'converter_site/settings.py',
+        'converter_site/urls.py',
+        'converter/urls.py',
+        'converter/api_urls.py',
         'Procfile',
         'build.sh',
         'requirements.txt'
     ]
-    
-    base_dir = Path(__file__).parent
     
     for filepath in critical_files:
         full_path = base_dir / filepath
