@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import tempfile
+from unittest.mock import Mock, patch
 """
 Интеграционные тесты для конвертера видео в GIF.
 Эти тесты проверяют работу системы в целом и взаимодействие компонентов.
@@ -8,9 +10,7 @@ python manage.py test test_integration
 """
 
 import os
-import tempfile
 import shutil
-from unittest.mock import Mock, patch, MagicMock
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.core.files.uploadedfile import SimpleUploadedFile

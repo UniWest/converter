@@ -1,13 +1,8 @@
 import os
-import tempfile
 import logging
-import subprocess
 import json
-import shutil
 import traceback
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Union, Tuple
 import numpy as np
 
 # Условные импорты Celery
@@ -21,9 +16,8 @@ except ImportError:
     current_task = None
     Ignore = Exception
     CELERY_AVAILABLE = False
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from django.conf import settings
+from typing import Dict, List, Any, Optional, Union, Tuple
 
 # Условные импорты для обработки изображений
 try:

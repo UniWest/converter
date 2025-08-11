@@ -1,6 +1,0 @@
-from django.http import JsonResponse
-def comprehensive_converter_view(request): return JsonResponse({"status": "ok"})
-def universal_convert_view(request): return JsonResponse({"status": "ok"})  
-def detect_file_type_view(request): return JsonResponse({"file_type": "unknown"})
-def batch_convert_view(request): return JsonResponse({"status": "ok"})
-def conversion_history_view(request): return JsonResponse({"history": []})

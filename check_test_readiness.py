@@ -15,7 +15,6 @@
 import os
 import sys
 import importlib
-import subprocess
 from datetime import datetime
 
 class TestReadinessChecker:

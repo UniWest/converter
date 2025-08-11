@@ -2,8 +2,6 @@
 """
 Script to fix null bytes in files by recreating them
 """
-import os
-import shutil
 from pathlib import Path
 
 def fix_file(filepath):

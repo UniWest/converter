@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import tempfile
 """
 Утилиты для тестирования конвертера видео в GIF.
 Включает в себя вспомогательные функции и классы для создания тестовых данных.
@@ -8,10 +9,8 @@ from test_utils import create_test_video_file, VideoTestCase, run_performance_te
 """
 
 import os
-import tempfile
 import time
 from io import BytesIO
-from unittest.mock import Mock, MagicMock
 from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
 from django.test import TestCase
 

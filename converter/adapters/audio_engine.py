@@ -4,7 +4,6 @@
 """
 
 from typing import Dict, List, Any, Union
-import os
 import logging
 from pathlib import Path
 from django.conf import settings

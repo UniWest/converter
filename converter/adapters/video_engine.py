@@ -1,14 +1,13 @@
+from .base import BaseEngine, ConversionResult
 """
 Адаптер для конвертации видео файлов.
 Использует существующую логику VideoConverter.
 """
 
 import os
-import tempfile
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from .base import BaseEngine, ConversionResult, EngineNotAvailableError, ConversionError, UnsupportedFormatError
 from ..utils import VideoConverter
 
 
@@ -218,11 +217,6 @@ class VideoEngine(BaseEngine):
         dependencies = super().check_dependencies()
         
         # Проверяем MoviePy
-        try:
-            import moviepy
-            dependencies['moviepy'] = True
-        except ImportError:
-            dependencies['moviepy'] = False
         
         # Проверяем FFmpeg через VideoConverter
         try:

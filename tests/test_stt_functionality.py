@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
+import os
+import json
+import tempfile
+from typing import Dict, List, Any
 """
 Тесты функциональности Speech-to-Text (STT) системы
 """
 
-import os
 import sys
 import unittest
-import requests
-import json
 import time
 from pathlib import Path
-from typing import Dict, List, Any
-import tempfile
 import logging
 
 # Добавляем корневую директорию проекта в PYTHONPATH
@@ -25,8 +24,6 @@ import django
 from django.test import TestCase, TransactionTestCase
 from django.test import Client
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
-from django.conf import settings
 
 # Инициализация Django
 django.setup()

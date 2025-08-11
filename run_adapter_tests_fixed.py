@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+import subprocess
 """
 Главный скрипт для запуска всех тестов адаптеров конвертации.
 Запускает unit-тесты, интеграционные тесты и тесты с небольшими файлами.
 """
 
-import os
 import sys
-import subprocess
 import time
 from pathlib import Path
 

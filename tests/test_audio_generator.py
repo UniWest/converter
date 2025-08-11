@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
+import os
+import tempfile
+from typing import Dict, List, Any
 """
 Генератор тестовых аудиофайлов для проверки функции Speech-to-Text
 """
 
-import os
-import tempfile
 from pathlib import Path
-from typing import List, Dict, Any
 import logging
 from pydub import AudioSegment
 from pydub.generators import Sine

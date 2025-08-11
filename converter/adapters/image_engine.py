@@ -1,17 +1,15 @@
+from .base import BaseEngine, ConversionResult
 """
 Адаптер для конвертации изображений.
 Базовая реализация с возможностью расширения.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from .base import BaseEngine, ConversionResult, EngineNotAvailableError, ConversionError, UnsupportedFormatError
 
 # PIL imports для использования во всем модуле
 try:
-    from PIL import Image, ImageEnhance
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
@@ -249,8 +247,6 @@ class ImageEngine(BaseEngine):
         Returns:
             ConversionResult: Результат создания GIF.
         """
-        from PIL import Image, ImageEnhance
-
         try:
             duration = int(kwargs.get('gif_duration', 200))
             loop = int(kwargs.get('gif_loop', 0))

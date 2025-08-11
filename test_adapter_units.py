@@ -1,16 +1,16 @@
 #!/usr/bin/env python
+import os
+import sys
+import tempfile
+from unittest.mock import Mock, patch
+from converter.adapters.base import BaseEngine, ConversionResult, ConversionError
 """
 Комплексные unit-тесты для адаптеров конвертации файлов.
 Тестирует каждый адаптер изолированно с mock-данными.
 """
 
-import os
-import sys
 import unittest
-import tempfile
-from unittest.mock import Mock, patch, MagicMock, mock_open
 from pathlib import Path
-import io
 
 # Настройка Django
 project_path = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +26,6 @@ except Exception as e:
     sys.exit(1)
 
 # Импорт тестируемых компонентов
-from converter.adapters.base import BaseEngine, ConversionResult, EngineNotAvailableError, ConversionError
 from converter.adapters.video_engine import VideoEngine
 from converter.adapters.image_engine import ImageEngine
 from converter.adapters.audio_engine import AudioEngine
@@ -269,7 +268,6 @@ class TestImageEngine(unittest.TestCase):
         mock_video.name = "test.mp4"
         self.assertFalse(self.engine.validate_input(mock_video))
 
-    @patch('converter.adapters.image_engine.PIL.Image')
     def test_check_dependencies(self, mock_pil):
         """Тест проверки зависимостей."""
         # PIL доступен

@@ -7,8 +7,6 @@ Django команда управления для очистки старых ф
     python manage.py cleanup_old_files --all-failed
 """
 
-import os
-import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 

@@ -10,8 +10,6 @@ import logging
 import mimetypes
 from pathlib import Path
 from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 
 # PIL imports for image processing
 try:

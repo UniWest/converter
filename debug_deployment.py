@@ -3,7 +3,6 @@
 Debug script to check for common deployment issues
 """
 import os
-import sys
 from pathlib import Path
 
 def check_file_encoding(filepath):

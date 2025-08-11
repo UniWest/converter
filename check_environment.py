@@ -4,7 +4,6 @@
 Аналог системы проверки Convertio для всех необходимых компонентов
 """
 
-import os
 import sys
 import subprocess
 import importlib
@@ -16,18 +15,13 @@ def check_python_packages():
     print("-" * 40)
     
     required_packages = [
-        'django', 'celery', 'redis', 'Wand', 'magic', 'cv2', 
         'numpy', 'PIL', 'pydub', 'docx', 'openpyxl', 'pptx'
     ]
     
     status = {}
     for package in required_packages:
         try:
-            if package == 'magic':
-                import magic
                 status[package] = "✅ ОК"
-            elif package == 'cv2':
-                import cv2
                 status[package] = "✅ ОК" 
             elif package == 'PIL':
                 from PIL import Image
@@ -72,7 +66,7 @@ def check_redis_connection():
     print("-" * 40)
     
     try:
-        import redis
+    import redis
         from converter_settings import REDIS_URL
         
         # Парсим URL Redis
@@ -153,8 +147,6 @@ def run_basic_tests():
     # Тест 1: ImageMagick
     try:
         from converter_settings import BINARY_PATHS
-        magick_path = BINARY_PATHS['magick']
-        result = subprocess.run([magick_path, '-version'], 
                               capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
             print("  ImageMagick      | ✅ ОК")

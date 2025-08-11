@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
+import os
+import json
+import tempfile
+from django.conf import settings
+from typing import Dict, List, Any
 """
 Автотесты для Celery + API через pytest
 Проверка асинхронных задач, очередей, воркеров
 """
 
-import os
 import sys
 import pytest
-import json
 import time
-import tempfile
 from pathlib import Path
-from typing import Dict, Any, List
 from unittest.mock import Mock, patch
 import logging
 
@@ -25,13 +26,11 @@ import django
 django.setup()
 
 from django.test import Client
-from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 # Celery imports
 from celery import Celery
 from celery.result import AsyncResult
-from celery.exceptions import WorkerLostError, Retry
 
 # Project imports
 from test_audio_generator import TestAudioGenerator

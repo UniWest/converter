@@ -8,9 +8,7 @@
 """
 
 import os
-import sys
 import django
-import requests
 from datetime import datetime, timedelta
 
 # Настройка Django

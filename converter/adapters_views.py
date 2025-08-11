@@ -3,7 +3,6 @@
 Демонстрация интеграции слоя адаптеров с Django views.
 """
 
-import os
 import tempfile
 import logging
 from django.http import JsonResponse

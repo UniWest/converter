@@ -1,13 +1,12 @@
+from .base import BaseEngine, ConversionResult
 """
 Адаптер для конвертации документов.
 Базовая реализация с возможностью расширения.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from .base import BaseEngine, ConversionResult, EngineNotAvailableError, ConversionError, UnsupportedFormatError
 
 
 class DocumentEngine(BaseEngine):

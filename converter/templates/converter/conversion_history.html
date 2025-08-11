@@ -239,11 +239,11 @@
             <span class="stat-label">Успешных</span>
         </div>
         <div class="stat-card">
-            <span class="stat-number">0</span>
+            <span class="stat-number">{{ today_conversions|default:0 }}</span>
             <span class="stat-label">За сегодня</span>
         </div>
         <div class="stat-card">
-            <span class="stat-number">0GB</span>
+            <span class="stat-number">{{ total_data_processed|default:"0MB" }}</span>
             <span class="stat-label">Обработано данных</span>
         </div>
     </div>

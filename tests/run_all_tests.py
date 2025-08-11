@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
+import os
+import json
+from typing import Dict, Any, List
 """
 Главный скрипт для запуска всех тестов функциональности STT системы
 Включает генерацию тестовых данных, API тесты, UI тесты, Celery тесты
 """
 
-import os
 import sys
 import argparse
 import time
 from pathlib import Path
-from typing import Dict, List, Any
 import logging
-import json
 from datetime import datetime
 
 # Настройка путей

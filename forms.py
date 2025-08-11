@@ -2,7 +2,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.forms.widgets import FileInput
-import os
 
 
 class MultipleFileInput(FileInput):
@@ -70,7 +69,7 @@ class VideoUploadForm(forms.Form):
             'min': 144,
             'max': 3840,
             'step': 1,
-            'placeholder': 'Например: 1920',
+            'placeholder': '1920',
             'id': 'width_input'
         }),
         initial=720,  # Снижаем для скорости
@@ -90,7 +89,7 @@ class VideoUploadForm(forms.Form):
             'min': 15,
             'max': 60,
             'step': 1,
-            'placeholder': 'Например: 30'
+            'placeholder': '30'
         }),
         initial=15  # Снижаем FPS для скорости
     )
@@ -161,7 +160,7 @@ class VideoUploadForm(forms.Form):
             'class': 'form-control',
             'min': 0,
             'step': 1,
-            'placeholder': 'Например: 10'
+            'placeholder': '10'
         }),
         initial=0,
         required=False
@@ -178,7 +177,7 @@ class VideoUploadForm(forms.Form):
             'class': 'form-control',
             'min': 1,
             'step': 1,
-            'placeholder': 'Например: 120'
+            'placeholder': '120'
         }),
         required=False
     )
@@ -490,7 +489,7 @@ class ImagesToGifForm(forms.Form):
             'min': 0.1,
             'max': 5.0,
             'step': 0.1,
-            'placeholder': 'Например: 0.5'
+            'placeholder': '0.5'
         }),
         initial=0.5
     )

@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -218,82 +217,7 @@ AUDIO_PREPROCESSING = {
     'keep_silence': 500,  # мс
 }
 
-# Celery Configuration - временно отключено для запуска сервера
-"""
-# Брокер сообщений (Redis)
-# CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-# CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
-
-# Настройки задач
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Europe/Moscow'
-# CELERY_ENABLE_UTC = False
-
-# Настройки воркеров
-# CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-# CELERY_TASK_ACKS_LATE = True
-# CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
-
-# Настройки таймаутов
-# CELERY_TASK_SOFT_TIME_LIMIT = 600  # 10 минут soft limit
-# CELERY_TASK_TIME_LIMIT = 900      # 15 минут hard limit
-# CELERY_WORKER_SEND_TASK_EVENTS = True
-# CELERY_TASK_SEND_SENT_EVENT = True
-
-# Маршрутизация задач по очередям
-# CELERY_TASK_ROUTES = {
-#     'converter.tasks.convert_video': {'queue': 'video'},
-#     'converter.tasks.convert_audio': {'queue': 'audio'},
-#     'converter.tasks.convert_image': {'queue': 'image'},
-#     'converter.tasks.convert_document': {'queue': 'document'},
-#     'converter.tasks.convert_archive': {'queue': 'archive'},
-#     'converter.tasks.cleanup_temp_files': {'queue': 'cleanup'},
-# }
-
-# Настройки результатов
-# CELERY_RESULT_EXPIRES = 3600  # Результаты хранятся 1 час
-
-# Настройки повторных попыток при ошибках
-# CELERY_TASK_RETRY_DELAY = 60  # Задержка между повторами в секундах
-# CELERY_TASK_MAX_RETRIES = 3   # Максимальное количество повторов
-
-# Logging для Celery
-# CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-# CELERY_WORKER_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s] %(message)s'
-# CELERY_WORKER_TASK_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s'
-
-# Celery Beat периодические задачи
-# from celery.schedules import crontab
-# 
-# CELERY_BEAT_SCHEDULE = {
-#     # Очистка временных файлов каждые 6 часов
-#     'cleanup-temp-files': {
-#         'task': 'converter.tasks.cleanup_old_files',
-#         'schedule': crontab(minute=0, hour='*/6'),  # Каждые 6 часов
-#         'args': (24,)  # Удаляем файлы старше 24 часов
-#     },
-#     # Очистка старых задач каждые 24 часа
-#     'cleanup-old-tasks': {
-#         'task': 'celery_app.cleanup_temp_files',
-#         'schedule': crontab(minute=0, hour=3),  # Каждый день в 3:00
-#         'args': (str(Path(MEDIA_ROOT) / 'temp'), 72)  # Очищаем файлы старше 72 часов
-#     },
-# }
-# 
-# # Таймзона для Celery Beat
-# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# 
-# # Дополнительные настройки обработки ошибок
-# CELERY_TASK_REJECT_ON_WORKER_LOST = True
-# CELERY_TASK_IGNORE_RESULT = False
-# CELERY_TASK_STORE_EAGER_RESULT = True
-# 
-# # Настройки мониторинга и метрик
-# CELERY_SEND_TASK_SENT_EVENT = True
-# CELERY_SEND_EVENTS = True
-"""
+# Celery Configuration disabled for development
 
 # ========================
 # КОНФИГУРАЦИЯ CELERY (ОТКЛЮЧЕНО ДЛЯ РАЗРАБОТКИ)
@@ -341,16 +265,6 @@ CELERY_RESULT_BACKEND = None
 # Все остальные настройки Celery отключены в dev режиме
 # Периодические задачи, события, аннотации - все закомментировано
 
-# try:
-#     from celery.schedules import crontab
-#     CELERY_BEAT_SCHEDULE = {
-#         'cleanup-temp-files': {
-#             'task': 'converter_site.tasks.cleanup_old_files',
-#             'schedule': crontab(hour=3, minute=0),
-#             'args': (1,)
-#         },
-#     }
-# except ImportError:
 #     CELERY_BEAT_SCHEDULE = {}
 #     CELERY_BEAT_SCHEDULER = None
 # 

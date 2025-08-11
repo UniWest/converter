@@ -13,7 +13,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 django.setup()
 
 from django.test import TestCase, Client
-from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 import io

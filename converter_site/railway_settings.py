@@ -1,6 +1,4 @@
 # railway_settings.py - A?5F80;L=> 4;O Railway
-import os
-from .settings import *
 
 # 5@5>?@545;O5< =0AB@>9:8 4;O Railway
 DEBUG = False

@@ -5,9 +5,7 @@ from unittest.mock import Mock, patch, MagicMock
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
 from django.urls import reverse
-from django.conf import settings
 from django.test.utils import override_settings
-from io import BytesIO
 
 from .utils import VideoConverter, save_uploaded_video, save_converted_gif, cleanup_temp_files
 from forms import VideoUploadForm, VideoProcessingForm

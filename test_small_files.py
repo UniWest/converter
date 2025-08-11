@@ -1,15 +1,15 @@
 #!/usr/bin/env python
+import os
+import sys
+import tempfile
+import io
 """
 Тесты для адаптеров с небольшими реальными файлами.
 Создает минимальные валидные файлы для тестирования конвертации.
 """
 
-import os
-import sys
 import unittest
-import tempfile
 from pathlib import Path
-import io
 
 # Настройка Django
 project_path = os.path.dirname(os.path.abspath(__file__))

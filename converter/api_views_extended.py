@@ -2,9 +2,7 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.core.files.storage import default_storage
-from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.contrib import messages
 from django.db.models import Q, Count
 import os
 import json
@@ -16,9 +14,6 @@ from django.utils import timezone
 from .models import ConversionTask
 from .tasks import process_conversion_task
 from .utils import get_file_type, validate_conversion_parameters
-from celery import current_task
-import celery
-from celery.result import AsyncResult
 
 logger = logging.getLogger(__name__)
 @csrf_exempt

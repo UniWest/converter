@@ -1,13 +1,13 @@
 #!/usr/bin/env python
+import os
+import sys
+import tempfile
 """
 Интеграционные тесты для адаптеров конвертации.
 Тестирует реальные сценарии конвертации с небольшими файлами.
 """
 
-import os
-import sys
 import unittest
-import tempfile
 from pathlib import Path
 
 # Настройка Django
@@ -26,7 +26,6 @@ except Exception as e:
 # Импорт компонентов
 from django.core.files.uploadedfile import SimpleUploadedFile
 from converter.adapters.engine_manager import EngineManager
-from converter.adapters.base import ConversionResult
 
 # --- Функции для создания тестовых файлов ---
 

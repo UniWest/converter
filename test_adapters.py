@@ -1,12 +1,12 @@
 #!/usr/bin/env python
+import sys
+import tempfile
 """
 Простые тесты для проверки работы слоя адаптеров.
 Запустите этот файл для проверки базовой функциональности.
 """
 
 import os
-import sys
-import tempfile
 
 # Добавляем путь к проекту
 project_path = os.path.dirname(os.path.abspath(__file__))

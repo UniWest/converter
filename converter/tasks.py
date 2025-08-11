@@ -4,11 +4,8 @@ Celery задачи для асинхронной конвертации фай�
 Включает обработку видео, аудио, изображений, документов и архивов
 """
 
-import os
 import time
 import logging
-import tempfile
-import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
 
