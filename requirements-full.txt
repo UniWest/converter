@@ -1,0 +1,62 @@
+# Основные зависимости Django
+Django==5.2.5
+Pillow>=10.4.0
+moviepy>=1.0.3
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+python-decouple>=3.8
+requests>=2.31.0
+
+# Очереди задач и кэш
+celery==5.4.0
+redis==5.2.1
+django-celery-beat==2.5.0
+flower==2.0.1
+
+# Обработка и конвертация файлов
+python-magic==0.4.27
+Wand==0.6.13
+
+# Дополнительные библиотеки для конвертации различных форматов
+openpyxl==3.1.5
+pdfrw==0.4
+PyPDF2==3.0.1
+pdfplumber==0.11.4
+reportlab==4.2.5
+fpdf2==2.8.1
+
+# Работа с архивами
+patool==2.4.0
+zipfile36==0.1.3
+py7zr==0.22.0
+
+# Обработка изображений (дополнительно к Pillow)
+opencv-python==4.10.0.84
+numpy==2.1.3
+scipy==1.14.1
+
+# Обработка аудио
+pydub==0.25.1
+speech-recognition==3.11.0
+faster-whisper==0.10.0
+librosa==0.10.1
+soundfile==0.12.1
+webrtcvad==2.0.10
+ffmpeg-python==0.2.0
+noisereduce==3.0.0
+
+# Работа с документами Office
+python-docx==1.1.2
+openpyxl==3.1.5
+python-pptx==0.6.23
+
+# Работа с веб-форматами и API
+beautifulsoup4==4.12.3
+lxml==5.3.0
+django-cors-headers==4.6.0
+django-rest-framework==0.1.0
+djangorestframework==3.15.2
+
+# Мониторинг и логирование
+django-extensions==3.2.3
+psutil>=5.9.0
