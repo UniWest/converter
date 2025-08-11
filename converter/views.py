@@ -161,3 +161,33 @@ def conversion_interface_view(request):
 def comprehensive_converter_view(request):
     """View for comprehensive converter."""
     return render(request, 'converter/comprehensive_converter.html')
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def video_info_view(request):
+    """Get video information via AJAX."""
+    if not request.FILES.get('video'):
+        return JsonResponse({'success': False, 'error': 'No video file provided'})
+    
+    try:
+        video_file = request.FILES['video']
+        converter = VideoConverter()
+        info = converter.get_video_info(video_file)
+        
+        if info:
+            return JsonResponse({
+                'success': True,
+                'info': info
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Could not extract video information'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting video info: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Server error while processing video'
+        })

@@ -8,6 +8,7 @@ urlpatterns = [
     path("upload/", views.VideoUploadView.as_view(), name="video_upload"),
     path("convert/", views.convert_video_view, name="convert_video"),
     path("status/", views.converter_status_view, name="converter_status"),
+    path("video-info/", views.video_info_view, name="video_info"),  # AJAX endpoint for video info
     
     # Additional converter views (placeholders for now)
     path("photos-to-gif/", views.photos_to_gif_view, name="photos_to_gif"),
