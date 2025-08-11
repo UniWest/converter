@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="140" viewBox="0 0 420 140" fill="none">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2B1B64"/>
+      <stop offset="100%" stop-color="#5B2EE5"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="400" height="120" rx="16" fill="url(#card)"/>
+  <!-- Шаг 1: видео -->
+  <g transform="translate(40,40)">
+    <rect x="-18" y="-14" width="36" height="28" rx="4" fill="#7A3DF2"/>
+    <polygon points="-6,-6 8,0 -6,6" fill="white"/>
+  </g>
+  <!-- Стрелка -->
+  <g transform="translate(140,55)">
+    <path d="M0,10 L80,10" stroke="#B287FF" stroke-width="4" stroke-linecap="round"/>
+    <path d="M70,0 L90,10 L70,20" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- Шаг 2: шестерёнка (конвертация) -->
+  <g transform="translate(220,40)">
+    <circle cx="0" cy="0" r="12" fill="#9B6BFF"/>
+    <g stroke="#2B1B64" stroke-width="2" stroke-linecap="round">
+      <path d="M0,-16 V-12"/>
+      <path d="M0,16 V12"/>
+      <path d="M-16,0 H-12"/>
+      <path d="M16,0 H12"/>
+      <path d="M-11,-11 L-8,-8"/>
+      <path d="M11,11 L8,8"/>
+      <path d="M-11,11 L-8,8"/>
+      <path d="M11,-11 L8,-8"/>
+    </g>
+  </g>
+  <!-- Стрелка -->
+  <g transform="translate(270,55)">
+    <path d="M0,10 L80,10" stroke="#B287FF" stroke-width="4" stroke-linecap="round"/>
+    <path d="M70,0 L90,10 L70,20" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- Шаг 3: файл результата -->
+  <g transform="translate(360,40)">
+    <rect x="-14" y="-18" width="28" height="36" rx="4" fill="#7A3DF2"/>
+    <path d="M-2,-18 L14,-2 L14,18 L-14,18 L-14,-18 Z" fill="#B287FF" opacity="0.35"/>
+  </g>
+</svg>
+

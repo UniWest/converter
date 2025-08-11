@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Пульсирующая точка (для статуса) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <radialGradient id="pg" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#B287FF"/>
+      <stop offset="100%" stop-color="#5B2EE5"/>
+    </radialGradient>
+  </defs>
+  <circle cx="12" cy="12" r="6" fill="url(#pg)">
+    <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.75;1" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="12" cy="12" r="11" fill="none" stroke="#7A3DF2" stroke-width="1.5" opacity="0.4">
+    <animate attributeName="r" values="9;11;9" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.15;0.45;0.15" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>
+

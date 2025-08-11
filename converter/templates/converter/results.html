@@ -1,0 +1,688 @@
+{% extends 'converter/base.html' %}
+
+{% block title %}Результаты конвертации{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        border: 1px solid #dee2e6;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .result-item {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+    }
+    .result-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .result-preview {
+        height: 200px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .result-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+    .result-preview video {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+    .result-info {
+        padding: 1.5rem;
+    }
+    .result-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+    .result-meta {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    .result-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box .bi-search {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .search-box input {
+        padding-left: 35px;
+    }
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+    }
+    .file-type-icon {
+        font-size: 3rem;
+        opacity: 0.3;
+    }
+    .download-progress {
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    .download-progress-bar {
+        height: 100%;
+        background: #28a745;
+        transition: width 0.3s ease;
+    }
+    .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+    }
+    .lightbox-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90%;
+        max-height: 90%;
+    }
+    .lightbox img, .lightbox video {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок результатов -->
+    <div class="results-header text-center">
+        <h1><i class="bi bi-check-circle"></i> Результаты конвертации</h1>
+        <p class="lead mb-0">Ваши файлы успешно обработаны</p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <span class="stats-icon">📊</span>
+                <h3 id="total-files">{{ total_files|default:0 }}</h3>
+                <p class="text-muted mb-0">Всего файлов</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <span class="stats-icon">✅</span>
+                <h3 id="completed-files" class="text-success">{{ completed_files|default:0 }}</h3>
+                <p class="text-muted mb-0">Завершено</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <span class="stats-icon">⏳</span>
+                <h3 id="processing-files" class="text-warning">{{ processing_files|default:0 }}</h3>
+                <p class="text-muted mb-0">Обрабатывается</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <span class="stats-icon">❌</span>
+                <h3 id="failed-files" class="text-danger">{{ failed_files|default:0 }}</h3>
+                <p class="text-muted mb-0">Ошибка</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Панель фильтров и поиска -->
+    <div class="filter-bar">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control" id="search-input" 
+                           placeholder="Поиск по имени файла...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="status-filter">
+                    <option value="">Все статусы</option>
+                    <option value="done">Завершено</option>
+                    <option value="running">Обрабатывается</option>
+                    <option value="queued">В очереди</option>
+                    <option value="failed">Ошибка</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="type-filter">
+                    <option value="">Все типы</option>
+                    <option value="video">Видео</option>
+                    <option value="image">Изображения</option>
+                    <option value="audio">Аудио</option>
+                    <option value="document">Документы</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" id="refresh-results">
+                        <i class="bi bi-arrow-clockwise"></i> Обновить
+                    </button>
+                    <button class="btn btn-outline-success" id="download-all">
+                        <i class="bi bi-download"></i> Скачать все
+                    </button>
+                    <button class="btn btn-outline-danger" id="clear-completed">
+                        <i class="bi bi-trash"></i> Очистить завершенные
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сетка результатов -->
+    <div class="results-grid" id="results-grid">
+        <!-- Заполняется через JavaScript -->
+    </div>
+
+    <!-- Сообщение о пустых результатах -->
+    <div class="text-center py-5" id="no-results" style="display: none;">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h3 class="text-muted mt-3">Результатов не найдено</h3>
+        <p class="text-muted">Попробуйте изменить фильтры или начать новую конвертацию</p>
+        <a href="{% url 'converter:conversion_interface' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Новая конвертация
+        </a>
+    </div>
+</div>
+
+<!-- Lightbox для предварительного просмотра -->
+<div class="lightbox" id="lightbox">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <div class="lightbox-content" id="lightbox-content">
+        <!-- Контент загружается динамически -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ResultsManager {
+    constructor() {
+        this.results = [];
+        this.filteredResults = [];
+        this.downloadQueue = [];
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.loadResults();
+        
+        // Автообновление каждые 5 секунд
+        this.refreshInterval = setInterval(() => {
+            this.loadResults(false);
+        }, 5000);
+    }
+    
+    setupEventListeners() {
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            this.filterResults();
+        });
+        
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            this.filterResults();
+        });
+        
+        document.getElementById('type-filter').addEventListener('change', (e) => {
+            this.filterResults();
+        });
+        
+        document.getElementById('refresh-results').addEventListener('click', () => {
+            this.loadResults(true);
+        });
+        
+        document.getElementById('download-all').addEventListener('click', () => {
+            this.downloadAll();
+        });
+        
+        document.getElementById('clear-completed').addEventListener('click', () => {
+            this.clearCompleted();
+        });
+    }
+    
+    async loadResults(showLoader = false) {
+        if (showLoader) {
+            document.getElementById('results-grid').innerHTML = this.getLoaderHTML();
+        }
+        
+        try {
+            const response = await fetch('/api/conversion/results/');
+            if (response.ok) {
+                const data = await response.json();
+                this.results = data.results || [];
+                this.updateStats(data.stats);
+                this.filterResults();
+            } else {
+                this.showError('Ошибка загрузки результатов');
+            }
+        } catch (error) {
+            console.error('Error loading results:', error);
+            this.showError('Ошибка подключения');
+        }
+    }
+    
+    updateStats(stats) {
+        document.getElementById('total-files').textContent = stats.total || 0;
+        document.getElementById('completed-files').textContent = stats.completed || 0;
+        document.getElementById('processing-files').textContent = stats.processing || 0;
+        document.getElementById('failed-files').textContent = stats.failed || 0;
+    }
+    
+    filterResults() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const statusFilter = document.getElementById('status-filter').value;
+        const typeFilter = document.getElementById('type-filter').value;
+        
+        this.filteredResults = this.results.filter(result => {
+            const matchesSearch = !searchTerm || 
+                result.original_filename.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || result.status === statusFilter;
+            const matchesType = !typeFilter || result.source_format === typeFilter;
+            
+            return matchesSearch && matchesStatus && matchesType;
+        });
+        
+        this.renderResults();
+    }
+    
+    renderResults() {
+        const grid = document.getElementById('results-grid');
+        const noResults = document.getElementById('no-results');
+        
+        if (this.filteredResults.length === 0) {
+            grid.innerHTML = '';
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        noResults.style.display = 'none';
+        
+        const html = this.filteredResults.map(result => this.renderResultItem(result)).join('');
+        grid.innerHTML = html;
+    }
+    
+    renderResultItem(result) {
+        const statusColor = this.getStatusColor(result.status);
+        const statusText = this.getStatusText(result.status);
+        const fileIcon = this.getFileIcon(result.target_format);
+        const canPreview = this.canPreview(result.target_format);
+        const canDownload = result.status === 'done' && result.output_url;
+        
+        return `
+            <div class="result-item" data-result-id="${result.id}">
+                <div class="result-preview">
+                    ${result.status === 'done' && result.preview_url ? 
+                        (result.target_format === 'gif' ? 
+                            `<img src="${result.preview_url}" alt="Preview" onclick="openLightbox('${result.output_url}', 'image')">` :
+                            `<div class="file-type-icon">${fileIcon}</div>`
+                        ) : 
+                        `<div class="file-type-icon">${fileIcon}</div>`
+                    }
+                    <span class="status-badge badge bg-${statusColor}">${statusText}</span>
+                </div>
+                <div class="result-info">
+                    <div class="result-title">${result.original_filename}</div>
+                    <div class="result-meta">
+                        ${result.source_format.toUpperCase()} → ${result.target_format.toUpperCase()}
+                        <br>
+                        <small class="text-muted">${new Date(result.created_at).toLocaleString()}</small>
+                        ${result.file_size ? `<br><small>${this.formatFileSize(result.file_size)}</small>` : ''}
+                    </div>
+                    
+                    ${result.status === 'running' && result.progress > 0 ? `
+                        <div class="mb-2">
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar" style="width: ${result.progress}%"></div>
+                            </div>
+                            <small class="text-muted">${result.progress}% завершено</small>
+                        </div>
+                    ` : ''}
+                    
+                    ${result.error_message ? `
+                        <div class="alert alert-danger py-2">
+                            <small>${result.error_message}</small>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="result-actions">
+                        ${canPreview ? `
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="openLightbox('${result.output_url}', '${this.getPreviewType(result.target_format)}')">
+                                <i class="bi bi-eye"></i> Просмотр
+                            </button>
+                        ` : ''}
+                        ${canDownload ? `
+                            <button class="btn btn-sm btn-success" 
+                                    onclick="downloadFile('${result.output_url}', '${result.converted_filename}')">
+                                <i class="bi bi-download"></i> Скачать
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-outline-secondary" 
+                                onclick="shareResult('${result.id}')">
+                            <i class="bi bi-share"></i> Поделиться
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="deleteResult('${result.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    getStatusColor(status) {
+        const colors = {
+            'done': 'success',
+            'running': 'primary',
+            'queued': 'info',
+            'failed': 'danger'
+        };
+        return colors[status] || 'secondary';
+    }
+    
+    getStatusText(status) {
+        const texts = {
+            'done': 'Готово',
+            'running': 'Обработка',
+            'queued': 'В очереди',
+            'failed': 'Ошибка'
+        };
+        return texts[status] || status;
+    }
+    
+    getFileIcon(format) {
+        const icons = {
+            'gif': '🎞️',
+            'mp4': '🎬',
+            'webm': '🎥',
+            'avi': '📹',
+            'jpg': '📸',
+            'png': '🖼️',
+            'webp': '🌐',
+            'pdf': '📄',
+            'mp3': '🎵',
+            'wav': '🔊',
+            'flac': '🎼',
+            'ogg': '🎧',
+            'docx': '📝',
+            'txt': '📃',
+            'html': '🌐'
+        };
+        return icons[format] || '📁';
+    }
+    
+    canPreview(format) {
+        const previewableFormats = ['gif', 'jpg', 'png', 'webp', 'mp4', 'webm'];
+        return previewableFormats.includes(format);
+    }
+    
+    getPreviewType(format) {
+        const videoFormats = ['mp4', 'webm', 'avi'];
+        return videoFormats.includes(format) ? 'video' : 'image';
+    }
+    
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    getLoaderHTML() {
+        return `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3 text-muted">Загрузка результатов...</p>
+            </div>
+        `;
+    }
+    
+    showError(message) {
+        const grid = document.getElementById('results-grid');
+        grid.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    ${message}
+                </div>
+            </div>
+        `;
+    }
+    
+    async downloadAll() {
+        const completedResults = this.filteredResults.filter(r => r.status === 'done' && r.output_url);
+        
+        if (completedResults.length === 0) {
+            alert('Нет файлов для скачивания');
+            return;
+        }
+        
+        // Создаем zip-архив на сервере
+        try {
+            const response = await fetch('/api/conversion/download-batch/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    result_ids: completedResults.map(r => r.id)
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                window.open(data.download_url, '_blank');
+            } else {
+                alert('Ошибка создания архива');
+            }
+        } catch (error) {
+            console.error('Error downloading batch:', error);
+            alert('Ошибка скачивания');
+        }
+    }
+    
+    async clearCompleted() {
+        if (!confirm('Удалить все завершенные задачи?')) return;
+        
+        try {
+            const response = await fetch('/api/conversion/clear-completed/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            if (response.ok) {
+                this.loadResults(true);
+                this.showNotification('Завершенные задачи очищены', 'success');
+            } else {
+                alert('Ошибка очистки');
+            }
+        } catch (error) {
+            console.error('Error clearing completed:', error);
+            alert('Ошибка подключения');
+        }
+    }
+    
+    showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+    }
+}
+
+// Глобальные функции для взаимодействия с результатами
+function openLightbox(url, type) {
+    const lightbox = document.getElementById('lightbox');
+    const content = document.getElementById('lightbox-content');
+    
+    if (type === 'video') {
+        content.innerHTML = `<video controls autoplay><source src="${url}"></video>`;
+    } else {
+        content.innerHTML = `<img src="${url}" alt="Preview">`;
+    }
+    
+    lightbox.style.display = 'block';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+}
+
+function downloadFile(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function shareResult(resultId) {
+    // Копируем ссылку в буфер обмена
+    const url = `${window.location.origin}/results/${resultId}/`;
+    navigator.clipboard.writeText(url).then(() => {
+        resultsManager.showNotification('Ссылка скопирована в буфер обмена', 'success');
+    });
+}
+
+async function deleteResult(resultId) {
+    if (!confirm('Удалить этот результат?')) return;
+    
+    try {
+        const response = await fetch(`/api/conversion/results/${resultId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+        
+        if (response.ok) {
+            resultsManager.loadResults(true);
+            resultsManager.showNotification('Результат удален', 'success');
+        } else {
+            alert('Ошибка удаления');
+        }
+    } catch (error) {
+        console.error('Error deleting result:', error);
+        alert('Ошибка подключения');
+    }
+}
+
+// Закрытие lightbox по клику вне контента
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') {
+        closeLightbox();
+    }
+});
+
+// Закрытие lightbox по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeLightbox();
+    }
+});
+
+// Инициализация
+let resultsManager;
+document.addEventListener('DOMContentLoaded', () => {
+    resultsManager = new ResultsManager();
+});
+
+// Очистка интервала при выходе со страницы
+window.addEventListener('beforeunload', () => {
+    if (resultsManager.refreshInterval) {
+        clearInterval(resultsManager.refreshInterval);
+    }
+});
+</script>
+{% endblock %}

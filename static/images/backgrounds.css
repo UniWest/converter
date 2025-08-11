@@ -1,0 +1,59 @@
+/* Фиолетовые CSS-градиенты для фонов */
+
+:root {
+  --violet-900: #1E0F4F;
+  --violet-800: #2B1B64;
+  --violet-700: #4A22A7;
+  --violet-600: #5B2EE5;
+  --violet-500: #7A3DF2;
+  --violet-400: #9B6BFF;
+  --violet-300: #B287FF;
+}
+
+.bg-violet-linear {
+  background: linear-gradient(135deg, var(--violet-900) 0%, var(--violet-700) 30%, var(--violet-500) 60%, var(--violet-300) 100%);
+}
+
+.bg-violet-radial {
+  background: radial-gradient(1200px circle at 20% 20%, var(--violet-500) 0%, var(--violet-800) 40%, var(--violet-900) 100%);
+}
+
+.bg-violet-conic {
+  background: conic-gradient(from 210deg at 70% 40%, var(--violet-300), var(--violet-500), var(--violet-800), var(--violet-300));
+}
+
+.bg-violet-noise {
+  background: linear-gradient(160deg, rgba(123,84,255,0.35), rgba(30,15,79,0.35)),
+              radial-gradient(800px circle at 70% 20%, rgba(155,107,255,0.25), transparent 60%),
+              radial-gradient(900px circle at 20% 70%, rgba(90,46,229,0.25), transparent 55%),
+              #0b0720;
+  background-blend-mode: screen, normal, normal, normal;
+}
+
+/* Небольшие полезные утилиты */
+.violet-overlay-30 { background-color: rgba(91, 46, 229, 0.3); }
+.violet-overlay-50 { background-color: rgba(91, 46, 229, 0.5); }
+
+/***** Анимированные эффекты *****/
+.breathing-bg {
+  position: relative;
+  overflow: hidden;
+}
+.breathing-bg::before, .breathing-bg::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(60% 60% at 30% 30%, rgba(155,107,255,0.35), transparent 70%);
+  animation: floatPulse 12s ease-in-out infinite;
+  filter: blur(20px);
+}
+.breathing-bg::after {
+  background: radial-gradient(50% 50% at 70% 60%, rgba(90,46,229,0.35), transparent 70%);
+  animation-duration: 16s;
+  animation-delay: -4s;
+}
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(-2%) translateX(-2%) scale(1); opacity: .8; }
+  50% { transform: translateY(2%) translateX(2%) scale(1.05); opacity: 1; }
+}
+

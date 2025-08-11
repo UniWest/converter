@@ -1,0 +1,1368 @@
+{% extends 'converter/base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% get_current_language as LANGUAGE_CODE %}
+    {% if LANGUAGE_CODE == 'en' %}
+        Audio to Text Converter - Speech Recognition
+    {% else %}
+        Конвертер аудио в текст - Распознавание речи
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Дополнительные стили для audio-to-text */
+.audio-drop-zone {
+    position: relative;
+    overflow: hidden;
+    border: 3px dashed var(--border-purple);
+    border-radius: var(--border-radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: var(--transition-bounce);
+    background: var(--gradient-card);
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.audio-drop-zone:hover,
+.audio-drop-zone.drag-over {
+    border-color: var(--border-hover);
+    background: var(--bg-purple-lighter);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+}
+
+.audio-drop-zone input[type=file] {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
+
+.audio-icon {
+    font-size: 4rem;
+    color: var(--primary-purple);
+    margin-bottom: 1.5rem;
+    transition: var(--transition-normal);
+}
+
+.audio-drop-zone:hover .audio-icon {
+    transform: scale(1.1) rotateZ(5deg);
+    color: var(--secondary-purple);
+}
+
+.settings-panel {
+    background: var(--gradient-card);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    border-left: 5px solid var(--primary-purple);
+    transition: var(--transition-normal);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.settings-panel:hover {
+    background: var(--bg-purple-lighter);
+    transform: translateX(5px);
+    box-shadow: var(--shadow-light);
+}
+
+.result-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-normal);
+}
+
+.result-panel:hover {
+    background: white;
+    box-shadow: var(--shadow-light);
+}
+
+.progress-container {
+    margin: 1.5rem 0;
+    display: none;
+}
+
+.progress-container.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.download-buttons {
+    margin-top: 1rem;
+    display: none;
+}
+
+.download-buttons.show {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    animation: slideInUp 0.5s ease-in-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-info {
+    background: var(--bg-purple-light);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border-light);
+    display: none;
+}
+
+.file-info.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    margin-top: 1rem;
+}
+
+.status-indicator.processing {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-indicator.completed {
+    background: rgba(25, 135, 84, 0.1);
+    color: #0f5132;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+}
+
+.status-indicator.error {
+    background: rgba(220, 53, 69, 0.1);
+    color: #721c24;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.language-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .download-buttons {
+        justify-content: center;
+    }
+    
+    .audio-drop-zone {
+        padding: 2rem 1rem;
+        min-height: 150px;
+    }
+    
+    .audio-icon {
+        font-size: 2.5rem;
+    }
+    
+    .settings-panel {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Language Toggle -->
+<div class="language-toggle">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setLanguage('ru')" id="lang-ru">
+            🇷🇺 RU
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setLanguage('en')" id="lang-en">
+            🇺🇸 EN
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- System Status Alert -->
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" id="systemStatusAlert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Уведомление о совместимости:</strong>
+            Некоторые библиотеки для распознавания речи не установлены. 
+            Система работает в ограниченном режиме.
+            <a href="#" class="alert-link" onclick="showLibraryInfo()">Подробнее »</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- File Upload Zone -->
+        <div class="audio-drop-zone fade-in" id="dropZone">
+            <div class="audio-icon" id="uploadIcon">🎵</div>
+            <h5 id="uploadTitle" class="mb-2">{% trans "Загрузите аудиофайл" %}</h5>
+            <p class="text-muted mb-3" id="uploadSubtitle">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Click here or drag and drop audio file
+                {% else %}
+                    Нажмите здесь или перетащите аудиофайл
+                {% endif %}
+            </p>
+            <p class="file-name text-primary fw-bold" id="fileName">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    No file selected
+                {% else %}
+                    Файл не выбран
+                {% endif %}
+            </p>
+            <input type="file" id="audioInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.wma">
+        </div>
+        
+        <!-- File Info -->
+        <div class="file-info" id="fileInfo">
+            <h6 id="fileInfoTitle">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    File Information
+                {% else %}
+                    Информация о файле
+                {% endif %}
+            </h6>
+            <div id="fileInfoContent"></div>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div class="settings-panel slide-in-left">
+            <h5 class="mb-3">
+                <i class="bi bi-gear-fill"></i>
+                <span id="settingsTitle">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Recognition Settings
+                    {% else %}
+                        Настройки распознавания
+                    {% endif %}
+                </span>
+            </h5>
+            
+            <div class="row">
+                <!-- Speech Recognition Engine -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="sttEngine" id="engineLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Recognition Engine
+                        {% else %}
+                            Движок распознавания
+                        {% endif %}
+                    </label>
+                    <select id="sttEngine" class="form-select">
+                        <option value="whisper" selected>OpenAI Whisper</option>
+                        <option value="google">Google Speech</option>
+                        <option value="yandex">Yandex SpeechKit</option>
+                        <option value="vosk">Vosk (Offline)</option>
+                    </select>
+                </div>
+                
+                <!-- Language -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="sttLanguage" id="languageLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Recognition Language
+                        {% else %}
+                            Язык распознавания
+                        {% endif %}
+                    </label>
+                    <select id="sttLanguage" class="form-select">
+                        <option value="ru-RU" selected>🇷🇺 Русский</option>
+                        <option value="en-US">🇺🇸 English</option>
+                        <option value="uk-UA">🇺🇦 Українська</option>
+                        <option value="de-DE">🇩🇪 Deutsch</option>
+                        <option value="fr-FR">🇫🇷 Français</option>
+                        <option value="es-ES">🇪🇸 Español</option>
+                        <option value="it-IT">🇮🇹 Italiano</option>
+                        <option value="ja-JP">🇯🇵 日本語</option>
+                        <option value="ko-KR">🇰🇷 한국어</option>
+                        <option value="zh-CN">🇨🇳 中文</option>
+                    </select>
+                </div>
+                
+                <!-- Quality -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="sttQuality" id="qualityLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Quality
+                        {% else %}
+                            Качество
+                        {% endif %}
+                    </label>
+                    <select id="sttQuality" class="form-select">
+                        <option value="standard" selected>
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Standard
+                            {% else %}
+                                Обычное
+                            {% endif %}
+                        </option>
+                        <option value="high">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                High (slower)
+                            {% else %}
+                                Высокое (медленнее)
+                            {% endif %}
+                        </option>
+                        <option value="fast">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Fast (less accurate)
+                            {% else %}
+                                Быстрое (менее точно)
+                            {% endif %}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Output Format -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" id="formatLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Output Format
+                        {% else %}
+                            Формат вывода
+                        {% endif %}
+                    </label>
+                    <div class="btn-group w-100" role="group" id="formatToggle">
+                        <input type="radio" class="btn-check" name="outputFormat" id="formatText" value="text" checked>
+                        <label class="btn btn-outline-primary" for="formatText">📝 TXT</label>
+                        
+                        <input type="radio" class="btn-check" name="outputFormat" id="formatSrt" value="srt">
+                        <label class="btn btn-outline-primary" for="formatSrt">🎬 SRT</label>
+                        
+                        <input type="radio" class="btn-check" name="outputFormat" id="formatJson" value="json">
+                        <label class="btn btn-outline-primary" for="formatJson">📊 JSON</label>
+                    </div>
+                </div>
+                
+                <!-- Additional Options -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" id="optionsLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Additional Options
+                        {% else %}
+                            Дополнительные опции
+                        {% endif %}
+                    </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeTimestamps">
+                        <label class="form-check-label" for="includeTimestamps" id="timestampsLabel">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Include timestamps
+                            {% else %}
+                                Включить временные метки
+                            {% endif %}
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="detectSpeakers">
+                        <label class="form-check-label" for="detectSpeakers" id="speakersLabel">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Detect speakers (experimental)
+                            {% else %}
+                                Определять спикеров (эксп.)
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Start Recognition Button -->
+        <div class="text-center slide-in-right">
+            <button type="button" class="btn btn-primary btn-lg" id="startRecognition">
+                <i class="bi bi-mic-fill"></i>
+                <span id="recognizeButton">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Start Recognition
+                    {% else %}
+                        Начать распознавание
+                    {% endif %}
+                </span>
+            </button>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span id="progressLabel">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Processing audio...
+                    {% else %}
+                        Обработка аудио...
+                    {% endif %}
+                </span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="status-indicator processing" id="statusIndicator" style="display: none;">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <span id="statusText">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Processing...
+                    {% else %}
+                        Обработка...
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Results Panel -->
+        <div class="result-panel" id="resultPanel" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-text"></i>
+                    <span id="resultTitle">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            Recognition Result
+                        {% else %}
+                            Результат распознавания
+                        {% endif %}
+                    </span>
+                </h5>
+                <div class="download-buttons" id="downloadButtons">
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadResult('txt')">
+                        <i class="bi bi-download"></i> TXT
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadResult('srt')">
+                        <i class="bi bi-download"></i> SRT
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadResult('json')">
+                        <i class="bi bi-download"></i> JSON
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard()">
+                        <i class="bi bi-clipboard"></i>
+                        <span id="copyButton">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Copy
+                            {% else %}
+                                Копировать
+                            {% endif %}
+                        </span>
+                    </button>
+                </div>
+            </div>
+            
+            <textarea id="resultText" class="form-control" rows="12" 
+                      placeholder="{% get_current_language as LANGUAGE_CODE %}{% if LANGUAGE_CODE == 'en' %}Recognition result will appear here{% else %}Результат распознавания появится здесь{% endif %}" 
+                      readonly></textarea>
+            
+            <div class="mt-3">
+                <small class="text-muted" id="resultInfo"></small>
+            </div>
+        </div>
+        
+        <!-- Error Alert -->
+        <div class="alert alert-danger mt-3" id="errorAlert" style="display: none;" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span id="errorMessage"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Information Cards -->
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">🎯</div>
+            <h5 id="accuracyTitle">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    High Accuracy
+                {% else %}
+                    Высокая точность
+                {% endif %}
+            </h5>
+            <p class="text-muted mb-0" id="accuracyDesc">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Advanced AI models for precise speech recognition in multiple languages
+                {% else %}
+                    Продвинутые ИИ модели для точного распознавания речи на множестве языков
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">📁</div>
+            <h5 id="formatsTitle">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Multiple Formats
+                {% else %}
+                    Множество форматов
+                {% endif %}
+            </h5>
+            <p class="text-muted mb-0" id="formatsDesc">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Support for MP3, WAV, M4A, AAC, OGG, FLAC, WMA and other audio formats
+                {% else %}
+                    Поддержка MP3, WAV, M4A, AAC, OGG, FLAC, WMA и других аудио форматов
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">⚡</div>
+            <h5 id="speedTitle">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Fast Processing
+                {% else %}
+                    Быстрая обработка
+                {% endif %}
+            </h5>
+            <p class="text-muted mb-0" id="speedDesc">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Optimized algorithms for quick speech-to-text conversion
+                {% else %}
+                    Оптимизированные алгоритмы для быстрого преобразования речи в текст
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Глобальные переменные
+let currentLanguage = 'ru';
+let recognitionTaskId = null;
+let progressInterval = null;
+let recognitionResult = null;
+
+// Тексты для разных языков
+const translations = {
+    ru: {
+        uploadTitle: 'Загрузите аудиофайл',
+        uploadSubtitle: 'Нажмите здесь или перетащите аудиофайл',
+        noFileSelected: 'Файл не выбран',
+        fileInfo: 'Информация о файле',
+        settingsTitle: 'Настройки распознавания',
+        engineLabel: 'Движок распознавания',
+        languageLabel: 'Язык распознавания',
+        qualityLabel: 'Качество',
+        formatLabel: 'Формат вывода',
+        optionsLabel: 'Дополнительные опции',
+        timestampsLabel: 'Включить временные метки',
+        speakersLabel: 'Определять спикеров (эксп.)',
+        recognizeButton: 'Начать распознавание',
+        progressLabel: 'Обработка аудио...',
+        statusProcessing: 'Обработка...',
+        resultTitle: 'Результат распознавания',
+        copyButton: 'Копировать',
+        resultPlaceholder: 'Результат распознавания появится здесь',
+        accuracyTitle: 'Высокая точность',
+        accuracyDesc: 'Продвинутые ИИ модели для точного распознавания речи на множестве языков',
+        formatsTitle: 'Множество форматов',
+        formatsDesc: 'Поддержка MP3, WAV, M4A, AAC, OGG, FLAC, WMA и других аудио форматов',
+        speedTitle: 'Быстрая обработка',
+        speedDesc: 'Оптимизированные алгоритмы для быстрого преобразования речи в текст',
+        // Качество
+        qualityStandard: 'Обычное',
+        qualityHigh: 'Высокое (медленнее)',
+        qualityFast: 'Быстрое (менее точно)',
+        // Ошибки и сообщения
+        errorNoFile: 'Пожалуйста, выберите аудиофайл',
+        errorFileSize: 'Файл слишком большой. Максимальный размер: 500 МБ',
+        errorFileType: 'Неподдерживаемый формат файла',
+        successCopied: 'Текст скопирован в буфер обмена',
+        statusCompleted: 'Распознавание завершено',
+        statusError: 'Ошибка распознавания'
+    },
+    en: {
+        uploadTitle: 'Upload Audio File',
+        uploadSubtitle: 'Click here or drag and drop audio file',
+        noFileSelected: 'No file selected',
+        fileInfo: 'File Information',
+        settingsTitle: 'Recognition Settings',
+        engineLabel: 'Recognition Engine',
+        languageLabel: 'Recognition Language',
+        qualityLabel: 'Quality',
+        formatLabel: 'Output Format',
+        optionsLabel: 'Additional Options',
+        timestampsLabel: 'Include timestamps',
+        speakersLabel: 'Detect speakers (experimental)',
+        recognizeButton: 'Start Recognition',
+        progressLabel: 'Processing audio...',
+        statusProcessing: 'Processing...',
+        resultTitle: 'Recognition Result',
+        copyButton: 'Copy',
+        resultPlaceholder: 'Recognition result will appear here',
+        accuracyTitle: 'High Accuracy',
+        accuracyDesc: 'Advanced AI models for precise speech recognition in multiple languages',
+        formatsTitle: 'Multiple Formats',
+        formatsDesc: 'Support for MP3, WAV, M4A, AAC, OGG, FLAC, WMA and other audio formats',
+        speedTitle: 'Fast Processing',
+        speedDesc: 'Optimized algorithms for quick speech-to-text conversion',
+        // Качество
+        qualityStandard: 'Standard',
+        qualityHigh: 'High (slower)',
+        qualityFast: 'Fast (less accurate)',
+        // Ошибки и сообщения
+        errorNoFile: 'Please select an audio file',
+        errorFileSize: 'File is too large. Maximum size: 500 MB',
+        errorFileType: 'Unsupported file format',
+        successCopied: 'Text copied to clipboard',
+        statusCompleted: 'Recognition completed',
+        statusError: 'Recognition error'
+    }
+};
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Определяем текущий язык из URL или localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const langFromUrl = urlParams.get('lang');
+    const langFromStorage = localStorage.getItem('audioToTextLang');
+    
+    currentLanguage = langFromUrl || langFromStorage || 'ru';
+    updateLanguage(currentLanguage);
+    
+    // Инициализируем компоненты
+    initDragAndDrop();
+    initFileInput();
+    initRecognitionButton();
+    initLanguageToggle();
+    
+    // Обновляем активную кнопку языка
+    document.getElementById('lang-' + currentLanguage).classList.add('active');
+});
+
+// Функция смены языка интерфейса
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('audioToTextLang', lang);
+    updateLanguage(lang);
+    
+    // Обновляем активную кнопку
+    document.querySelectorAll('.language-toggle .btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('lang-' + lang).classList.add('active');
+}
+
+// Обновление текстов интерфейса
+function updateLanguage(lang) {
+    const t = translations[lang];
+    if (!t) return;
+    
+    // Обновляем все элементы с переводами
+    const elements = {
+        'uploadTitle': 'textContent',
+        'uploadSubtitle': 'textContent',
+        'fileName': 'textContent',
+        'fileInfoTitle': 'textContent',
+        'settingsTitle': 'textContent',
+        'engineLabel': 'textContent',
+        'languageLabel': 'textContent',
+        'qualityLabel': 'textContent',
+        'formatLabel': 'textContent',
+        'optionsLabel': 'textContent',
+        'timestampsLabel': 'textContent',
+        'speakersLabel': 'textContent',
+        'recognizeButton': 'textContent',
+        'progressLabel': 'textContent',
+        'statusText': 'textContent',
+        'resultTitle': 'textContent',
+        'copyButton': 'textContent',
+        'resultText': 'placeholder',
+        'accuracyTitle': 'textContent',
+        'accuracyDesc': 'textContent',
+        'formatsTitle': 'textContent',
+        'formatsDesc': 'textContent',
+        'speedTitle': 'textContent',
+        'speedDesc': 'textContent'
+    };
+    
+    Object.entries(elements).forEach(([id, prop]) => {
+        const element = document.getElementById(id);
+        if (element && t[id]) {
+            element[prop] = t[id];
+        }
+    });
+    
+    // Обновляем опции качества
+    const qualitySelect = document.getElementById('sttQuality');
+    if (qualitySelect) {
+        qualitySelect.options[0].textContent = t.qualityStandard;
+        qualitySelect.options[1].textContent = t.qualityHigh;
+        qualitySelect.options[2].textContent = t.qualityFast;
+    }
+    
+    // Обновляем placeholder в зависимости от выбранного файла
+    const fileName = document.getElementById('fileName');
+    if (fileName && fileName.textContent.includes('No file') || fileName.textContent.includes('Файл не')) {
+        fileName.textContent = t.noFileSelected;
+    }
+}
+
+// Инициализация Drag & Drop
+function initDragAndDrop() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('audioInput');
+    
+    // Предотвращаем стандартное поведение
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Выделяем зону при драге
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Обработка дропа
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    // Клик по зоне = клик по input
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight() {
+        dropZone.classList.add('drag-over');
+    }
+    
+    function unhighlight() {
+        dropZone.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    }
+}
+
+// Инициализация input файла
+function initFileInput() {
+    const fileInput = document.getElementById('audioInput');
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+}
+
+// Обработка выбора файла
+function handleFileSelect(file) {
+    const t = translations[currentLanguage];
+    
+    // Валидация файла
+    if (!validateFile(file)) {
+        return;
+    }
+    
+    // Обновляем имя файла
+    document.getElementById('fileName').textContent = file.name;
+    
+    // Показываем информацию о файле
+    showFileInfo(file);
+    
+    // Скрываем предыдущие результаты
+    hideResults();
+    hideError();
+}
+
+// Валидация файла
+function validateFile(file) {
+    const t = translations[currentLanguage];
+    const maxSize = 500 * 1024 * 1024; // 500 MB
+    const allowedTypes = [
+        'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav',
+        'audio/m4a', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/flac',
+        'audio/wma', 'audio/webm'
+    ];
+    
+    const allowedExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac', '.wma'];
+    
+    // Проверка размера
+    if (file.size > maxSize) {
+        showError(t.errorFileSize);
+        return false;
+    }
+    
+    // Проверка типа файла
+    const isValidType = allowedTypes.includes(file.type) || 
+                       allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    
+    if (!isValidType) {
+        showError(t.errorFileType);
+        return false;
+    }
+    
+    return true;
+}
+
+// Показ информации о файле
+function showFileInfo(file) {
+    const fileInfo = document.getElementById('fileInfo');
+    const fileInfoContent = document.getElementById('fileInfoContent');
+    
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const lastModified = new Date(file.lastModified).toLocaleString();
+    
+    fileInfoContent.innerHTML = `
+        <p><strong>${currentLanguage === 'en' ? 'Name' : 'Имя'}:</strong> ${file.name}</p>
+        <p><strong>${currentLanguage === 'en' ? 'Size' : 'Размер'}:</strong> ${sizeInMB} ${currentLanguage === 'en' ? 'MB' : 'МБ'}</p>
+        <p><strong>${currentLanguage === 'en' ? 'Type' : 'Тип'}:</strong> ${file.type || 'unknown'}</p>
+        <p><strong>${currentLanguage === 'en' ? 'Last modified' : 'Изменен'}:</strong> ${lastModified}</p>
+    `;
+    
+    fileInfo.classList.add('show');
+}
+
+// Инициализация кнопки распознавания
+function initRecognitionButton() {
+    const startButton = document.getElementById('startRecognition');
+    startButton.addEventListener('click', startRecognition);
+}
+
+// Запуск распознавания
+async function startRecognition() {
+    const t = translations[currentLanguage];
+    const fileInput = document.getElementById('audioInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showError(t.errorNoFile);
+        return;
+    }
+    
+    // Получаем настройки
+    const settings = getRecognitionSettings();
+    
+    // Показываем прогресс
+    showProgress();
+    
+    // Подготавливаем данные для отправки
+    const formData = new FormData();
+    formData.append('audio', file);
+    formData.append('engine', settings.engine);
+    formData.append('language', settings.language);
+    formData.append('quality', settings.quality);
+    formData.append('output_format', settings.outputFormat);
+    formData.append('include_timestamps', settings.includeTimestamps);
+    formData.append('detect_speakers', settings.detectSpeakers);
+    
+    try {
+        // Отправляем запрос
+        const response = await fetch('/api/audio-to-text/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // Сначала получаем текст ответа для отладки
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        // Парсим JSON
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Failed to parse JSON:', e);
+            console.error('Response text:', responseText);
+            throw new Error('Invalid JSON response from server');
+        }
+        
+        // Добавляем отладочную информацию
+        console.log('Response result:', result);
+        console.log('Result type:', typeof result);
+        console.log('Result keys:', Object.keys(result || {}));
+        
+        // Проверяем каждое поле
+        console.log('result.success:', result?.success);
+        console.log('result.text:', result?.text);
+        console.log('result.metadata:', result?.metadata);
+        console.log('result.error:', result?.error);
+        
+        if (result.success) {
+            // Распознавание завершено успешно
+            console.log('Recognition successful, text:', result.text);
+            console.log('Recognition metadata:', result.metadata);
+            recognitionResult = result;
+            showResults(result);
+            hideProgress();
+            showStatusIndicator('completed', t.statusCompleted);
+        } else {
+            console.error('Recognition failed:', result.error);
+            throw new Error(result.error || 'Unknown error');
+        }
+        
+    } catch (error) {
+        console.error('Recognition error:', error);
+        showError(error.message || error.toString());
+        hideProgress();
+        showStatusIndicator('error', t.statusError);
+    }
+}
+
+// Получение настроек распознавания
+function getRecognitionSettings() {
+    return {
+        engine: document.getElementById('sttEngine').value,
+        language: document.getElementById('sttLanguage').value,
+        quality: document.getElementById('sttQuality').value,
+        outputFormat: document.querySelector('input[name="outputFormat"]:checked').value,
+        includeTimestamps: document.getElementById('includeTimestamps').checked,
+        detectSpeakers: document.getElementById('detectSpeakers').checked
+    };
+}
+
+// Показ прогресса
+function showProgress() {
+    const progressContainer = document.getElementById('progressContainer');
+    const startButton = document.getElementById('startRecognition');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    
+    progressContainer.classList.add('show');
+    startButton.disabled = true;
+    
+    // Симуляция прогресса (можно заменить на реальные данные с сервера)
+    let progress = 0;
+    progressInterval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 95) progress = 95;
+        
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = Math.round(progress) + '%';
+    }, 500);
+    
+    showStatusIndicator('processing', translations[currentLanguage].statusProcessing);
+}
+
+// Скрытие прогресса
+function hideProgress() {
+    const progressContainer = document.getElementById('progressContainer');
+    const startButton = document.getElementById('startRecognition');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    
+    progressContainer.classList.remove('show');
+    startButton.disabled = false;
+    
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+    
+    // Завершаем прогресс на 100%
+    progressBar.style.width = '100%';
+    progressPercent.textContent = '100%';
+    
+    setTimeout(() => {
+        progressBar.style.width = '0%';
+        progressPercent.textContent = '0%';
+    }, 1000);
+}
+
+// Показ индикатора статуса
+function showStatusIndicator(type, message) {
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    
+    statusIndicator.className = 'status-indicator ' + type;
+    statusText.textContent = message;
+    statusIndicator.style.display = 'inline-flex';
+    
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+        statusIndicator.style.display = 'none';
+    }, 5000);
+}
+
+// Показ результатов
+function showResults(result) {
+    console.log('showResults called with:', result);
+    
+    const resultPanel = document.getElementById('resultPanel');
+    const resultText = document.getElementById('resultText');
+    const downloadButtons = document.getElementById('downloadButtons');
+    const resultInfo = document.getElementById('resultInfo');
+    
+    console.log('Elements found:', {
+        resultPanel: !!resultPanel,
+        resultText: !!resultText,
+        downloadButtons: !!downloadButtons,
+        resultInfo: !!resultInfo
+    });
+    
+    // Показываем панель результатов
+    resultPanel.style.display = 'block';
+    console.log('Panel displayed, result text to show:', result.text);
+    
+    // Заполняем текст
+    resultText.value = result.text || '';
+    console.log('Text area value set to:', resultText.value);
+    
+    // Показываем кнопки скачивания
+    downloadButtons.classList.add('show');
+    
+    // Показываем дополнительную информацию
+    if (result.metadata) {
+        const duration = result.metadata.duration ? `${result.metadata.duration}s` : 'N/A';
+        const language = result.metadata.language || 'N/A';
+        const confidence = result.metadata.confidence ? `${Math.round(result.metadata.confidence * 100)}%` : 'N/A';
+        
+        resultInfo.innerHTML = `
+            ${currentLanguage === 'en' ? 'Duration' : 'Длительность'}: ${duration} | 
+            ${currentLanguage === 'en' ? 'Language' : 'Язык'}: ${language} | 
+            ${currentLanguage === 'en' ? 'Confidence' : 'Уверенность'}: ${confidence}
+        `;
+    }
+    
+    // Прокручиваем к результатам
+    resultPanel.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Скрытие результатов
+function hideResults() {
+    const resultPanel = document.getElementById('resultPanel');
+    const downloadButtons = document.getElementById('downloadButtons');
+    
+    resultPanel.style.display = 'none';
+    downloadButtons.classList.remove('show');
+    recognitionResult = null;
+}
+
+// Показ ошибки
+function showError(message) {
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    errorMessage.textContent = message;
+    errorAlert.style.display = 'block';
+    
+    // Автоматически скрываем через 10 секунд
+    setTimeout(() => {
+        hideError();
+    }, 10000);
+}
+
+// Скрытие ошибки
+function hideError() {
+    const errorAlert = document.getElementById('errorAlert');
+    errorAlert.style.display = 'none';
+}
+
+// Скачивание результата в разных форматах
+function downloadResult(format) {
+    if (!recognitionResult) {
+        showError(translations[currentLanguage].errorNoResult || 'No recognition result available');
+        return;
+    }
+    
+    let content, filename, mimeType;
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    
+    switch (format) {
+        case 'txt':
+            content = recognitionResult.text || '';
+            filename = `speech-recognition_${timestamp}.txt`;
+            mimeType = 'text/plain';
+            break;
+            
+        case 'srt':
+            content = generateSrtContent(recognitionResult);
+            filename = `speech-recognition_${timestamp}.srt`;
+            mimeType = 'application/x-subrip';
+            break;
+            
+        case 'json':
+            content = JSON.stringify(recognitionResult, null, 2);
+            filename = `speech-recognition_${timestamp}.json`;
+            mimeType = 'application/json';
+            break;
+            
+        default:
+            return;
+    }
+    
+    // Создаем и скачиваем файл
+    const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Генерация SRT контента
+function generateSrtContent(result) {
+    if (!result.segments || !Array.isArray(result.segments)) {
+        // Если нет сегментов, создаем один сегмент на весь текст
+        return `1\n00:00:00,000 --> 00:00:10,000\n${result.text || ''}\n\n`;
+    }
+    
+    return result.segments.map((segment, index) => {
+        const start = formatTime(segment.start || 0);
+        const end = formatTime(segment.end || segment.start + 5);
+        return `${index + 1}\n${start} --> ${end}\n${segment.text || ''}\n`;
+    }).join('\n');
+}
+
+// Форматирование времени для SRT
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 1000);
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${ms.toString().padStart(3, '0')}`;
+}
+
+// Копирование в буфер обмена
+async function copyToClipboard() {
+    const resultText = document.getElementById('resultText');
+    const t = translations[currentLanguage];
+    
+    if (!resultText.value) {
+        return;
+    }
+    
+    try {
+        await navigator.clipboard.writeText(resultText.value);
+        
+        // Показываем уведомление
+        const copyButton = document.querySelector('button[onclick="copyToClipboard()"]');
+        const originalText = copyButton.innerHTML;
+        
+        copyButton.innerHTML = '<i class="bi bi-check"></i> ' + t.successCopied;
+        copyButton.classList.add('btn-success');
+        copyButton.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+            copyButton.innerHTML = originalText;
+            copyButton.classList.remove('btn-success');
+            copyButton.classList.add('btn-outline-secondary');
+        }, 2000);
+        
+    } catch (err) {
+        // Fallback для старых браузеров
+        resultText.select();
+        document.execCommand('copy');
+    }
+}
+
+// Инициализация переключателя языков
+function initLanguageToggle() {
+    // Обработчики уже добавлены в HTML через onclick
+    // Можно добавить дополнительную логику здесь при необходимости
+}
+
+// Получение CSRF токена
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+           '';
+}
+
+// Обработчик изменения формата вывода
+document.addEventListener('change', function(e) {
+    if (e.target.name === 'outputFormat') {
+        // Можно добавить логику предпросмотра для разных форматов
+        console.log('Output format changed to:', e.target.value);
+    }
+});
+
+// Обработчик изменения движка распознавания
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'sttEngine') {
+        // Можно добавить логику для настройки параметров в зависимости от движка
+        console.log('Recognition engine changed to:', e.target.value);
+    }
+});
+
+// Дополнительные утилиты
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// Функция для показа информации о библиотеках
+function showLibraryInfo() {
+    const modalHtml = `
+        <div class="modal fade" id="libraryInfoModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-info-circle"></i>
+                            Информация о системе распознавания речи
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-exclamation-triangle-fill"></i> Текущее состояние системы</h6>
+                            <p>Система работает в режиме совместимости с отсутствующими библиотеками:</p>
+                            <ul>
+                                <li><strong>Celery:</strong> Недоступен - асинхронная обработка отключена</li>
+                                <li><strong>pydub:</strong> Недоступен - предварительная обработка аудио ограничена</li>
+                                <li><strong>speech_recognition:</strong> Недоступен - распознавание речи недоступно</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-check-circle text-success"></i> Что работает</h6>
+                                <ul>
+                                    <li>Загрузка аудиофайлов</li>
+                                    <li>Интерфейс пользователя</li>
+                                    <li>Базовая обработка форм</li>
+                                    <li>Система обработки ошибок</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-x-circle text-danger"></i> Что не работает</h6>
+                                <ul>
+                                    <li>Распознавание речи из аудио</li>
+                                    <li>Асинхронная обработка файлов</li>
+                                    <li>Предварительная обработка аудио</li>
+                                    <li>Генерация субтитров</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6><i class="bi bi-tools"></i> Для полной функциональности установите:</h6>
+                        <div class="bg-dark text-light p-3 rounded">
+                            <code>
+                                pip install celery[redis]<br>
+                                pip install pydub<br>
+                                pip install SpeechRecognition<br>
+                                pip install ffmpeg-python
+                            </code>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-lightbulb"></i>
+                                <strong>Совет:</strong> После установки библиотек перезапустите Django сервер для применения изменений.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Удаляем предыдущий модал если есть
+    const existingModal = document.getElementById('libraryInfoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Добавляем модал в DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Показываем модал
+    const modal = new bootstrap.Modal(document.getElementById('libraryInfoModal'));
+    modal.show();
+    
+    // Удаляем модал после закрытия
+    document.getElementById('libraryInfoModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Экспорт функций для глобального использования
+window.audioToTextApp = {
+    setLanguage,
+    downloadResult,
+    copyToClipboard,
+    startRecognition,
+    showLibraryInfo
+};
+</script>
+{% endblock %}

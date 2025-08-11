@@ -1,0 +1,805 @@
+{% extends 'converter/base.html' %}
+
+{% block title %}Интерфейс конвертации файлов{% endblock %}
+
+{% block extra_css %}
+<style>
+    .conversion-selector {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .conversion-selector:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .conversion-selector.active {
+        border-color: #0d6efd;
+        background-color: #e3f2fd;
+        border-style: solid;
+    }
+    .format-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .format-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .format-card:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .format-card.selected {
+        border-color: #0d6efd;
+        background-color: #e3f2fd;
+        border-width: 2px;
+    }
+    .file-drop-zone {
+        border: 3px dashed #dee2e6;
+        border-radius: 15px;
+        padding: 3rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: pointer;
+    }
+    .file-drop-zone.dragover {
+        border-color: #0d6efd;
+        background-color: #e3f2fd;
+    }
+    .file-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .file-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background-color: white;
+    }
+    .file-item .file-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .progress {
+        height: 6px;
+    }
+    .conversion-params {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .param-group {
+        margin-bottom: 1rem;
+    }
+    .format-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">
+        <i class="bi bi-arrow-left-right"></i>
+        Интерфейс конвертации файлов
+    </h1>
+
+    <!-- Выбор типа конвертации -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>Выберите тип конвертации</h3>
+            <div class="conversion-selector" id="conversion-selector">
+                <div class="row">
+                    <div class="col-md-5">
+                        <h5>ИЗ</h5>
+                        <div class="format-grid" id="source-formats">
+                            <div class="format-card" data-format="video">
+                                <span class="format-icon">🎬</span>
+                                <strong>Видео</strong>
+                                <small class="d-block text-muted">MP4, AVI, MOV, MKV</small>
+                            </div>
+                            <div class="format-card" data-format="image">
+                                <span class="format-icon">🖼️</span>
+                                <strong>Изображения</strong>
+                                <small class="d-block text-muted">JPG, PNG, BMP, TIFF</small>
+                            </div>
+                            <div class="format-card" data-format="audio">
+                                <span class="format-icon">🎵</span>
+                                <strong>Аудио</strong>
+                                <small class="d-block text-muted">MP3, WAV, FLAC, AAC</small>
+                            </div>
+                            <div class="format-card" data-format="document">
+                                <span class="format-icon">📄</span>
+                                <strong>Документы</strong>
+                                <small class="d-block text-muted">PDF, DOC, DOCX, TXT</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-arrow-right display-4 text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <h5>В</h5>
+                        <div class="format-grid" id="target-formats">
+                            <!-- Динамически заполняется в зависимости от выбора источника -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Зона загрузки файлов -->
+    <div class="row mb-4" id="upload-section" style="display: none;">
+        <div class="col-12">
+            <h3>Загрузите файлы для конвертации</h3>
+            <div class="file-drop-zone" id="file-drop-zone">
+                <i class="bi bi-cloud-upload display-1 text-primary"></i>
+                <h4>Перетащите файлы сюда или нажмите для выбора</h4>
+                <p class="text-muted">Поддерживаются множественные файлы. Максимальный размер файла: 500MB</p>
+                <input type="file" id="file-input" multiple accept="" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Список загруженных файлов -->
+    <div class="row mb-4" id="files-section" style="display: none;">
+        <div class="col-12">
+            <h3>Загруженные файлы (<span id="file-count">0</span>)</h3>
+            <div class="file-list" id="file-list">
+                <!-- Динамически заполняется -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Параметры конвертации -->
+    <div class="row mb-4" id="params-section" style="display: none;">
+        <div class="col-12">
+            <div class="conversion-params">
+                <h3>Параметры конвертации</h3>
+                <div id="conversion-parameters">
+                    <!-- Динамически заполняется в зависимости от типа конвертации -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="row mb-4" id="actions-section" style="display: none;">
+        <div class="col-12">
+            <div class="d-flex gap-3">
+                <button class="btn btn-primary btn-lg" id="start-conversion" disabled>
+                    <i class="bi bi-play-fill"></i>
+                    Начать конвертацию
+                </button>
+                <button class="btn btn-secondary" id="clear-files">
+                    <i class="bi bi-trash"></i>
+                    Очистить список
+                </button>
+                <button class="btn btn-info" id="view-queue">
+                    <i class="bi bi-list-task"></i>
+                    Посмотреть очередь
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра очереди задач -->
+<div class="modal fade" id="queue-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-list-task"></i>
+                    Очередь задач конвертации
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="queue-content">
+                    <!-- Загружается через AJAX -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="refresh-queue">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Обновить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ConversionInterface {
+    constructor() {
+        this.selectedSourceFormat = null;
+        this.selectedTargetFormat = null;
+        this.uploadedFiles = [];
+        this.conversionTypes = {
+            video: {
+                name: 'Видео',
+                targets: {
+                    'gif': { name: 'GIF', icon: '🎞️', description: 'Анимированное изображение' },
+                    'mp4': { name: 'MP4', icon: '🎬', description: 'Видео формат' },
+                    'webm': { name: 'WebM', icon: '🎥', description: 'Веб-видео' },
+                    'avi': { name: 'AVI', icon: '📹', description: 'Классический формат' }
+                },
+                accept: 'video/*',
+                maxSize: 500 * 1024 * 1024 // 500MB
+            },
+            image: {
+                name: 'Изображения',
+                targets: {
+                    'jpg': { name: 'JPG', icon: '📸', description: 'JPEG изображение' },
+                    'png': { name: 'PNG', icon: '🖼️', description: 'PNG с прозрачностью' },
+                    'webp': { name: 'WebP', icon: '🌐', description: 'Современный формат' },
+                    'pdf': { name: 'PDF', icon: '📄', description: 'PDF документ' }
+                },
+                accept: 'image/*',
+                maxSize: 100 * 1024 * 1024 // 100MB
+            },
+            audio: {
+                name: 'Аудио',
+                targets: {
+                    'mp3': { name: 'MP3', icon: '🎵', description: 'Популярный формат' },
+                    'wav': { name: 'WAV', icon: '🔊', description: 'Несжатый звук' },
+                    'flac': { name: 'FLAC', icon: '🎼', description: 'Lossless качество' },
+                    'ogg': { name: 'OGG', icon: '🎧', description: 'Открытый формат' }
+                },
+                accept: 'audio/*',
+                maxSize: 200 * 1024 * 1024 // 200MB
+            },
+            document: {
+                name: 'Документы',
+                targets: {
+                    'pdf': { name: 'PDF', icon: '📄', description: 'PDF документ' },
+                    'docx': { name: 'DOCX', icon: '📝', description: 'Word документ' },
+                    'txt': { name: 'TXT', icon: '📃', description: 'Текстовый файл' },
+                    'html': { name: 'HTML', icon: '🌐', description: 'HTML страница' }
+                },
+                accept: '.pdf,.doc,.docx,.txt,.rtf,.odt',
+                maxSize: 50 * 1024 * 1024 // 50MB
+            }
+        };
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupDragAndDrop();
+    }
+    
+    setupEventListeners() {
+        // Выбор исходного формата
+        document.querySelectorAll('#source-formats .format-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                this.selectSourceFormat(e.currentTarget.dataset.format);
+            });
+        });
+        
+        // Загрузка файлов
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            this.handleFileSelection(e.target.files);
+        });
+        
+        document.getElementById('file-drop-zone').addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
+        
+        // Кнопки действий
+        document.getElementById('start-conversion').addEventListener('click', () => {
+            this.startConversion();
+        });
+        
+        document.getElementById('clear-files').addEventListener('click', () => {
+            this.clearFiles();
+        });
+        
+        document.getElementById('view-queue').addEventListener('click', () => {
+            this.showQueue();
+        });
+        
+        document.getElementById('refresh-queue').addEventListener('click', () => {
+            this.refreshQueue();
+        });
+    }
+    
+    setupDragAndDrop() {
+        const dropZone = document.getElementById('file-drop-zone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            this.handleFileSelection(e.dataTransfer.files);
+        });
+    }
+    
+    selectSourceFormat(format) {
+        // Убираем предыдущий выбор
+        document.querySelectorAll('#source-formats .format-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Выделяем выбранный формат
+        document.querySelector(`#source-formats [data-format="${format}"]`).classList.add('selected');
+        
+        this.selectedSourceFormat = format;
+        this.updateTargetFormats(format);
+        this.updateFileInput();
+        
+        // Показываем секцию загрузки
+        document.getElementById('upload-section').style.display = 'block';
+    }
+    
+    updateTargetFormats(sourceFormat) {
+        const targetContainer = document.getElementById('target-formats');
+        const targets = this.conversionTypes[sourceFormat].targets;
+        
+        targetContainer.innerHTML = '';
+        
+        Object.entries(targets).forEach(([format, info]) => {
+            const card = document.createElement('div');
+            card.className = 'format-card';
+            card.dataset.format = format;
+            card.innerHTML = `
+                <span class="format-icon">${info.icon}</span>
+                <strong>${info.name}</strong>
+                <small class="d-block text-muted">${info.description}</small>
+            `;
+            
+            card.addEventListener('click', () => {
+                this.selectTargetFormat(format);
+            });
+            
+            targetContainer.appendChild(card);
+        });
+    }
+    
+    selectTargetFormat(format) {
+        // Убираем предыдущий выбор
+        document.querySelectorAll('#target-formats .format-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Выделяем выбранный формат
+        document.querySelector(`#target-formats [data-format="${format}"]`).classList.add('selected');
+        
+        this.selectedTargetFormat = format;
+        this.updateConversionParameters();
+    }
+    
+    updateFileInput() {
+        const fileInput = document.getElementById('file-input');
+        const acceptType = this.conversionTypes[this.selectedSourceFormat].accept;
+        fileInput.accept = acceptType;
+    }
+    
+    handleFileSelection(files) {
+        Array.from(files).forEach(file => {
+            if (this.validateFile(file)) {
+                this.uploadedFiles.push({
+                    file: file,
+                    id: Date.now() + Math.random(),
+                    status: 'ready',
+                    progress: 0
+                });
+            }
+        });
+        
+        this.updateFileList();
+        this.updateUI();
+    }
+    
+    validateFile(file) {
+        const sourceFormat = this.conversionTypes[this.selectedSourceFormat];
+        
+        if (file.size > sourceFormat.maxSize) {
+            alert(`Файл ${file.name} слишком большой. Максимальный размер: ${this.formatFileSize(sourceFormat.maxSize)}`);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    updateFileList() {
+        const fileList = document.getElementById('file-list');
+        const fileCount = document.getElementById('file-count');
+        
+        fileList.innerHTML = '';
+        fileCount.textContent = this.uploadedFiles.length;
+        
+        this.uploadedFiles.forEach(fileData => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div>
+                        <strong>${fileData.file.name}</strong>
+                        <small class="text-muted d-block">${this.formatFileSize(fileData.file.size)}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-${this.getStatusColor(fileData.status)}">${this.getStatusText(fileData.status)}</span>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="conversionInterface.removeFile('${fileData.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${fileData.progress > 0 ? `
+                    <div class="progress mt-2">
+                        <div class="progress-bar" style="width: ${fileData.progress}%"></div>
+                    </div>
+                ` : ''}
+            `;
+            fileList.appendChild(fileItem);
+        });
+    }
+    
+    removeFile(fileId) {
+        this.uploadedFiles = this.uploadedFiles.filter(f => f.id != fileId);
+        this.updateFileList();
+        this.updateUI();
+    }
+    
+    updateUI() {
+        const hasFiles = this.uploadedFiles.length > 0;
+        const hasFormats = this.selectedSourceFormat && this.selectedTargetFormat;
+        
+        document.getElementById('files-section').style.display = hasFiles ? 'block' : 'none';
+        document.getElementById('params-section').style.display = hasFormats ? 'block' : 'none';
+        document.getElementById('actions-section').style.display = hasFiles && hasFormats ? 'block' : 'none';
+        document.getElementById('start-conversion').disabled = !hasFiles || !hasFormats;
+    }
+    
+    updateConversionParameters() {
+        const paramsContainer = document.getElementById('conversion-parameters');
+        const sourceFormat = this.selectedSourceFormat;
+        const targetFormat = this.selectedTargetFormat;
+        
+        // Параметры в зависимости от типа конвертации
+        let parametersHTML = '';
+        
+        if (sourceFormat === 'video' && targetFormat === 'gif') {
+            parametersHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Ширина (px)</label>
+                            <input type="number" class="form-control" value="480" min="144" max="1920">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">FPS</label>
+                            <input type="number" class="form-control" value="15" min="10" max="30">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Качество</label>
+                            <select class="form-select">
+                                <option value="medium">Среднее</option>
+                                <option value="high">Высокое</option>
+                                <option value="low">Низкое</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="keep-original-size">
+                            <label class="form-check-label" for="keep-original-size">
+                                Сохранить оригинальные размеры
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="optimize-colors">
+                            <label class="form-check-label" for="optimize-colors">
+                                Оптимизировать палитру цветов
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (sourceFormat === 'image') {
+            parametersHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="param-group">
+                            <label class="form-label">Качество (для JPG)</label>
+                            <input type="range" class="form-range" min="1" max="100" value="85">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="param-group">
+                            <label class="form-label">Размер</label>
+                            <select class="form-select">
+                                <option value="original">Оригинальный</option>
+                                <option value="1920x1080">1920x1080</option>
+                                <option value="1280x720">1280x720</option>
+                                <option value="800x600">800x600</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (sourceFormat === 'audio') {
+            parametersHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Битрейт (kbps)</label>
+                            <select class="form-select">
+                                <option value="128">128</option>
+                                <option value="192">192</option>
+                                <option value="256">256</option>
+                                <option value="320">320</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Частота дискретизации</label>
+                            <select class="form-select">
+                                <option value="44100">44.1 kHz</option>
+                                <option value="48000">48 kHz</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Каналы</label>
+                            <select class="form-select">
+                                <option value="mono">Моно</option>
+                                <option value="stereo" selected>Стерео</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            parametersHTML = `
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Для данного типа конвертации используются стандартные параметры.
+                </div>
+            `;
+        }
+        
+        paramsContainer.innerHTML = parametersHTML;
+        this.updateUI();
+    }
+    
+    startConversion() {
+        if (!this.selectedSourceFormat || !this.selectedTargetFormat || this.uploadedFiles.length === 0) {
+            alert('Пожалуйста, выберите форматы и загрузите файлы');
+            return;
+        }
+        
+        // Получаем параметры конвертации
+        const params = this.getConversionParams();
+        
+        // Отправляем задачи на конвертацию
+        this.uploadedFiles.forEach(fileData => {
+            this.submitConversionTask(fileData, params);
+        });
+        
+        // Показываем уведомление
+        this.showNotification('Задачи отправлены в очередь на обработку', 'success');
+        
+        // Переходим к просмотру очереди
+        setTimeout(() => {
+            this.showQueue();
+        }, 1000);
+    }
+    
+    getConversionParams() {
+        const params = {
+            source_format: this.selectedSourceFormat,
+            target_format: this.selectedTargetFormat
+        };
+        
+        // Собираем параметры из формы
+        document.querySelectorAll('#conversion-parameters input, #conversion-parameters select').forEach(input => {
+            if (input.type === 'checkbox') {
+                params[input.id.replace('-', '_')] = input.checked;
+            } else {
+                params[input.id.replace('-', '_')] = input.value;
+            }
+        });
+        
+        return params;
+    }
+    
+    async submitConversionTask(fileData, params) {
+        const formData = new FormData();
+        formData.append('file', fileData.file);
+        formData.append('source_format', params.source_format);
+        formData.append('target_format', params.target_format);
+        formData.append('params', JSON.stringify(params));
+        
+        try {
+            fileData.status = 'uploading';
+            this.updateFileList();
+            
+            const response = await fetch('/api/conversion/submit/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                fileData.status = 'queued';
+                fileData.taskId = result.task_id;
+            } else {
+                fileData.status = 'error';
+            }
+        } catch (error) {
+            console.error('Error submitting task:', error);
+            fileData.status = 'error';
+        }
+        
+        this.updateFileList();
+    }
+    
+    clearFiles() {
+        this.uploadedFiles = [];
+        this.updateFileList();
+        this.updateUI();
+    }
+    
+    async showQueue() {
+        const modal = new bootstrap.Modal(document.getElementById('queue-modal'));
+        modal.show();
+        await this.refreshQueue();
+    }
+    
+    async refreshQueue() {
+        const queueContent = document.getElementById('queue-content');
+        queueContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        
+        try {
+            const response = await fetch('/api/conversion/queue/');
+            if (response.ok) {
+                const data = await response.json();
+                this.renderQueue(data.tasks);
+            } else {
+                queueContent.innerHTML = '<div class="alert alert-danger">Ошибка загрузки очереди</div>';
+            }
+        } catch (error) {
+            console.error('Error fetching queue:', error);
+            queueContent.innerHTML = '<div class="alert alert-danger">Ошибка подключения</div>';
+        }
+    }
+    
+    renderQueue(tasks) {
+        const queueContent = document.getElementById('queue-content');
+        
+        if (tasks.length === 0) {
+            queueContent.innerHTML = '<div class="alert alert-info">Очередь пуста</div>';
+            return;
+        }
+        
+        let html = '<div class="list-group">';
+        tasks.forEach(task => {
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${task.filename || 'Неизвестный файл'}</h6>
+                        <small>${new Date(task.created_at).toLocaleString()}</small>
+                    </div>
+                    <p class="mb-1">
+                        ${task.source_format} → ${task.target_format}
+                        <span class="badge bg-${this.getStatusColor(task.status)} ms-2">${this.getStatusText(task.status)}</span>
+                    </p>
+                    ${task.progress > 0 ? `
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar" style="width: ${task.progress}%"></div>
+                        </div>
+                    ` : ''}
+                    ${task.error_message ? `<small class="text-danger">${task.error_message}</small>` : ''}
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        queueContent.innerHTML = html;
+    }
+    
+    getStatusColor(status) {
+        const colors = {
+            ready: 'secondary',
+            queued: 'info',
+            uploading: 'warning',
+            running: 'primary',
+            done: 'success',
+            error: 'danger',
+            failed: 'danger'
+        };
+        return colors[status] || 'secondary';
+    }
+    
+    getStatusText(status) {
+        const texts = {
+            ready: 'Готов',
+            queued: 'В очереди',
+            uploading: 'Загрузка',
+            running: 'Обработка',
+            done: 'Готово',
+            error: 'Ошибка',
+            failed: 'Неудача'
+        };
+        return texts[status] || status;
+    }
+    
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+    }
+}
+
+// Инициализация при загрузке страницы
+let conversionInterface;
+document.addEventListener('DOMContentLoaded', () => {
+    conversionInterface = new ConversionInterface();
+});
+</script>
+{% endblock %}

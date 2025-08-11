@@ -1,0 +1,257 @@
+{% extends 'converter/base.html' %}
+{% load static %}
+
+{% block title %}Фото в GIF — Конвертер{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-3">📸 Фото в GIF</h2>
+      <p class="text-muted">Загрузите 1–100 изображений, настройте параметры анимации и получите GIF. При загрузке 1 изображения кадр будет продублирован.</p>
+    </div>
+  </div>
+
+  <form id="photosToGifForm" class="conversion-settings" autocomplete="off">
+    <div class="row g-4">
+      <div class="col-12">
+        <label class="form-label">Изображения</label>
+        <div id="dropzone" class="file-input-wrapper">
+          <i class="bi bi-cloud-arrow-up upload-icon"></i>
+          <p class="mb-2">Перетащите файлы сюда или нажмите для выбора</p>
+          <small class="text-muted d-block">Поддерживаются: JPG, PNG, WEBP, BMP, TIFF, HEIC, GIF</small>
+          <input id="imagesInput" type="file" accept="image/*" multiple>
+        </div>
+        <div id="preview" class="mt-3 d-flex flex-wrap gap-2"></div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="settings-group">
+          <label for="frameDuration" class="form-label">Длительность кадра (сек)</label>
+          <input type="number" min="0.05" step="0.05" value="0.5" id="frameDuration" class="form-control">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="settings-group">
+          <label for="outputSize" class="form-label">Размер GIF</label>
+          <select id="outputSize" class="form-select">
+            <option value="original">Оригинал</option>
+            <option value="320">320 x 320</option>
+            <option value="480" selected>480 x 480</option>
+            <option value="720">720 x 720</option>
+            <option value="1080">1080 x 1080</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="settings-group">
+          <label for="colors" class="form-label">Цветов (палитра)</label>
+          <input type="number" min="2" max="256" value="128" id="colors" class="form-control">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="settings-group">
+          <label for="sortOrder" class="form-label">Порядок кадров</label>
+          <select id="sortOrder" class="form-select">
+            <option value="filename" selected>По имени файла (A→Z)</option>
+            <option value="upload">В порядке загрузки</option>
+            <option value="reverse">Обратный порядок</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="loop" checked>
+          <label class="form-check-label" for="loop">Зациклить</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="pingpong">
+          <label class="form-check-label" for="pingpong">Эффект пинг-понг</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="optimize" checked>
+          <label class="form-check-label" for="optimize">Оптимизировать</label>
+        </div>
+      </div>
+
+      <div class="col-12 d-flex gap-2 mt-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-gear"></i>
+          <span class="ms-2">Конвертировать</span>
+        </button>
+        <button type="button" id="clearBtn" class="btn btn-outline-secondary">Очистить</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="progressBox" class="loading-spinner">
+    <div class="spinner-border" role="status"></div>
+    <p class="mt-3 mb-0">Создание GIF… Пожалуйста, подождите.</p>
+  </div>
+
+  <div id="resultBox" class="mt-4" style="display:none;">
+    <div class="alert alert-success">Готово! Ниже — ваш результат.</div>
+    <div class="card p-3">
+      <div class="d-flex flex-wrap gap-3 align-items-start">
+        <img id="resultPreview" class="gif-preview" alt="GIF preview" />
+        <div>
+          <a id="downloadLink" class="btn btn-primary mb-2" download>
+            <i class="bi bi-download"></i>
+            <span class="ms-2">Скачать GIF</span>
+          </a>
+          <div id="fileInfo" class="text-muted small"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const dropzone = document.getElementById('dropzone');
+  const imagesInput = document.getElementById('imagesInput');
+  const preview = document.getElementById('preview');
+  const form = document.getElementById('photosToGifForm');
+  const clearBtn = document.getElementById('clearBtn');
+  const progressBox = document.getElementById('progressBox');
+  const resultBox = document.getElementById('resultBox');
+  const resultPreview = document.getElementById('resultPreview');
+  const downloadLink = document.getElementById('downloadLink');
+  const fileInfo = document.getElementById('fileInfo');
+
+  let files = [];
+
+  function showProgress(show){ progressBox.style.display = show ? 'block' : 'none'; }
+  function showResult(show){ resultBox.style.display = show ? 'block' : 'none'; }
+
+  function validateImages(list){
+    const arr = Array.from(list || []);
+    const filtered = arr.filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|bmp|tiff?|gif|heic|heif)$/i.test(f.name));
+    return filtered;
+  }
+
+  function renderPreview(){
+    preview.innerHTML = '';
+    files.forEach((f, idx) => {
+      const url = URL.createObjectURL(f);
+      const wrap = document.createElement('div');
+      wrap.style.width = '96px';
+      wrap.style.height = '96px';
+      wrap.style.overflow = 'hidden';
+      wrap.style.borderRadius = '8px';
+      wrap.style.border = '1px solid #e1e5f2';
+      wrap.style.position = 'relative';
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = f.name;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      wrap.appendChild(img);
+
+      const badge = document.createElement('span');
+      badge.textContent = idx + 1;
+      badge.style.position = 'absolute';
+      badge.style.left = '6px';
+      badge.style.top = '6px';
+      badge.style.background = '#667eea';
+      badge.style.color = '#fff';
+      badge.style.fontSize = '12px';
+      badge.style.borderRadius = '999px';
+      badge.style.padding = '2px 6px';
+      wrap.appendChild(badge);
+
+      preview.appendChild(wrap);
+    });
+  }
+
+  function addFiles(list){
+    const newFiles = validateImages(list);
+    files = files.concat(newFiles);
+    if(files.length > 100){
+      alert('Максимум 100 изображений за раз');
+      files = files.slice(0, 100);
+    }
+    renderPreview();
+  }
+
+  dropzone.addEventListener('click', () => imagesInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-primary'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-primary'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault(); dropzone.classList.remove('border-primary');
+    addFiles(e.dataTransfer.files);
+  });
+  imagesInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+  clearBtn.addEventListener('click', () => {
+    files = []; imagesInput.value = ''; preview.innerHTML = ''; showResult(false);
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showResult(false);
+    if(files.length < 1){
+      alert('Для создания GIF необходимо минимум 1 изображение. При одном изображении кадр будет продублирован.');
+      return;
+    }
+
+    const totalSize = files.reduce((s, f) => s + (f.size || 0), 0);
+    if(totalSize > 100 * 1024 * 1024){
+      alert('Суммарный размер изображений превышает 100 МБ.');
+      return;
+    }
+
+    const fd = new FormData();
+    files.forEach(f => fd.append('images', f, f.name));
+
+    fd.append('frame_duration', document.getElementById('frameDuration').value || '0.5');
+    fd.append('output_size', document.getElementById('outputSize').value || '480');
+    fd.append('colors', document.getElementById('colors').value || '128');
+    fd.append('loop', document.getElementById('loop').checked ? 'true' : 'false');
+    fd.append('sort_order', document.getElementById('sortOrder').value || 'filename');
+    fd.append('pingpong', document.getElementById('pingpong').checked ? 'true' : 'false');
+    fd.append('optimize', document.getElementById('optimize').checked ? 'true' : 'false');
+
+    showProgress(true);
+
+    try {
+      const resp = await fetch('{% url "converter:api_photos_to_gif" %}', {
+        method: 'POST',
+        body: fd
+      });
+      const data = await resp.json();
+      if(!resp.ok || !data.success){
+        throw new Error((data && (data.error || data.message)) || 'Ошибка при создании GIF');
+      }
+
+      const url = data.gif_url;
+      resultPreview.src = url;
+      downloadLink.href = url;
+      downloadLink.setAttribute('download', (url.split('/').pop() || 'result.gif'));
+
+      const info = data.file_info || {};
+      fileInfo.textContent = `Кадров: ${info.frames ?? files.length}, ` +
+        `Длительность кадра: ${info.duration_per_frame ?? Number(document.getElementById('frameDuration').value || '0.5')} с, ` +
+        `Общая длительность: ${info.total_duration ? Number(info.total_duration).toFixed(2) : (files.length * Number(document.getElementById('frameDuration').value || '0.5')).toFixed(2)} с, ` +
+        `Размер файла: ${info.file_size ? (info.file_size/1024/1024).toFixed(2) + ' МБ' : '—'}, ` +
+        `Размеры: ${info.dimensions || (document.getElementById('outputSize').value === 'original' ? 'Original' : document.getElementById('outputSize').value + 'x' + document.getElementById('outputSize').value)}`;
+
+      showResult(true);
+    } catch (err){
+      alert(err.message || 'Произошла ошибка при создании GIF');
+    } finally {
+      showProgress(false);
+    }
+  });
+})();
+</script>
+{% endblock %}
+

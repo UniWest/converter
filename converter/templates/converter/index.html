@@ -1,0 +1,466 @@
+{% extends 'converter/base.html' %}
+
+{% block title %}Конвертер видео в GIF - Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <form method="post" enctype="multipart/form-data" id="upload-form" class="fade-in">
+            {% csrf_token %}
+            
+            <!-- Выбор файла -->
+            <div class="mb-4">
+                <div class="file-input-wrapper" onclick="document.getElementById('{{ form.video.id_for_label }}').click()">
+                    <div class="upload-icon">📹</div>
+                    <h5 class="mb-3">Загрузите видео файл</h5>
+                    <p class="text-muted mb-2">Нажмите здесь или перетащите файл</p>
+                    <p class="file-name text-primary fw-bold">Файл не выбран</p>
+                </div>
+                
+                {{ form.video }}
+                
+                {% if form.video.errors %}
+                    <div class="text-danger mt-2">
+                        {% for error in form.video.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Настройки конвертации -->
+            <div class="conversion-settings slide-in-left">
+                <h5 class="mb-4">
+                    <i class="bi bi-gear-fill me-2"></i>
+                    Настройки конвертации
+                </h5>
+                
+                <div class="row">
+                    <!-- Ширина -->
+                    <div class="col-md-6">
+                        <div class="settings-group">
+                            <label for="{{ form.width.id_for_label }}" class="form-label">
+                                <i class="bi bi-aspect-ratio me-2"></i>
+                                {{ form.width.label }}
+                            </label>
+                            {{ form.width }}
+                            {% if form.width.help_text %}
+                                <div class="form-text">{{ form.width.help_text }}</div>
+                            {% endif %}
+                            {% if form.width.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.width.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- FPS -->
+                    <div class="col-md-6">
+                        <div class="settings-group">
+                            <label for="{{ form.fps.id_for_label }}" class="form-label">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                {{ form.fps.label }}
+                            </label>
+                            {{ form.fps }}
+                            {% if form.fps.help_text %}
+                                <div class="form-text">{{ form.fps.help_text }}</div>
+                            {% endif %}
+                            {% if form.fps.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.fps.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <!-- Начальное время -->
+                    <div class="col-md-6">
+                        <div class="settings-group">
+                            <label for="{{ form.start_time.id_for_label }}" class="form-label">
+                                <i class="bi bi-skip-start me-2"></i>
+                                {{ form.start_time.label }}
+                            </label>
+                            {{ form.start_time }}
+                            {% if form.start_time.help_text %}
+                                <div class="form-text">{{ form.start_time.help_text }}</div>
+                            {% endif %}
+                            {% if form.start_time.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.start_time.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Конечное время -->
+                    <div class="col-md-6">
+                        <div class="settings-group">
+                            <label for="{{ form.end_time.id_for_label }}" class="form-label">
+                                <i class="bi bi-skip-end me-2"></i>
+                                {{ form.end_time.label }}
+                            </label>
+                            {{ form.end_time }}
+                            {% if form.end_time.help_text %}
+                                <div class="form-text">{{ form.end_time.help_text }}</div>
+                            {% endif %}
+                            {% if form.end_time.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.end_time.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Общие ошибки формы -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Кнопка отправки -->
+            <div class="text-center slide-in-right">
+                <button type="submit" class="btn btn-primary btn-lg" id="convert-btn">
+                    <i class="bi bi-play-circle-fill me-2"></i>
+                    Конвертировать в GIF
+                </button>
+            </div>
+        </form>
+        
+        <!-- Спиннер загрузки -->
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Конвертация...</span>
+            </div>
+            <h5 class="mt-3">Конвертация видео...</h5>
+            <p class="text-muted">Пожалуйста, подождите. Это может занять несколько минут в зависимости от размера видео.</p>
+            
+            <!-- Прогресс бар (если нужен) -->
+            <div class="progress mt-3" style="display: none;">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Дополнительная информация -->
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">⚡</div>
+            <h5>Быстрая обработка</h5>
+            <p class="text-muted mb-0">Конвертация с использованием оптимизированных алгоритмов FFmpeg для максимальной производительности</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">🔧</div>
+            <h5>Гибкие настройки</h5>
+            <p class="text-muted mb-0">Настройте размер, частоту кадров и временные рамки для получения идеального результата</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card fade-in">
+            <div class="feature-icon">📱</div>
+            <h5>Поддержка форматов</h5>
+            <p class="text-muted mb-0">MP4, AVI, MOV, MKV, WMV, WebM и другие популярные видео форматы</p>
+        </div>
+    </div>
+</div>
+
+<!-- Инструкции по использованию -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="conversion-settings fade-in">
+            <h5 class="mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Как использовать конвертер
+            </h5>
+            <div class="row">
+                <div class="col-md-3 text-center mb-3">
+                    <div class="feature-icon">1️⃣</div>
+                    <h6>Выберите файл</h6>
+                    <small class="text-muted">Загрузите видео или перетащите его в область загрузки</small>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="feature-icon">2️⃣</div>
+                    <h6>Настройте параметры</h6>
+                    <small class="text-muted">Укажите размер, FPS и временной интервал</small>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="feature-icon">3️⃣</div>
+                    <h6>Запустите конвертацию</h6>
+                    <small class="text-muted">Нажмите кнопку и дождитесь завершения</small>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="feature-icon">4️⃣</div>
+                    <h6>Скачайте результат</h6>
+                    <small class="text-muted">Получите готовый GIF файл</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('upload-form');
+    const fileInput = document.getElementById('{{ form.video.id_for_label }}');
+    const convertBtn = document.getElementById('convert-btn');
+    const spinner = document.getElementById('loading-spinner');
+    
+    // Обработка выбора файла
+    fileInput.addEventListener('change', function() {
+        updateFileName(this);
+        if (validateFile(this)) {
+            // Добавить предпросмотр информации о файле
+            getVideoInfo(this.files[0]);
+        }
+    });
+    
+    // Drag & Drop functionality
+    const fileWrapper = document.querySelector('.file-input-wrapper');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileWrapper.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileWrapper.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileWrapper.addEventListener(eventName, unhighlight, false);
+    });
+    
+    fileWrapper.addEventListener('drop', handleDrop, false);
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight(e) {
+        fileWrapper.classList.add('border-primary');
+        fileWrapper.style.borderColor = 'var(--light-purple)';
+        fileWrapper.style.backgroundColor = 'var(--bg-purple-lighter)';
+    }
+    
+    function unhighlight(e) {
+        fileWrapper.classList.remove('border-primary');
+        fileWrapper.style.borderColor = '';
+        fileWrapper.style.backgroundColor = '';
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileName(fileInput);
+            if (validateFile(fileInput)) {
+                getVideoInfo(files[0]);
+            }
+        }
+    }
+    
+    // Обновление названия файла
+    function updateFileName(input) {
+        const fileName = input.files[0] ? input.files[0].name : 'Файл не выбран';
+        const fileNameElement = document.querySelector('.file-name');
+        if (fileNameElement) {
+            fileNameElement.textContent = fileName;
+            if (input.files[0]) {
+                fileNameElement.style.color = 'var(--primary-purple)';
+                fileNameElement.innerHTML = `<i class="bi bi-check-circle me-1"></i>${fileName}`;
+            } else {
+                fileNameElement.style.color = '#6c757d';
+                fileNameElement.innerHTML = fileName;
+            }
+        }
+    }
+    
+    // Отправка формы
+    form.addEventListener('submit', function(e) {
+        const file = fileInput.files[0];
+        if (!file) {
+            e.preventDefault();
+            showAlert('Пожалуйста, выберите видео файл', 'warning');
+            return false;
+        }
+        
+        // Показать спиннер с анимацией
+        convertBtn.disabled = true;
+        convertBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Конвертация...';
+        
+        spinner.style.display = 'block';
+        spinner.classList.add('fade-in');
+        
+        // Плавная прокрутка к спиннеру
+        spinner.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'center'
+        });
+        
+        // Симуляция прогресса (если нужно)
+        simulateProgress();
+    });
+    
+    // Получение информации о видео
+    function getVideoInfo(file) {
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('video', file);
+        
+        // Показать индикатор загрузки
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'alert alert-info mt-2';
+        loadingIndicator.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Получение информации о видео...';
+        
+        // Удалить предыдущие уведомления
+        const existingAlerts = document.querySelectorAll('.alert-info');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        fileWrapper.parentNode.appendChild(loadingIndicator);
+        
+        fetch('{% url "video_info" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingIndicator.remove();
+            
+            if (data.success && data.info) {
+                const info = data.info;
+                let infoText = `Длительность: ${Math.round(info.duration)}с`;
+                if (info.width && info.height) {
+                    infoText += `, Размер: ${info.width}x${info.height}`;
+                }
+                if (info.fps) {
+                    infoText += `, FPS: ${Math.round(info.fps)}`;
+                }
+                
+                // Показать информацию о видео
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'alert alert-info mt-2 slide-in-left';
+                infoDiv.innerHTML = `<i class="bi bi-info-circle me-2"></i>${infoText}`;
+                
+                fileWrapper.parentNode.appendChild(infoDiv);
+                
+                // Автонастройка параметров
+                autoConfigureSettings(info);
+                
+                // Автоматическое скрытие через 10 секунд
+                setTimeout(() => {
+                    infoDiv.style.transition = 'opacity 0.5s ease';
+                    infoDiv.style.opacity = '0';
+                    setTimeout(() => infoDiv.remove(), 500);
+                }, 10000);
+            }
+        })
+        .catch(error => {
+            loadingIndicator.remove();
+            console.error('Ошибка при получении информации о видео:', error);
+            showAlert('Не удалось получить информацию о видео', 'warning');
+        });
+    }
+    
+    // Автонастройка параметров на основе информации о видео
+    function autoConfigureSettings(info) {
+        // Автонастройка ширины для больших видео
+        if (info.width > 1920) {
+            const widthInput = document.getElementById('{{ form.width.id_for_label }}');
+            if (widthInput && !widthInput.value) {
+                widthInput.value = 1920;
+                showAlert('Ширина автоматически установлена на 1920px для оптимизации размера GIF', 'info');
+            }
+        }
+        
+        // Автонастройка FPS для высокочастотных видео
+        if (info.fps > 30) {
+            const fpsInput = document.getElementById('{{ form.fps.id_for_label }}');
+            if (fpsInput && !fpsInput.value) {
+                fpsInput.value = 15;
+                showAlert('FPS автоматически установлен на 15 для оптимизации размера GIF', 'info');
+            }
+        }
+    }
+    
+    // Симуляция прогресса
+    function simulateProgress() {
+        const progressBar = document.querySelector('.progress');
+        const progressBarFill = document.querySelector('.progress-bar');
+        
+        if (progressBar && progressBarFill) {
+            progressBar.style.display = 'block';
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 3;
+                if (progress > 95) progress = 95;
+                
+                progressBarFill.style.width = progress + '%';
+                progressBarFill.textContent = Math.round(progress) + '%';
+            }, 1000);
+            
+            // Остановить симуляцию через 30 секунд
+            setTimeout(() => {
+                clearInterval(interval);
+            }, 30000);
+        }
+    }
+    
+    // Показать уведомление
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show slide-in-left`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const contentArea = document.querySelector('.content-area');
+        contentArea.insertBefore(alertDiv, contentArea.firstChild);
+        
+        // Автоматическое скрытие через 5 секунд
+        setTimeout(() => {
+            if (document.body.contains(alertDiv)) {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }
+        }, 5000);
+    }
+    
+    // Инициализация анимаций при загрузке
+    setTimeout(() => {
+        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach((el, index) => {
+            el.style.animationDelay = (index * 0.1) + 's';
+        });
+    }, 100);
+});
+</script>
+{% endblock %}

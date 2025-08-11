@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Redis для Celery
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # PostgreSQL база данных (опционально, по умолчанию SQLite)
+  # db:
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: converter_db
+  #     POSTGRES_USER: converter_user
+  #     POSTGRES_PASSWORD: converter_pass
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+  # Django веб-приложение
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - media_files:/app/media
+      - temp_files:/app/temp
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 300 converter_site.wsgi:application"
+
+  # Celery Worker для обработки задач
+  celery_worker:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - media_files:/app/media
+      - temp_files:/app/temp
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - web
+    command: celery -A converter_site worker --loglevel=info --concurrency=2 --max-tasks-per-child=100
+
+  # Celery Beat для периодических задач
+  celery_beat:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - media_files:/app/media
+      - temp_files:/app/temp
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - web
+    command: celery -A converter_site beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  # Flower для мониторинга Celery (опционально)
+  flower:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - celery_worker
+    command: celery -A converter_site flower --port=5555
+
+volumes:
+  redis_data:
+  media_files:
+  temp_files:
+  # postgres_data:  # Раскомментировать если используете PostgreSQL

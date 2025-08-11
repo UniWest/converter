@@ -1,0 +1,122 @@
+{% extends 'converter/base.html' %}
+
+{% block title %}Конвертация завершена - GIF готов!{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto text-center">
+        <!-- Иконка успеха -->
+        <div class="mb-4">
+            <div style="font-size: 5rem; color: #28a745;">✅</div>
+            <h2 class="text-success">Конвертация завершена успешно!</h2>
+            <p class="text-muted">Ваш видеофайл "{{ original_filename }}" успешно конвертирован в GIF</p>
+        </div>
+        
+        <!-- Предпросмотр GIF -->
+        <div class="mb-4">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Предпросмотр GIF</h5>
+                    <img src="{{ gif_url }}" alt="Конвертированный GIF" class="gif-preview img-fluid">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Действия -->
+        <div class="mb-4">
+            <div class="row g-3 justify-content-center">
+                <div class="col-md-4">
+                    <a href="{{ gif_url }}" download class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-download"></i>
+                        Скачать GIF
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'converter:home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                        <i class="bi bi-arrow-left"></i>
+                        Новая конвертация
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Информация о файле -->
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h6 class="card-title">Информация о файле</h6>
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-2">
+                            <div class="text-primary fw-bold">Исходный файл</div>
+                            <small class="text-muted">{{ original_filename }}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-2">
+                            <div class="text-primary fw-bold">Формат</div>
+                            <small class="text-muted">Анимированный GIF</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-2">
+                            <div class="text-primary fw-bold" id="file-size">Размер файла</div>
+                            <small class="text-muted">Загружается...</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-2">
+                            <div class="text-primary fw-bold">Статус</div>
+                            <small class="text-success">Готов к скачиванию</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Советы -->
+        <div class="mt-4">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body">
+                    <h6><i class="bi bi-lightbulb"></i> Полезные советы:</h6>
+                    <ul class="text-start mb-0">
+                        <li>Используйте GIF для коротких анимаций (до 10 секунд) для лучшего качества</li>
+                        <li>Для длинных видео рассмотрите возможность использования MP4 вместо GIF</li>
+                        <li>Уменьшите FPS для получения файлов меньшего размера</li>
+                        <li>Настройте ширину в зависимости от целевой платформы</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем размер файла
+    fetch('{{ gif_url }}', {method: 'HEAD'})
+        .then(response => {
+            const size = response.headers.get('content-length');
+            if (size) {
+                const sizeInMB = (parseInt(size) / (1024 * 1024)).toFixed(2);
+                document.querySelector('#file-size small').textContent = `${sizeInMB} МБ`;
+            }
+        })
+        .catch(error => {
+            document.querySelector('#file-size small').textContent = 'Неизвестно';
+        });
+});
+
+// Функции поделиться удалены
+
+// Автоматическое скачивание через 3 секунды (опционально)
+// setTimeout(() => {
+//     const downloadLink = document.querySelector('a[download]');
+//     if (downloadLink && confirm('Хотите скачать GIF автоматически?')) {
+//         downloadLink.click();
+//     }
+// }, 3000);
+</script>
+{% endblock %}

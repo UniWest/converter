@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#8B5CF6" />
+    <title>{% block title %}Моё приложение{% endblock %}</title>
+
+    <!-- Шрифт для современного вида -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS через CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Конфигурация Tailwind: расширяем тему фиолетовыми цветами
+      tailwind.config = {
+        darkMode: 'media',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#8B5CF6',
+              primaryDark: '#7C3AED',
+              primaryDarker: '#6D28D9',
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Дополнительные CSS-переменные и базовые стили -->
+    <style>
+      :root {
+        --color-primary: #8B5CF6;
+        --color-primary-dark: #7C3AED;
+        --color-primary-darker: #6D28D9;
+      }
+      html {
+        font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial,
+          'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+      }
+    </style>
+
+    {% block head %}{% endblock %}
+  </head>
+  <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <a href="/" class="flex items-center gap-2 font-semibold text-primary">
+            <span class="inline-block h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primaryDark"></span>
+            <span>Моё приложение</span>
+          </a>
+          <nav class="flex items-center gap-4">
+            <a href="#" class="text-sm font-medium text-gray-600 hover:text-primaryDark">Главная</a>
+            <a href="#" class="text-sm font-medium text-gray-600 hover:text-primaryDark">О нас</a>
+            <a
+              href="#"
+              class="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primaryDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primaryDarker"
+              >Войти</a
+            >
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Контент -->
+    <main class="flex-1">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}
+        <div class="rounded-xl border bg-white p-6 shadow-sm">
+          <h1 class="text-2xl font-bold text-gray-900">Добро пожаловать</h1>
+          <p class="mt-2 text-gray-600">Замените этот блок своим содержимым.</p>
+        </div>
+        {% endblock %}
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm text-gray-500 flex items-center justify-between">
+        <p>&copy; {% now "Y" %} Моё приложение. Все права защищены.</p>
+        <div class="flex items-center gap-3">
+          <a class="hover:text-primaryDark" href="#">Политика</a>
+          <a class="hover:text-primaryDark" href="#">Контакты</a>
+        </div>
+      </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
+

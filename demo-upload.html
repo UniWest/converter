@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Загрузка и конвертация — демо</title>
+  <link rel="preload" as="style" href="assets/styles.css" onload="this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="assets/styles.css" /></noscript>
+</head>
+  <body>
+    <noscript>
+      <div style="margin:0;padding:12px;background:#fff3cd;border-bottom:1px solid #ffe08a;color:#614e1a;font:14px/1.4 system-ui">
+        Для работы демо требуется включить JavaScript.
+      </div>
+    </noscript>
+  <main style="max-width:880px;margin:40px auto;padding:0 16px">
+    <h1 style="margin:0 0 16px">Демо: загрузка файла и индикатор прогресса</h1>
+
+    <section class="card">
+      <form id="upload-form">
+        <div id="dropzone" class="upload-dropzone">
+          <div class="upload-icon">
+            <!-- simple icon -->
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 16V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 9l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="3" y="16" width="18" height="4" rx="2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="upload-title">Перетащите файл сюда</div>
+          <div class="upload-hint">или нажмите, чтобы выбрать с диска</div>
+          <input id="file-input" type="file" />
+          <div class="file-name"></div>
+        </div>
+
+        <div class="mt-16">
+          <div id="progress" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="bar"></div>
+          </div>
+        </div>
+
+        <div class="mt-16 flex items-center justify-between">
+          <div style="font-size:13px;color:var(--muted)">Поддерживаются любые файлы для примера</div>
+          <button id="submit-btn" class="btn btn-primary" type="submit">Загрузить</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 12px">Кнопки (фиолетовая тема)</h2>
+      <div class="flex gap-8">
+        <button class="btn btn-primary">Основная кнопка</button>
+        <button class="btn btn-outline">Вторичная</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Оверлей загрузки -->
+  <div id="loading" class="loading-overlay">
+    <div class="loading-card">
+      <span class="spinner"></span>
+      <span>Идёт обработка…</span>
+    </div>
+  </div>
+
+  <script src="assets/upload.js"></script>
+  <script>
+    // Пример инициализации: endpoint укажите свой (ниже — эхо-сервер-тест)
+    const uploader = new Uploader({
+      form: document.querySelector('#upload-form'),
+      input: document.querySelector('#file-input'),
+      dropzone: document.querySelector('#dropzone'),
+      submitBtn: document.querySelector('#submit-btn'),
+      progressEl: document.querySelector('#progress'),
+      progressBarEl: document.querySelector('#progress .bar'),
+      overlay: document.querySelector('#loading'),
+      endpoint: '/upload', // замените на ваш эндпоинт
+      method: 'POST',
+      fieldName: 'file',
+      onComplete: (res) => {
+        alert('Готово! Ответ сервера: ' + (typeof res === 'string' ? res : JSON.stringify(res)))
+      },
+      onError: (xhr) => {
+        alert('Ошибка загрузки: ' + xhr.status)
+      }
+    })
+  </script>
+</body>
+</html>
+

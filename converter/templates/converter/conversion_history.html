@@ -1,0 +1,679 @@
+{% extends 'converter/base.html' %}
+
+{% block title %}История конвертации{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .history-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.6s ease;
+    }
+
+    .stat-card:hover::before {
+        transform: scale(1);
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .history-item {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .history-item:hover {
+        border-color: var(--bs-primary);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .history-file-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .file-icon.video { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+    .file-icon.image { background: rgba(25, 135, 84, 0.1); color: #198754; }
+    .file-icon.audio { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .file-icon.document { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+    .file-icon.archive { background: rgba(108, 117, 125, 0.1); color: #6c757d; }
+
+    .conversion-path {
+        display: flex;
+        align-items: center;
+        margin: 1rem 0;
+    }
+
+    .format-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .format-from { 
+        background: #e9ecef; 
+        color: #495057; 
+    }
+
+    .format-to { 
+        background: #d1edff; 
+        color: #0c63e4; 
+    }
+
+    .conversion-arrow {
+        margin: 0 1rem;
+        color: #6c757d;
+    }
+
+    .filter-controls {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-box {
+        border-radius: 50px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    .time-filter {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .time-button {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        background: white;
+        color: #495057;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .time-button:hover,
+    .time-button.active {
+        background: var(--bs-primary);
+        color: white;
+        border-color: var(--bs-primary);
+    }
+
+    .charts-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin: 2rem 0;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 2rem 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">📊 История конвертации</h1>
+            <p class="lead text-muted">
+                Просматривайте статистику и историю всех выполненных конвертаций
+            </p>
+        </div>
+    </div>
+
+    <!-- Статистические карточки -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">{{ total_conversions|default:0 }}</span>
+            <span class="stat-label">Всего конвертаций</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ total_conversions|default:0 }}</span>
+            <span class="stat-label">Успешных</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">0</span>
+            <span class="stat-label">За сегодня</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">0GB</span>
+            <span class="stat-label">Обработано данных</span>
+        </div>
+    </div>
+
+    <!-- Популярные форматы -->
+    <div class="history-card">
+        <h5><i class="bi bi-graph-up"></i> Популярные форматы конвертации</h5>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h6>Входные форматы:</h6>
+                <div id="input-formats-chart" class="chart-container"></div>
+            </div>
+            <div class="col-md-6">
+                <h6>Выходные форматы:</h6>
+                <div id="output-formats-chart" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- График активности по времени -->
+    <div class="charts-section">
+        <h5><i class="bi bi-activity"></i> Активность по времени</h5>
+        <div id="activity-chart" class="chart-container"></div>
+    </div>
+
+    <!-- Фильтры и поиск -->
+    <div class="filter-controls">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control search-box" 
+                           placeholder="Поиск по имени файла..." 
+                           id="history-search">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="time-filter">
+                    <span class="small text-muted">Период:</span>
+                    <button class="time-button active" data-period="all">Всё время</button>
+                    <button class="time-button" data-period="today">Сегодня</button>
+                    <button class="time-button" data-period="week">Неделя</button>
+                    <button class="time-button" data-period="month">Месяц</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <select class="form-select" id="type-filter">
+                    <option value="">Все типы файлов</option>
+                    <option value="video">Видео</option>
+                    <option value="image">Изображения</option>
+                    <option value="audio">Аудио</option>
+                    <option value="document">Документы</option>
+                    <option value="archive">Архивы</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="status-filter">
+                    <option value="">Все статусы</option>
+                    <option value="completed">Завершено</option>
+                    <option value="failed">Ошибка</option>
+                    <option value="processing">В процессе</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-outline-primary w-100" id="clear-filters">
+                    <i class="bi bi-arrow-clockwise"></i> Сбросить фильтры
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- История конвертаций -->
+    <div class="history-card">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5><i class="bi bi-clock-history"></i> История конвертаций</h5>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary" id="export-history">
+                    <i class="bi bi-download"></i> Экспорт
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="clear-history">
+                    <i class="bi bi-trash"></i> Очистить
+                </button>
+            </div>
+        </div>
+
+        <div id="history-list">
+            {% if recent_conversions %}
+                {% for conversion in recent_conversions %}
+                <div class="history-item">
+                    <div class="history-meta">
+                        <span class="text-muted">
+                            <i class="bi bi-calendar"></i>
+                            {{ conversion.created_at|date:"d.m.Y H:i" }}
+                        </span>
+                        <span class="badge bg-success">Завершено</span>
+                    </div>
+                    
+                    <div class="history-file-info">
+                        <div class="file-icon {{ conversion.type|default:'unknown' }}">
+                            {% if conversion.type == 'video' %}🎥
+                            {% elif conversion.type == 'image' %}🖼️
+                            {% elif conversion.type == 'audio' %}🎵
+                            {% elif conversion.type == 'document' %}📄
+                            {% elif conversion.type == 'archive' %}🗜️
+                            {% else %}📄{% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">{{ conversion.original_filename }}</div>
+                            <small class="text-muted">
+                                {{ conversion.file_size|filesizeformat }} • 
+                                Время обработки: {{ conversion.processing_time }}сек
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-path">
+                        <span class="format-badge format-from">{{ conversion.input_format|upper }}</span>
+                        <i class="bi bi-arrow-right conversion-arrow"></i>
+                        <span class="format-badge format-to">{{ conversion.output_format|upper }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            <i class="bi bi-gear"></i>
+                            Настройки: {{ conversion.settings_summary }}
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-primary" onclick="downloadFile('{{ conversion.output_url }}')">
+                                <i class="bi bi-download"></i> Скачать
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="repeatConversion('{{ conversion.id }}')">
+                                <i class="bi bi-arrow-repeat"></i> Повторить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <h4>История пуста</h4>
+                    <p class="text-muted">
+                        У вас пока нет конвертированных файлов.<br>
+                        <a href="{% url 'converter:home' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Начать конвертацию
+                        </a>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination-wrapper">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Предыдущая</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Следующая</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Системная статистика -->
+    <div class="history-card">
+        <h5><i class="bi bi-cpu"></i> Системная статистика</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-primary">{{ system_stats.uptime|default:"N/A" }}</h3>
+                    <small class="text-muted">Время работы</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-success">{{ system_stats.avg_processing_time|default:"N/A" }}с</h3>
+                    <small class="text-muted">Среднее время обработки</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-info">{{ system_stats.success_rate|default:"N/A" }}%</h3>
+                    <small class="text-muted">Процент успеха</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    setupFilters();
+    loadHistoryData();
+});
+
+// Инициализация графиков
+function initializeCharts() {
+    // График популярных входных форматов
+    const inputFormatsCtx = document.getElementById('input-formats-chart');
+    if (inputFormatsCtx) {
+        new Chart(inputFormatsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['MP4', 'AVI', 'JPG', 'PNG', 'PDF'],
+                datasets: [{
+                    data: [35, 20, 25, 15, 5],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB', 
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // График популярных выходных форматов
+    const outputFormatsCtx = document.getElementById('output-formats-chart');
+    if (outputFormatsCtx) {
+        new Chart(outputFormatsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['GIF', 'JPG', 'PNG', 'PDF', 'MP3'],
+                datasets: [{
+                    data: [45, 30, 15, 7, 3],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56', 
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // График активности по времени
+    const activityCtx = document.getElementById('activity-chart');
+    if (activityCtx) {
+        new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                datasets: [{
+                    label: 'Конвертации',
+                    data: [12, 19, 8, 15, 22, 8, 5],
+                    borderColor: '#36A2EB',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Настройка фильтров
+function setupFilters() {
+    // Фильтр периода времени
+    document.querySelectorAll('.time-button').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.time-button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filterHistory();
+        });
+    });
+
+    // Поиск
+    document.getElementById('history-search').addEventListener('input', filterHistory);
+    
+    // Фильтры
+    document.getElementById('type-filter').addEventListener('change', filterHistory);
+    document.getElementById('status-filter').addEventListener('change', filterHistory);
+    
+    // Сброс фильтров
+    document.getElementById('clear-filters').addEventListener('click', function() {
+        document.getElementById('history-search').value = '';
+        document.getElementById('type-filter').value = '';
+        document.getElementById('status-filter').value = '';
+        document.querySelectorAll('.time-button').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-period="all"]').classList.add('active');
+        filterHistory();
+    });
+
+    // Экспорт истории
+    document.getElementById('export-history').addEventListener('click', exportHistory);
+    
+    // Очистка истории
+    document.getElementById('clear-history').addEventListener('click', function() {
+        if (confirm('Вы уверены, что хотите очистить всю историю конвертаций?')) {
+            clearHistory();
+        }
+    });
+}
+
+// Фильтрация истории
+function filterHistory() {
+    const searchTerm = document.getElementById('history-search').value.toLowerCase();
+    const typeFilter = document.getElementById('type-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    const timeFilter = document.querySelector('.time-button.active').dataset.period;
+    
+    // Здесь должна быть логика фильтрации
+    console.log('Фильтры:', { searchTerm, typeFilter, statusFilter, timeFilter });
+    
+    // Пока что просто показываем все элементы
+    document.querySelectorAll('.history-item').forEach(item => {
+        item.style.display = 'block';
+    });
+}
+
+// Загрузка данных истории
+function loadHistoryData() {
+    // Здесь должен быть AJAX-запрос для загрузки истории
+    console.log('Загрузка истории...');
+}
+
+// Экспорт истории
+function exportHistory() {
+    // Создаем CSV с историей конвертаций
+    const csvData = 'Дата,Файл,Тип,Размер,Формат входной,Формат выходной,Статус\n';
+    
+    // Здесь должна быть логика экспорта
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'conversion_history.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Очистка истории
+function clearHistory() {
+    // AJAX-запрос для очистки истории
+    fetch('/converter/conversion_history/', {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка при очистке истории');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка');
+    });
+}
+
+// Скачивание файла
+function downloadFile(url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = url.split('/').pop();
+    link.click();
+}
+
+// Повторить конвертацию
+function repeatConversion(conversionId) {
+    // Логика повтора конвертации
+    window.location.href = `/converter/?repeat=${conversionId}`;
+}
+
+// Получение CSRF токена
+function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+</script>
+{% endblock %}
