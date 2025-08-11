@@ -1,5 +1,6 @@
 from django.urls import path  
 from . import views
+from . import api_views_extended
 
 app_name = "converter"
 
@@ -14,6 +15,19 @@ urlpatterns = [
     # Additional converter views (placeholders for now)
     path("photos-to-gif/", views.photos_to_gif_view, name="photos_to_gif"),
     path("audio-to-text/", views.audio_to_text_view, name="audio_to_text"),
+    
+    # API endpoint for audio-to-text
+    path("api/audio-to-text/", views.api_audio_to_text_view, name="api_audio_to_text"),
+    
+    # API endpoints for conversion interface
+    path("api/conversion/submit/", views.api_conversion_submit, name="api_conversion_submit"),
+    path("api/conversion/queue/", views.api_conversion_queue, name="api_conversion_queue"),
+    
     path("conversion-interface/", views.conversion_interface_view, name="conversion_interface"),
     path("comprehensive/", views.comprehensive_converter_view, name="comprehensive_converter"),
+    
+    # API endpoints для универсального конвертера
+    path("ajax_convert/", views.ajax_convert_video, name="ajax_convert"),
+    path("convert_with_adapters/", views.convert_with_adapters, name="convert_with_adapters"),
+    path("engine_status/", views.engine_status, name="engine_status"),
 ]

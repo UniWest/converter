@@ -12,6 +12,15 @@
 
 {% block extra_css %}
 <style>
+/* Скрываем языковой селектор на этой странице */
+#languageDropdown {
+    display: none !important;
+}
+
+.dropdown.position-absolute {
+    display: none !important;
+}
+
 /* Дополнительные стили для audio-to-text */
 .audio-drop-zone {
     position: relative;
@@ -167,8 +176,176 @@
 .language-toggle {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 20px;
     z-index: 1000;
+}
+
+/* Advanced settings styles */
+.advanced-settings-panel {
+    background: rgba(138, 43, 226, 0.05);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(138, 43, 226, 0.2);
+    transition: var(--transition-normal);
+}
+
+.advanced-settings-panel.show {
+    animation: slideInDown 0.3s ease-in-out;
+}
+
+.range-container {
+    position: relative;
+}
+
+.form-range {
+    margin-bottom: 0.5rem;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--primary-purple);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.form-range::-moz-range-thumb {
+    background: var(--primary-purple);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.form-range:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(138, 43, 226, 0.25);
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Range value indicators */
+.range-container .text-muted {
+    font-size: 0.8rem;
+}
+
+/* Dark theme text color overrides */
+[data-theme="dark"] .file-info {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .file-info p,
+[data-theme="dark"] .file-info h6 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .settings-panel,
+[data-theme="dark"] .settings-panel * {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .form-check-label {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="dark"] .audio-drop-zone h5,
+[data-theme="dark"] .audio-drop-zone p {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .result-panel {
+    background: rgba(17, 24, 39, 0.9) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .result-panel h5,
+[data-theme="dark"] .result-panel span,
+[data-theme="dark"] .result-panel small {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] #resultText {
+    background: rgba(31, 41, 55, 0.9) !important;
+    color: var(--text-primary) !important;
+    border-color: rgba(55, 65, 81, 0.6) !important;
+}
+
+[data-theme="dark"] .feature-card {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .feature-card h5,
+[data-theme="dark"] .feature-card p {
+    color: var(--text-primary) !important;
+}
+
+/* Auto dark theme text colors */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .file-info {
+        color: var(--text-primary);
+    }
+    
+    :root:not([data-theme="light"]) .file-info p,
+    :root:not([data-theme="light"]) .file-info h6 {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .settings-panel,
+    :root:not([data-theme="light"]) .settings-panel * {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .form-label,
+    :root:not([data-theme="light"]) .form-check-label {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .text-muted {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    :root:not([data-theme="light"]) .audio-drop-zone h5,
+    :root:not([data-theme="light"]) .audio-drop-zone p {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .result-panel {
+        background: rgba(17, 24, 39, 0.9) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .result-panel h5,
+    :root:not([data-theme="light"]) .result-panel span,
+    :root:not([data-theme="light"]) .result-panel small {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) #resultText {
+        background: rgba(31, 41, 55, 0.9) !important;
+        color: var(--text-primary) !important;
+        border-color: rgba(55, 65, 81, 0.6) !important;
+    }
+    
+    :root:not([data-theme="light"]) .feature-card {
+        color: var(--text-primary) !important;
+    }
+    
+    :root:not([data-theme="light"]) .feature-card h5,
+    :root:not([data-theme="light"]) .feature-card p {
+        color: var(--text-primary) !important;
+    }
 }
 
 /* Responsive improvements */
@@ -194,18 +371,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- Language Toggle -->
-<div class="language-toggle">
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setLanguage('ru')" id="lang-ru">
-            🇷🇺 RU
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setLanguage('en')" id="lang-en">
-            🇺🇸 EN
-        </button>
-    </div>
-</div>
-
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <!-- System Status Alert -->
@@ -347,6 +512,150 @@
                             {% endif %}
                         </option>
                     </select>
+                </div>
+            </div>
+            
+            <!-- Advanced Audio Settings -->
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="advancedSettings">
+                        <label class="form-check-label fw-bold" for="advancedSettings" id="advancedLabel">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                🎛️ Advanced Audio Settings
+                            {% else %}
+                                🎛️ Расширенные настройки аудио
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Settings Panel -->
+            <div class="row advanced-settings-panel" id="advancedPanel" style="display: none;">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="volumeGain" id="volumeLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            🔊 Volume Gain
+                        {% else %}
+                            🔊 Усиление громкости
+                        {% endif %}
+                    </label>
+                    <div class="range-container">
+                        <input type="range" class="form-range" id="volumeGain" min="0" max="200" value="100" step="5">
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>0%</span>
+                            <span id="volumeValue">100%</span>
+                            <span>200%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="bassBoost" id="bassLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            🎵 Bass Boost
+                        {% else %}
+                            🎵 Усиление басов
+                        {% endif %}
+                    </label>
+                    <div class="range-container">
+                        <input type="range" class="form-range" id="bassBoost" min="-20" max="20" value="0" step="1">
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>-20dB</span>
+                            <span id="bassValue">0dB</span>
+                            <span>+20dB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="trebleBoost" id="trebleLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            🎼 Treble Boost
+                        {% else %}
+                            🎼 Усиление высоких
+                        {% endif %}
+                    </label>
+                    <div class="range-container">
+                        <input type="range" class="form-range" id="trebleBoost" min="-20" max="20" value="0" step="1">
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>-20dB</span>
+                            <span id="trebleValue">0dB</span>
+                            <span>+20dB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="noiseReduction" id="noiseLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            🔇 Noise Reduction
+                        {% else %}
+                            🔇 Шумоподавление
+                        {% endif %}
+                    </label>
+                    <select id="noiseReduction" class="form-select">
+                        <option value="none" selected>
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                None
+                            {% else %}
+                                Отключено
+                            {% endif %}
+                        </option>
+                        <option value="light">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Light
+                            {% else %}
+                                Легкое
+                            {% endif %}
+                        </option>
+                        <option value="moderate">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Moderate
+                            {% else %}
+                                Умеренное
+                            {% endif %}
+                        </option>
+                        <option value="aggressive">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Aggressive
+                            {% else %}
+                                Агрессивное
+                            {% endif %}
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="normalization" id="normalizationLabel">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% if LANGUAGE_CODE == 'en' %}
+                            📊 Audio Normalization
+                        {% else %}
+                            📊 Нормализация аудио
+                        {% endif %}
+                    </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableNormalization">
+                        <label class="form-check-label" for="enableNormalization" id="enableNormalizationLabel">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'en' %}
+                                Enable automatic normalization
+                            {% else %}
+                                Включить автоматическую нормализацию
+                            {% endif %}
+                        </label>
+                    </div>
                 </div>
             </div>
             
@@ -618,7 +927,7 @@ const translations = {
         qualityFast: 'Быстрое (менее точно)',
         // Ошибки и сообщения
         errorNoFile: 'Пожалуйста, выберите аудиофайл',
-        errorFileSize: 'Файл слишком большой. Максимальный размер: 500 МБ',
+        errorFileSize: 'Файл слишком большой. Максимальный размер: 100 МБ',
         errorFileType: 'Неподдерживаемый формат файла',
         successCopied: 'Текст скопирован в буфер обмена',
         statusCompleted: 'Распознавание завершено',
@@ -655,7 +964,7 @@ const translations = {
         qualityFast: 'Fast (less accurate)',
         // Ошибки и сообщения
         errorNoFile: 'Please select an audio file',
-        errorFileSize: 'File is too large. Maximum size: 500 MB',
+        errorFileSize: 'File is too large. Maximum size: 100 MB',
         errorFileType: 'Unsupported file format',
         successCopied: 'Text copied to clipboard',
         statusCompleted: 'Recognition completed',
@@ -678,6 +987,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFileInput();
     initRecognitionButton();
     initLanguageToggle();
+    initAdvancedSettings();
     
     // Обновляем активную кнопку языка
     document.getElementById('lang-' + currentLanguage).classList.add('active');
@@ -690,8 +1000,29 @@ function setLanguage(lang) {
     updateLanguage(lang);
     
     // Обновляем активную кнопку
-    document.querySelectorAll('.language-toggle .btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('lang-' + lang).classList.add('active');
+    document.querySelectorAll('.language-toggle .btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+    
+    const activeButton = document.getElementById('lang-' + lang);
+    if (activeButton) {
+        activeButton.classList.remove('btn-outline-primary');
+        activeButton.classList.add('btn-primary', 'active');
+    }
+    
+    // Также обновляем язык распознавания в селекторе
+    const sttLanguageSelect = document.getElementById('sttLanguage');
+    if (sttLanguageSelect) {
+        if (lang === 'ru') {
+            sttLanguageSelect.value = 'ru-RU';
+        } else if (lang === 'en') {
+            sttLanguageSelect.value = 'en-US';
+        }
+    }
+    
+    console.log('Language changed to:', lang);
 }
 
 // Обновление текстов интерфейса
@@ -830,7 +1161,7 @@ function handleFileSelect(file) {
 // Валидация файла
 function validateFile(file) {
     const t = translations[currentLanguage];
-    const maxSize = 500 * 1024 * 1024; // 500 MB
+        const maxSize = 100 * 1024 * 1024; // 100 MB
     const allowedTypes = [
         'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav',
         'audio/m4a', 'audio/x-m4a', 'audio/aac', 'audio/ogg', 'audio/flac',
@@ -908,9 +1239,16 @@ async function startRecognition() {
     formData.append('include_timestamps', settings.includeTimestamps);
     formData.append('detect_speakers', settings.detectSpeakers);
     
+    // Добавляем расширенные настройки аудио если они включены
+    if (settings.volumeGain !== undefined) formData.append('volume_gain', settings.volumeGain);
+    if (settings.bassBoost !== undefined) formData.append('bass_boost', settings.bassBoost);
+    if (settings.trebleBoost !== undefined) formData.append('treble_boost', settings.trebleBoost);
+    if (settings.noiseReduction !== undefined) formData.append('noise_reduction', settings.noiseReduction);
+    if (settings.enableNormalization !== undefined) formData.append('enable_normalization', settings.enableNormalization);
+    
     try {
         // Отправляем запрос
-        const response = await fetch('/api/audio-to-text/', {
+        const response = await fetch('/app/api/audio-to-text/', {
             method: 'POST',
             body: formData,
             headers: {
@@ -970,7 +1308,7 @@ async function startRecognition() {
 
 // Получение настроек распознавания
 function getRecognitionSettings() {
-    return {
+    const settings = {
         engine: document.getElementById('sttEngine').value,
         language: document.getElementById('sttLanguage').value,
         quality: document.getElementById('sttQuality').value,
@@ -978,6 +1316,18 @@ function getRecognitionSettings() {
         includeTimestamps: document.getElementById('includeTimestamps').checked,
         detectSpeakers: document.getElementById('detectSpeakers').checked
     };
+    
+    // Add advanced audio settings if the panel is enabled
+    const advancedEnabled = document.getElementById('advancedSettings').checked;
+    if (advancedEnabled) {
+        settings.volumeGain = document.getElementById('volumeGain').value;
+        settings.bassBoost = document.getElementById('bassBoost').value;
+        settings.trebleBoost = document.getElementById('trebleBoost').value;
+        settings.noiseReduction = document.getElementById('noiseReduction').value;
+        settings.enableNormalization = document.getElementById('enableNormalization').checked;
+    }
+    
+    return settings;
 }
 
 // Показ прогресса
@@ -1223,6 +1573,57 @@ async function copyToClipboard() {
 function initLanguageToggle() {
     // Обработчики уже добавлены в HTML через onclick
     // Можно добавить дополнительную логику здесь при необходимости
+}
+
+// Инициализация расширенных настроек аудио
+function initAdvancedSettings() {
+    const advancedToggle = document.getElementById('advancedSettings');
+    const advancedPanel = document.getElementById('advancedPanel');
+    const volumeGain = document.getElementById('volumeGain');
+    const bassBoost = document.getElementById('bassBoost');
+    const trebleBoost = document.getElementById('trebleBoost');
+    const volumeValue = document.getElementById('volumeValue');
+    const bassValue = document.getElementById('bassValue');
+    const trebleValue = document.getElementById('trebleValue');
+    
+    // Обработчик переключения расширенных настроек
+    advancedToggle.addEventListener('change', function() {
+        if (this.checked) {
+            advancedPanel.style.display = 'flex';
+            advancedPanel.classList.add('show');
+        } else {
+            advancedPanel.style.display = 'none';
+            advancedPanel.classList.remove('show');
+        }
+    });
+    
+    // Обработчики изменения значений слайдеров
+    volumeGain.addEventListener('input', function() {
+        volumeValue.textContent = this.value + '%';
+        console.log('Volume gain changed to:', this.value + '%');
+    });
+    
+    bassBoost.addEventListener('input', function() {
+        const value = this.value;
+        bassValue.textContent = (value >= 0 ? '+' : '') + value + 'dB';
+        console.log('Bass boost changed to:', value + 'dB');
+    });
+    
+    trebleBoost.addEventListener('input', function() {
+        const value = this.value;
+        trebleValue.textContent = (value >= 0 ? '+' : '') + value + 'dB';
+        console.log('Treble boost changed to:', value + 'dB');
+    });
+    
+    // Обработчик изменения шумоподавления
+    document.getElementById('noiseReduction').addEventListener('change', function() {
+        console.log('Noise reduction changed to:', this.value);
+    });
+    
+    // Обработчик изменения нормализации
+    document.getElementById('enableNormalization').addEventListener('change', function() {
+        console.log('Audio normalization:', this.checked ? 'enabled' : 'disabled');
+    });
 }
 
 // Получение CSRF токена

@@ -189,10 +189,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'ru'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
 
-TIME_ZONE = 'Europe/Moscow'
 
+# Enhanced Audio Processing Settings
+try:
+    from .production_audio_settings import *
+except ImportError:
+    # Fallback settings if production_audio_settings.py doesn't exist
+    WHISPER_MODEL = 'base'
+    WHISPER_DEVICE = 'cpu'
+    WHISPER_COMPUTE_TYPE = 'int8'
+    AUDIO_MAX_DURATION = 3600
+    AUDIO_MAX_FILE_SIZE = 100
+    CONCURRENT_AUDIO_JOBS = 2
 USE_I18N = True
 
 USE_TZ = True
@@ -256,7 +269,7 @@ else:  # Windows
 # ===================
 
 # Maximum file upload sizes
-MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=500, cast=int) * 1024 * 1024  # MB to bytes
+MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=100, cast=int) * 1024 * 1024  # MB to bytes
 VIDEO_PROCESSING_TIMEOUT = config('VIDEO_PROCESSING_TIMEOUT', default=300, cast=int)  # seconds
 AUDIO_MAX_DURATION = config('AUDIO_MAX_DURATION', default=3600, cast=int)  # seconds
 

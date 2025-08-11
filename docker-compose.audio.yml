@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.audio
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - WHISPER_MODEL=base
+      - WHISPER_DEVICE=cpu
+      - AUDIO_MAX_DURATION=3600
+      - CONCURRENT_AUDIO_JOBS=2
+      - MAX_MEMORY_USAGE_MB=2048
+    volumes:
+      - ./media:/app/media
+      - whisper_cache:/app/.cache/whisper
+      - audio_logs:/var/log
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/engine-status/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.audio
+    command: celery -A converter_site worker --loglevel=info --concurrency=2
+    environment:
+      - DEBUG=False
+      - WHISPER_MODEL=base
+      - WHISPER_DEVICE=cpu
+    volumes:
+      - ./media:/app/media
+      - whisper_cache:/app/.cache/whisper
+      - audio_logs:/var/log
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./media:/var/www/media
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  whisper_cache:
+    driver: local
+  audio_logs:
+    driver: local

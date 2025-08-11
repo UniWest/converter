@@ -67,8 +67,8 @@
             --bg-purple-lighter: rgba(31, 41, 55, 0.8);
             --bg-gradient-start: rgba(102, 126, 234, 0.15);
             --bg-gradient-end: rgba(118, 75, 162, 0.15);
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
+            --text-primary: #ffffff;
+            --text-secondary: #e5e7eb;
             --surface-color: rgba(31, 41, 55, 0.9);
             --border-light: rgba(55, 65, 81, 0.6);
             --shadow-light: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -85,8 +85,8 @@
                 --bg-purple-lighter: rgba(31, 41, 55, 0.8);
                 --bg-gradient-start: rgba(102, 126, 234, 0.15);
                 --bg-gradient-end: rgba(118, 75, 162, 0.15);
-                --text-primary: #f3f4f6;
-                --text-secondary: #9ca3af;
+                --text-primary: #ffffff;
+                --text-secondary: #ffffff;
                 --surface-color: rgba(31, 41, 55, 0.9);
                 --border-light: rgba(55, 65, 81, 0.6);
                 --shadow-light: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -424,6 +424,89 @@
             border-color: var(--primary-purple) !important;
         }
         
+        /* Универсальные правила для текста в темной теме */
+        [data-theme="dark"] * {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .text-muted,
+        [data-theme="dark"] small,
+        [data-theme="dark"] .small {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] h1, 
+        [data-theme="dark"] h2, 
+        [data-theme="dark"] h3, 
+        [data-theme="dark"] h4, 
+        [data-theme="dark"] h5, 
+        [data-theme="dark"] h6 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] p,
+        [data-theme="dark"] span,
+        [data-theme="dark"] div,
+        [data-theme="dark"] label,
+        [data-theme="dark"] strong,
+        [data-theme="dark"] b,
+        [data-theme="dark"] em,
+        [data-theme="dark"] i {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-control {
+            background: rgba(55, 65, 81, 0.8);
+            border-color: var(--border-light);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-control:focus {
+            background: rgba(55, 65, 81, 0.9);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-select {
+            background: rgba(55, 65, 81, 0.8);
+            border-color: var(--border-light);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-check-label {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .btn {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .alert {
+            color: var(--text-primary);
+        }
+        
+        /* Автоматическая темная тема при системных настройках - текст */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) * {
+                color: #ffffff;
+            }
+            
+            :root:not([data-theme="light"]) .text-muted,
+            :root:not([data-theme="light"]) small,
+            :root:not([data-theme="light"]) .small {
+                color: #e5e7eb !important;
+            }
+            
+            :root:not([data-theme="light"]) .form-control {
+                background: rgba(55, 65, 81, 0.8);
+                color: #ffffff;
+            }
+            
+            :root:not([data-theme="light"]) .form-select {
+                background: rgba(55, 65, 81, 0.8);
+                color: #ffffff;
+            }
+        }
+        
         .feature-card {
             background: rgba(255, 255, 255, 0.9);
             border-radius: var(--border-radius-lg);
@@ -451,6 +534,227 @@
         
         .feature-card:hover .feature-icon {
             transform: scale(1.2) rotateZ(10deg);
+        }
+        
+        /* Темные карточки в темной теме */
+        [data-theme="dark"] .feature-card {
+            background: rgba(31, 41, 55, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .feature-card:hover {
+            background: rgba(55, 65, 81, 0.9);
+            border-color: var(--primary-purple);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .feature-card .text-muted {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .dropdown-menu {
+            background: rgba(31, 41, 55, 0.95);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        [data-theme="dark"] .dropdown-item {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .dropdown-item:hover,
+        [data-theme="dark"] .dropdown-item:focus {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--text-primary);
+        }
+        
+        /* Автоматическая темная тема для карточек */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .feature-card {
+                background: rgba(31, 41, 55, 0.8);
+                border-color: rgba(102, 126, 234, 0.3);
+                color: #ffffff;
+            }
+            
+            :root:not([data-theme="light"]) .feature-card:hover {
+                background: rgba(55, 65, 81, 0.9);
+                border-color: var(--primary-purple);
+                color: #ffffff;
+            }
+            
+            :root:not([data-theme="light"]) .dropdown-menu {
+                background: rgba(31, 41, 55, 0.95);
+                border-color: rgba(102, 126, 234, 0.3);
+            }
+            
+            :root:not([data-theme="light"]) .dropdown-item {
+                color: #ffffff;
+            }
+            
+            :root:not([data-theme="light"]) .dropdown-item:hover {
+                background: rgba(102, 126, 234, 0.2);
+                color: #ffffff;
+            }
+        }
+        
+        /* Language Selector Styles - Enhanced and Dynamic */
+        .language-selector {
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+        }
+        
+        .language-selector .btn-group {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .language-selector .btn-group::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .language-selector .btn-group:hover::before {
+            opacity: 1;
+        }
+        
+        .language-selector .lang-btn {
+            border: none;
+            background: transparent;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 0;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+        
+        .language-selector .lang-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .language-selector .lang-btn:first-child {
+            border-top-left-radius: 11px;
+            border-bottom-left-radius: 11px;
+        }
+        
+        .language-selector .lang-btn:last-child {
+            border-top-right-radius: 11px;
+            border-bottom-right-radius: 11px;
+        }
+        
+        .language-selector .lang-btn:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            right: 0;
+            width: 1px;
+            height: 60%;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+        
+        .language-selector .lang-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .language-selector .lang-btn:hover::before {
+            left: 100%;
+        }
+        
+        .language-selector .lang-btn.active {
+            background: linear-gradient(135deg, 
+                rgba(139, 153, 255, 0.9) 0%, 
+                rgba(102, 126, 234, 0.9) 50%, 
+                rgba(118, 75, 162, 0.9) 100%);
+            color: white;
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px) scale(1.02);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        
+        .language-selector .lang-btn.active::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .language-selector .lang-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+        
+        .language-selector .lang-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        /* Добавляем пульсацию для активной кнопки */
+        .language-selector .lang-btn.active {
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+        }
+        
+        /* Dark theme adjustments - Enhanced */
+        [data-theme="dark"] .language-selector .btn-group {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        [data-theme="dark"] .language-selector .lang-btn.active {
+            background: linear-gradient(135deg, 
+                rgba(102, 126, 234, 0.8) 0%, 
+                rgba(118, 75, 162, 0.8) 50%, 
+                rgba(88, 28, 135, 0.8) 100%);
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.6),
+                0 2px 8px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Добавляем эффект свечения */
+        .language-selector:hover {
+            filter: drop-shadow(0 8px 25px rgba(102, 126, 234, 0.3));
+        }
+        
+        /* Медиа запросы для адаптивности */
+        @media (max-width: 768px) {
+            .language-selector .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
         }
         
         /* Анимации появления */
@@ -536,6 +840,18 @@
             <div class="col-lg-10 col-xl-8">
                 <div class="main-container">
                     <div class="header">
+                        <!-- Language Selector -->
+                        <div class="language-selector position-absolute" style="top: 1rem; left: 1rem; z-index: 10;">
+                            <div class="btn-group" role="group" aria-label="Language selection">
+                                <button type="button" class="btn btn-outline-light btn-sm lang-btn active" data-lang="ru">
+                                    🇷🇺 RU
+                                </button>
+                                <button type="button" class="btn btn-outline-light btn-sm lang-btn" data-lang="en">
+                                    🇺🇸 EN
+                                </button>
+                            </div>
+                        </div>
+                        
                         <!-- Theme Toggle -->
                         <button 
                             id="theme-toggle" 
@@ -565,7 +881,7 @@
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:audio_to_text' %}" tabindex="3">
                                     <i class="bi bi-mic-fill" aria-hidden="true"></i>
-                                    <span class="ms-1">Speech-to-Text</span>
+                                    <span class="ms-1">Голос в текст</span>
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:conversion_interface' %}" tabindex="4">
                                     <i class="bi bi-tools" aria-hidden="true"></i>
@@ -628,11 +944,11 @@
         function validateFile(input) {
             const file = input.files[0];
             if (file) {
-                const maxSize = 500 * 1024 * 1024; // 500 МБ
+                const maxSize = 100 * 1024 * 1024; // 100 МБ
                 const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/wmv', 'video/webm'];
                 
                 if (file.size > maxSize) {
-                    alert('Файл слишком большой. Максимальный размер: 500 МБ');
+                    alert('Файл слишком большой. Максимальный размер: 100 МБ');
                     input.value = '';
                     return false;
                 }
@@ -905,9 +1221,185 @@
             });
         }
         
+        // Language management with simple JavaScript translation
+        class LanguageManager {
+            constructor() {
+                this.langKey = 'preferred-language';
+                this.currentLang = this.getStoredLanguage() || 'ru';
+                this.languageDropdown = document.getElementById('languageDropdown');
+                this.currentLangSpan = document.getElementById('current-lang');
+                
+                // Translation dictionary
+                this.translations = {
+                    'ru': {
+                        'title': 'Конвертер видео в GIF',
+                        'subtitle': 'Быстро и легко превращайте ваши видео в анимированные GIF',
+                        'home': 'Главная',
+                        'photos-to-gif': 'Фото в GIF',
+                        'voice-to-text': 'Голос в текст',
+                        'interface': 'Интерфейс',
+                        'universal': 'Универсальный',
+                        'footer': '© 2025 Конвертер видео в GIF. Сделано с ❤️',
+                        'toggle-theme': 'Переключить тему',
+                        'light-theme': 'Переключить на светлую тему',
+                        'dark-theme': 'Переключить на темную тему',
+                        'current-theme-dark': 'Текущая тема: темная',
+                        'current-theme-light': 'Текущая тема: светлая',
+                        'switched-dark': 'Переключено на темную тему',
+                        'switched-light': 'Переключено на светлую тему',
+                        'file-not-selected': 'Файл не выбран',
+                        'file-too-large': 'Файл слишком большой. Максимальный размер: 100 МБ',
+                        'unsupported-format': 'Неподдерживаемый формат файла. Разрешенные форматы: MP4, AVI, MOV, MKV, WMV, WebM',
+                        'page-loaded': 'Страница загружена и готова для использования',
+                        'skip-content': 'Перейти к основному содержанию',
+                        'switched-russian': 'Переключено на русский язык',
+                        'switched-english': 'Переключено на английский язык',
+                        'keyboard-shortcut': 'Клавиатурное сокращение: переключение темы'
+                    },
+                    'en': {
+                        'title': 'Video to GIF Converter',
+                        'subtitle': 'Quickly and easily turn your videos into animated GIFs',
+                        'home': 'Home',
+                        'photos-to-gif': 'Photos to GIF',
+                        'voice-to-text': 'Voice to Text',
+                        'interface': 'Interface',
+                        'universal': 'Universal',
+                        'footer': '© 2025 Video to GIF Converter. Made with ❤️',
+                        'toggle-theme': 'Toggle theme',
+                        'light-theme': 'Switch to light theme',
+                        'dark-theme': 'Switch to dark theme',
+                        'current-theme-dark': 'Current theme: dark',
+                        'current-theme-light': 'Current theme: light',
+                        'switched-dark': 'Switched to dark theme',
+                        'switched-light': 'Switched to light theme',
+                        'file-not-selected': 'File not selected',
+                        'file-too-large': 'File too large. Maximum size: 100 MB',
+                        'unsupported-format': 'Unsupported file format. Allowed formats: MP4, AVI, MOV, MKV, WMV, WebM',
+                        'page-loaded': 'Page loaded and ready for use',
+                        'skip-content': 'Skip to main content',
+                        'switched-russian': 'Switched to Russian language',
+                        'switched-english': 'Switched to English language',
+                        'keyboard-shortcut': 'Keyboard shortcut: theme toggle'
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.updateDisplay();
+                this.updateButtonStates();
+                this.translatePage();
+                this.attachEventListeners();
+            }
+            
+            getStoredLanguage() {
+                return localStorage.getItem(this.langKey);
+            }
+            
+            storeLanguage(lang) {
+                localStorage.setItem(this.langKey, lang);
+            }
+            
+            updateDisplay() {
+                if (this.currentLangSpan) {
+                    this.currentLangSpan.textContent = this.currentLang.toUpperCase();
+                }
+            }
+            
+            translatePage() {
+                const translations = this.translations[this.currentLang];
+                if (!translations) return;
+                
+                // Update specific elements by their content or data attributes
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[key]) {
+                        element.textContent = translations[key];
+                    }
+                });
+                
+                // Update specific selectors
+                const titleElement = document.querySelector('h2');
+                if (titleElement && titleElement.textContent.includes('Конвертер') || titleElement.textContent.includes('Converter')) {
+                    titleElement.textContent = translations['title'];
+                }
+                
+                const subtitleElement = document.querySelector('.header p');
+                if (subtitleElement) {
+                    subtitleElement.textContent = translations['subtitle'];
+                }
+                
+                const footerElement = document.querySelector('.footer p');
+                if (footerElement) {
+                    footerElement.innerHTML = translations['footer'];
+                }
+                
+                // Update navigation links
+                const navLinks = {
+                    'home': 'a[href*="home"]',
+                    'photos-to-gif': 'a[href*="photos_to_gif"]',
+                    'voice-to-text': 'a[href*="audio_to_text"]',
+                    'interface': 'a[href*="conversion_interface"]',
+                    'universal': 'a[href*="comprehensive_converter"]'
+                };
+                
+                Object.keys(navLinks).forEach(key => {
+                    const element = document.querySelector(navLinks[key] + ' .ms-1');
+                    if (element && translations[key]) {
+                        element.textContent = translations[key];
+                    }
+                });
+                
+                // Update theme toggle attributes
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.setAttribute('aria-label', translations['toggle-theme']);
+                    themeToggle.setAttribute('title', translations['toggle-theme']);
+                }
+            }
+            
+            switchLanguage(lang) {
+                this.currentLang = lang;
+                this.storeLanguage(lang);
+                this.updateButtonStates();
+                this.translatePage();
+                
+                // Announce language change
+                const message = lang === 'ru' 
+                    ? this.translations['ru']['switched-russian']
+                    : this.translations['en']['switched-english'];
+                announceToScreenReader(message, 'status');
+            }
+            
+            updateButtonStates() {
+                // Update active state for language buttons
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    const btnLang = btn.getAttribute('data-lang');
+                    if (btnLang === this.currentLang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+            
+            attachEventListeners() {
+                // Обработчик клика по кнопкам языков
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const lang = e.currentTarget.getAttribute('data-lang');
+                        this.switchLanguage(lang);
+                    });
+                });
+            }
+        }
+        
         // Initialize all accessibility features
         document.addEventListener('DOMContentLoaded', () => {
             new ThemeManager();
+            new LanguageManager();
             new KeyboardNavigation();
             enhanceFormAccessibility();
             

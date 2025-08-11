@@ -19,11 +19,16 @@ flower>=2.0.1
 moviepy>=1.0.3
 Pillow>=10.4.0
 
-# Audio Processing (STT)
-# faster-whisper>=1.0.0  # Uncomment if using Whisper STT
-# speechrecognition>=3.10.0  # Uncomment if using Google STT
-# pydub>=0.25.1  # For audio preprocessing
-# noisereduce>=3.0.0  # For noise reduction
+# Audio Processing (STT) - Enhanced
+faster-whisper>=1.0.0  # Advanced Whisper STT with better performance
+speechrecognition>=3.10.0  # Google STT and other engines
+pydub>=0.25.1  # Audio preprocessing and manipulation
+noisereduce>=3.0.0  # Noise reduction algorithms
+openai-whisper>=20240930  # Original Whisper as fallback
+scipy>=1.12.0  # Signal processing for audio enhancement
+numpy>=1.24.3  # Numerical computing for audio processing
+librosa>=0.10.1  # Advanced audio analysis
+soundfile>=0.12.1  # Audio file I/O
 
 # Development and Testing Dependencies
 pytest>=7.4.0

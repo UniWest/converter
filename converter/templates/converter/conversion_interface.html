@@ -91,10 +91,100 @@
         margin-bottom: 0.5rem;
         display: block;
     }
+    
+    /* Темная тема для интерфейса конвертации */
+    [data-theme="dark"] .conversion-selector {
+        border-color: rgba(102, 126, 234, 0.6);
+        background: rgba(31, 41, 55, 0.8);
+    }
+    
+    [data-theme="dark"] .format-card {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.4);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card:hover {
+        background: rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+    }
+    
+    [data-theme="dark"] .format-card.selected {
+        background: rgba(102, 126, 234, 0.3);
+        border-color: #667eea;
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .file-drop-zone {
+        background: rgba(31, 41, 55, 0.8);
+        border-color: rgba(102, 126, 234, 0.6);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .file-drop-zone:hover,
+    [data-theme="dark"] .file-drop-zone.dragover {
+        background: rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+    }
+    
+    [data-theme="dark"] .file-item {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.4);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .conversion-params {
+        background: rgba(31, 41, 55, 0.8);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .param-group label {
+        color: #ffffff !important;
+    }
+    
+    [data-theme="dark"] .modal-content {
+        background: rgba(17, 24, 39, 0.95);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .modal-header {
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+    
+    [data-theme="dark"] .modal-footer {
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+    
+    [data-theme="dark"] .list-group-item {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    /* Автоматическая темная тема */
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .conversion-selector {
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(31, 41, 55, 0.8);
+        }
+        
+        :root:not([data-theme="light"]) .format-card {
+            background: rgba(55, 65, 81, 0.8);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #ffffff;
+        }
+        
+        :root:not([data-theme="light"]) .file-drop-zone {
+            background: rgba(31, 41, 55, 0.8);
+            border-color: rgba(102, 126, 234, 0.6);
+            color: #ffffff;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="container-fluid">
     <h1 class="mb-4">
         <i class="bi bi-arrow-left-right"></i>
@@ -659,7 +749,7 @@ class ConversionInterface {
             fileData.status = 'uploading';
             this.updateFileList();
             
-            const response = await fetch('/api/conversion/submit/', {
+            const response = await fetch('/app/api/conversion/submit/', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -699,7 +789,7 @@ class ConversionInterface {
         queueContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
         
         try {
-            const response = await fetch('/api/conversion/queue/');
+            const response = await fetch('/app/api/conversion/queue/');
             if (response.ok) {
                 const data = await response.json();
                 this.renderQueue(data.tasks);
