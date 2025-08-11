@@ -34,15 +34,23 @@
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
+        background: white;
+        color: #333;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .format-card:hover {
         border-color: #0d6efd;
         background-color: #f8f9fa;
+        color: #333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .format-card.selected {
         border-color: #0d6efd;
         background-color: #e3f2fd;
         border-width: 2px;
+        color: #0d47a1;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
     }
     .file-drop-zone {
         border: 3px dashed #dee2e6;
@@ -53,6 +61,12 @@
         transition: all 0.3s ease;
         position: relative;
         cursor: pointer;
+        color: #666;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .file-drop-zone.dragover {
         border-color: #0d6efd;
@@ -90,6 +104,20 @@
         font-size: 2rem;
         margin-bottom: 0.5rem;
         display: block;
+    }
+    
+    /* Дополнительные стили для лучшей видимости */
+    .format-card strong {
+        color: inherit;
+        font-size: 1.1rem;
+    }
+    
+    .format-card small {
+        color: #666 !important;
+    }
+    
+    .format-card.selected small {
+        color: #0d47a1 !important;
     }
     
     /* Темная тема для интерфейса конвертации */

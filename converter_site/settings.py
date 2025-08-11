@@ -56,6 +56,15 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+# Security headers for all environments
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+SECURE_REFERRER_POLICY = 'same-origin'
+
+# Development specific settings
+if DEBUG:
+    # For development, be less restrictive with security headers
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = None  # Disable for localhost development
+
 # ===================
 # CORS AND CSRF CONFIGURATION
 # ===================
