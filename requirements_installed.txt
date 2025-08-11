@@ -1,0 +1,75 @@
+# Successfully installed requirements for Python 3.13
+# Generated during fresh virtual environment setup
+
+# Основные зависимости Django
+Django==5.2.5
+Pillow>=10.4.0
+moviepy>=1.0.3
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+python-decouple>=3.8
+requests>=2.31.0
+
+# Очереди задач и кэш
+celery==5.4.0
+redis==5.2.1
+# Note: django-celery-beat and flower were skipped due to Django 5.x compatibility issues
+
+# Обработка и конвертация файлов
+python-magic==0.4.27
+# Note: Wand was skipped - may require additional system dependencies
+
+# Дополнительные библиотеки для конвертации различных форматов
+openpyxl==3.1.5
+pdfrw==0.4
+PyPDF2==3.0.1
+pdfplumber>=0.11.4
+reportlab>=4.0.0
+fpdf2>=2.8.0
+
+# Работа с архивами
+patool>=4.0.0
+zipfile36==0.1.3
+# Note: py7zr was skipped due to compilation requirements (pyppmd, pybcj dependencies)
+
+# Обработка изображений (дополнительно к Pillow)
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Обработка аудио
+pydub==0.25.1
+SpeechRecognition
+faster-whisper>=0.9.0
+librosa>=0.9.0
+soundfile>=0.12.1
+# Note: webrtcvad was skipped due to missing C++ compiler
+ffmpeg-python==0.2.0
+noisereduce>=2.0.0
+
+# Работа с документами Office
+python-docx>=1.1.0
+python-pptx>=0.6.0
+
+# Работа с веб-форматами и API
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+django-cors-headers>=4.6.0
+djangorestframework>=3.15.0
+# Note: django-rest-framework==0.1.0 was also installed (legacy package)
+
+# Мониторинг и логирование
+django-extensions>=3.2.0
+psutil>=5.9.0
+
+# NOTES ON FAILED PACKAGES:
+# - django-celery-beat: Incompatible with Django 5.x (requires Django<5.0)
+# - flower: May have similar Django compatibility issues
+# - py7zr: Requires compilation of pyppmd and pybcj (needs Visual C++ compiler)
+# - webrtcvad: Requires compilation (needs Visual C++ compiler)
+# - Wand: May require ImageMagick system installation
+# 
+# These packages can be installed later if needed:
+# 1. Install Visual Studio Build Tools for C++ compilation requirements
+# 2. Find django-celery-beat alternatives or newer versions for Django 5.x
+# 3. Install ImageMagick for Wand support
