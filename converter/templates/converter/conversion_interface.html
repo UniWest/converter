@@ -822,17 +822,62 @@ class ConversionInterface {
                 return;
             }
             
+            // Уничтожаем предыдущий экземпляр модального окна если он есть
+            const existingModalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (existingModalInstance) {
+                existingModalInstance.dispose();
+            }
+            
             const modal = new bootstrap.Modal(modalElement, {
                 backdrop: true,
-                keyboard: true
+                keyboard: true,
+                focus: true
             });
             
-            modal.show();
+            // Сохраняем ссылку на модальное окно
+            this.currentModal = modal;
             
-            // Ожидаем открытия модального окна
-            modalElement.addEventListener('shown.bs.modal', async () => {
-                await this.refreshQueue();
-            }, { once: true });
+            // Обработчик открытия модального окна
+            const onModalShown = async () => {
+                try {
+                    await this.refreshQueue();
+                } catch (error) {
+                    console.error('Error refreshing queue:', error);
+                }
+            };
+            
+            // Обработчик закрытия модального окна
+            const onModalHidden = () => {
+                try {
+                    // Очищаем ссылку на модальное окно
+                    this.currentModal = null;
+                    
+                    // Убираем все event listener'ы
+                    modalElement.removeEventListener('shown.bs.modal', onModalShown);
+                    modalElement.removeEventListener('hidden.bs.modal', onModalHidden);
+                    
+                    // Принудительно убираем backdrop если он остался
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                    
+                    // Восстанавливаем прокрутку body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                    
+                } catch (error) {
+                    console.error('Error in modal cleanup:', error);
+                }
+            };
+            
+            // Добавляем обработчики событий
+            modalElement.addEventListener('shown.bs.modal', onModalShown, { once: true });
+            modalElement.addEventListener('hidden.bs.modal', onModalHidden, { once: true });
+            
+            // Показываем модальное окно
+            modal.show();
             
         } catch (error) {
             console.error('Error showing queue modal:', error);

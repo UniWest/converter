@@ -439,6 +439,58 @@ class VideoConverter:
             logger.error(f"Ошибка при конвертации с FFmpeg: {str(e)}")
             return False
     
+    def convert_to_gif(self, input_path, output_path, width=None, fps=15, start_time=0, end_time=None, grayscale=False, reverse=False, boomerang=False):
+        """
+        Метод-обертка для совместимости с существующим кодом.
+        Конвертирует видео в GIF с указанными параметрами.
+        
+        Args:
+            input_path: Путь к входному видеофайлу
+            output_path: Путь для сохранения GIF
+            width: Ширина выходного GIF
+            fps: Частота кадров
+            start_time: Время начала (секунды)
+            end_time: Время окончания (секунды)
+            grayscale: Черно-белый режим
+            reverse: Реверс видео
+            boomerang: Эффект бумеранга
+            
+        Returns:
+            bool: True если конвертация прошла успешно
+        """
+        try:
+            # Создаем объект файла из пути
+            class FileWrapper:
+                def __init__(self, file_path):
+                    self.file_path = file_path
+                    self.name = os.path.basename(file_path)
+                    
+                def chunks(self, chunk_size=8192):
+                    with open(self.file_path, 'rb') as f:
+                        while True:
+                            chunk = f.read(chunk_size)
+                            if not chunk:
+                                break
+                            yield chunk
+            
+            file_wrapper = FileWrapper(input_path)
+            
+            # Вызываем основной метод конвертации
+            return self.convert_video_to_gif(
+                video_file=file_wrapper,
+                output_path=output_path,
+                width=width,
+                fps=fps,
+                start_time=start_time,
+                end_time=end_time,
+                grayscale=grayscale,
+                reverse=reverse,
+                boomerang=boomerang
+            )
+        except Exception as e:
+            logger.error(f"Ошибка в convert_to_gif: {str(e)}")
+            return False
+    
     def _check_ffmpeg(self, ffmpeg_path):
         """
         Проверяет доступность FFmpeg.
