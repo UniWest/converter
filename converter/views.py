@@ -191,3 +191,104 @@ def video_info_view(request):
             'success': False,
             'error': 'Server error while processing video'
         })
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def api_photos_to_gif_view(request):
+    """API endpoint for converting photos to GIF."""
+    try:
+        from .utils import PhotoToGifConverter
+        import tempfile
+        import uuid
+        
+        # Check if images are provided
+        images = request.FILES.getlist('images')
+        if not images:
+            return JsonResponse({
+                'success': False,
+                'error': 'No images provided'
+            })
+        
+        # Get parameters from request
+        frame_duration = float(request.POST.get('frame_duration', 0.5)) * 1000  # Convert to milliseconds
+        output_size = request.POST.get('output_size', '480')
+        colors = int(request.POST.get('colors', 128))
+        loop = request.POST.get('loop', 'true').lower() == 'true'
+        sort_order = request.POST.get('sort_order', 'filename')
+        pingpong = request.POST.get('pingpong', 'false').lower() == 'true'
+        optimize = request.POST.get('optimize', 'true').lower() == 'true'
+        
+        # Sort images if needed
+        if sort_order == 'filename':
+            images = sorted(images, key=lambda x: x.name)
+        # Add more sorting options if needed
+        
+        # Determine output size
+        resize = None
+        if output_size != 'original' and output_size.isdigit():
+            size = int(output_size)
+            resize = (size, size)
+        
+        # Create temporary output file
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        output_filename = f"photos_to_gif_{uuid.uuid4().hex[:8]}.gif"
+        output_path = temp_dir / output_filename
+        
+        # Initialize converter
+        converter = PhotoToGifConverter()
+        
+        # Convert photos to GIF
+        success = converter.create_gif_from_photos(
+            photo_files=images,
+            output_path=str(output_path),
+            duration=int(frame_duration),
+            loop=0 if loop else 1,
+            quality=85,
+            resize=resize,
+            reverse=pingpong,
+            optimize=optimize
+        )
+        
+        if success and output_path.exists():
+            # Move to final location
+            final_dir = Path(settings.MEDIA_ROOT) / 'gifs'
+            final_dir.mkdir(exist_ok=True)
+            
+            final_filename = f"photos_{uuid.uuid4().hex[:8]}.gif"
+            final_path = final_dir / final_filename
+            
+            import shutil
+            shutil.move(str(output_path), str(final_path))
+            
+            # Generate URL
+            gif_url = f"{settings.MEDIA_URL}gifs/{final_filename}"
+            
+            # Get file info
+            file_size = final_path.stat().st_size
+            total_duration = len(images) * (frame_duration / 1000)
+            
+            return JsonResponse({
+                'success': True,
+                'gif_url': gif_url,
+                'file_info': {
+                    'frames': len(images),
+                    'duration_per_frame': frame_duration / 1000,
+                    'total_duration': total_duration,
+                    'file_size': file_size,
+                    'dimensions': f"{resize[0]}x{resize[1]}" if resize else 'Original'
+                }
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to create GIF from photos'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error creating GIF from photos: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Server error: {str(e)}'
+        })

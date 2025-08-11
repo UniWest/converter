@@ -9,6 +9,7 @@ urlpatterns = [
     path("convert/", views.convert_video_view, name="convert_video"),
     path("status/", views.converter_status_view, name="converter_status"),
     path("video-info/", views.video_info_view, name="video_info"),  # AJAX endpoint for video info
+    path("api/photos-to-gif/", views.api_photos_to_gif_view, name="api_photos_to_gif"),  # API for photos to GIF
     
     # Additional converter views (placeholders for now)
     path("photos-to-gif/", views.photos_to_gif_view, name="photos_to_gif"),
