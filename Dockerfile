@@ -62,5 +62,9 @@ USER app_user
 # Экспонируем порт
 EXPOSE 8000
 
-# Команда по умолчанию
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Копируем скрипт запуска для Docker-платформ (Railway)
+COPY scripts/start.sh /app/scripts/start.sh
+RUN chmod +x /app/scripts/start.sh
+
+# Команда по умолчанию (Railway будет передавать $PORT)
+CMD ["/bin/bash", "-lc", "/app/scripts/start.sh"]
