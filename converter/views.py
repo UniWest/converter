@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.views import View
-from forms import VideoUploadForm
+import forms
 from .models import ConversionTask
 from .services import VideoConversionService
 from .utils import VideoConverter
@@ -418,12 +418,12 @@ class VideoUploadView(View):
     
     def get(self, request):
         """Display the upload form."""
-        form = VideoUploadForm()
+        form = forms.VideoUploadForm()
         return render(request, 'converter/home.html', {'form': form})
     
     def post(self, request):
         """Handle video upload and initiate conversion."""
-        form = VideoUploadForm(request.POST, request.FILES)
+        form = forms.VideoUploadForm(request.POST, request.FILES)
         
         if form.is_valid():
             try:
@@ -532,7 +532,7 @@ def home_view(request):
     return upload_view(request)
 
 def convert_video_view(request):
-    return render(request, 'converter/index.html', {'form': VideoUploadForm()})
+    return render(request, 'converter/index.html', {'form': forms.VideoUploadForm()})
 
 def converter_status_view(request):
     return JsonResponse({'status': 'operational', 'version': '1.0.0'})
@@ -716,9 +716,21 @@ def api_conversion_submit(request):
         if source_format == 'video' and target_format == 'gif':
             # Use existing video to GIF conversion
             return handle_video_to_gif_conversion(request, uploaded_file, params)
+        elif source_format == 'video' and target_format == 'mp3':
+            # Video to MP3 conversion (extract audio)
+            return handle_video_to_mp3_conversion(request, uploaded_file, params)
+        elif source_format == 'video':
+            # Video to video conversion (mp4, avi, webm, mkv)
+            return handle_video_to_video_conversion(request, uploaded_file, target_format, params)
+        elif source_format == 'audio':
+            # Audio format conversion
+            return handle_audio_conversion(request, uploaded_file, target_format, params)
         elif source_format == 'image':
             # Use existing image conversion
             return handle_image_conversion(request, uploaded_file, target_format, params)
+        elif source_format == 'document':
+            # Document conversion
+            return handle_document_conversion(request, uploaded_file, target_format, params)
         else:
             return JsonResponse({
                 'success': False,
@@ -807,6 +819,499 @@ def handle_video_to_gif_conversion(request, video_file, params):
         return JsonResponse({
             'success': False,
             'error': f'Video conversion error: {str(e)}'
+        })
+
+
+def handle_video_to_mp3_conversion(request, video_file, params):
+    """Handle video to MP3 conversion (extract audio)."""
+    try:
+        # Extract parameters with defaults
+        bitrate = params.get('audio_bitrate', '192')  # kbps
+        quality = params.get('audio_quality', 'medium')
+        channels = params.get('audio_channels', 'stereo')
+        
+        # Create temporary files
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        video_filename = f"video_{uuid.uuid4().hex[:8]}{Path(video_file.name).suffix}"
+        video_path = temp_dir / video_filename
+        
+        # Save uploaded video file
+        with open(video_path, 'wb+') as destination:
+            for chunk in video_file.chunks():
+                destination.write(chunk)
+        
+        # Create output MP3 file
+        mp3_filename = f"video_to_mp3_{uuid.uuid4().hex[:8]}.mp3"
+        mp3_path = temp_dir / mp3_filename
+        
+        try:
+            # Try using ffmpeg-python if available
+            import ffmpeg
+            
+            # Build ffmpeg command
+            input_stream = ffmpeg.input(str(video_path))
+            
+            # Audio conversion options
+            audio_options = {
+                'acodec': 'libmp3lame',
+                'ab': f'{bitrate}k',
+            }
+            
+            # Set channels
+            if channels == 'mono':
+                audio_options['ac'] = 1
+            else:  # stereo
+                audio_options['ac'] = 2
+            
+            # Set quality based on parameter
+            if quality == 'high':
+                audio_options['q:a'] = 0
+            elif quality == 'low':
+                audio_options['q:a'] = 9
+            else:  # medium
+                audio_options['q:a'] = 4
+            
+            # Extract audio
+            output_stream = ffmpeg.output(input_stream, str(mp3_path), **audio_options)
+            ffmpeg.run(output_stream, overwrite_output=True, quiet=True)
+            
+        except ImportError:
+            # Fallback to using VideoConverter if available
+            try:
+                converter = VideoConverter()
+                if hasattr(converter, 'extract_audio'):
+                    success = converter.extract_audio(
+                        input_path=str(video_path),
+                        output_path=str(mp3_path),
+                        bitrate=bitrate,
+                        channels=1 if channels == 'mono' else 2
+                    )
+                    if not success:
+                        raise Exception("Audio extraction failed")
+                else:
+                    raise Exception("Audio extraction not supported by VideoConverter")
+            except Exception as fallback_error:
+                logger.error(f"Fallback audio extraction failed: {fallback_error}")
+                # Try using pydub as last resort
+                try:
+                    from pydub import AudioSegment
+                    
+                    # Load video file and extract audio
+                    audio = AudioSegment.from_file(str(video_path))
+                    
+                    # Convert to mono if requested
+                    if channels == 'mono':
+                        audio = audio.set_channels(1)
+                    
+                    # Set bitrate (approximate)
+                    bitrate_int = int(bitrate)
+                    export_params = {
+                        "format": "mp3",
+                        "bitrate": f"{bitrate_int}k"
+                    }
+                    
+                    # Export to MP3
+                    audio.export(str(mp3_path), **export_params)
+                    
+                except ImportError:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Required libraries (ffmpeg-python or pydub) not available for audio extraction'
+                    })
+                except Exception as pydub_error:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Audio extraction failed: {str(pydub_error)}'
+                    })
+        
+        if mp3_path.exists():
+            # Move to final location
+            final_dir = Path(settings.MEDIA_ROOT) / 'audio'
+            final_dir.mkdir(exist_ok=True)
+            
+            final_mp3_filename = f"extracted_audio_{uuid.uuid4().hex[:8]}.mp3"
+            final_mp3_path = final_dir / final_mp3_filename
+            
+            import shutil
+            shutil.move(str(mp3_path), str(final_mp3_path))
+            
+            # Clean up temporary video file
+            try:
+                video_path.unlink()
+            except:
+                pass
+            
+            # Generate URL
+            mp3_url = f"{settings.MEDIA_URL}audio/{final_mp3_filename}"
+            
+            return JsonResponse({
+                'success': True,
+                'task_id': uuid.uuid4().hex,
+                'output_url': mp3_url,
+                'file_size': final_mp3_path.stat().st_size
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to extract audio from video'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in video to MP3 conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Video to MP3 conversion error: {str(e)}'
+        })
+
+
+def handle_video_to_video_conversion(request, video_file, target_format, params):
+    """Handle video to video format conversion (MP4, AVI, WebM, MKV)."""
+    try:
+        # Extract parameters with defaults
+        width = params.get('width')
+        height = params.get('height')
+        bitrate = params.get('bitrate', '1000k')
+        fps = params.get('fps', 30)
+        codec = params.get('codec', 'auto')
+        quality = params.get('quality', 'medium')
+        
+        # Create temporary files
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        video_filename = f"input_video_{uuid.uuid4().hex[:8]}{Path(video_file.name).suffix}"
+        video_path = temp_dir / video_filename
+        
+        # Save uploaded video file
+        with open(video_path, 'wb+') as destination:
+            for chunk in video_file.chunks():
+                destination.write(chunk)
+        
+        # Create output video file
+        output_filename = f"converted_video_{uuid.uuid4().hex[:8]}.{target_format}"
+        output_path = temp_dir / output_filename
+        
+        try:
+            # Try using ffmpeg-python first
+            import ffmpeg
+            
+            # Build ffmpeg command
+            input_stream = ffmpeg.input(str(video_path))
+            
+            # Video conversion options
+            video_options = {}
+            
+            # Set codec based on target format and quality
+            if target_format == 'mp4':
+                if codec == 'auto':
+                    video_options['vcodec'] = 'libx264'
+                else:
+                    video_options['vcodec'] = codec
+                video_options['acodec'] = 'aac'
+            elif target_format == 'webm':
+                video_options['vcodec'] = 'libvpx-vp9'
+                video_options['acodec'] = 'libopus'
+            elif target_format == 'avi':
+                video_options['vcodec'] = 'libxvid'
+                video_options['acodec'] = 'mp3'
+            elif target_format == 'mkv':
+                video_options['vcodec'] = 'libx264'
+                video_options['acodec'] = 'aac'
+            
+            # Set bitrate and quality
+            video_options['b:v'] = bitrate
+            
+            if quality == 'high':
+                video_options['crf'] = '18'
+            elif quality == 'low':
+                video_options['crf'] = '30'
+            else:  # medium
+                video_options['crf'] = '23'
+            
+            # Set resolution if specified
+            if width or height:
+                if width and height:
+                    scale_filter = f'scale={width}:{height}'
+                elif width:
+                    scale_filter = f'scale={width}:-2'
+                else:  # height only
+                    scale_filter = f'scale=-2:{height}'
+                video_options['vf'] = scale_filter
+            
+            # Set FPS
+            if fps:
+                video_options['r'] = fps
+            
+            # Convert video
+            output_stream = ffmpeg.output(input_stream, str(output_path), **video_options)
+            ffmpeg.run(output_stream, overwrite_output=True, quiet=True)
+            
+        except ImportError:
+            # Fallback to using direct FFmpeg command
+            try:
+                ffmpeg_path = getattr(settings, 'FFMPEG_BINARY', 'ffmpeg')
+                
+                cmd = [
+                    ffmpeg_path,
+                    '-i', str(video_path),
+                    '-y'  # Overwrite output file
+                ]
+                
+                # Add video codec
+                if target_format == 'mp4':
+                    cmd.extend(['-vcodec', 'libx264', '-acodec', 'aac'])
+                elif target_format == 'webm':
+                    cmd.extend(['-vcodec', 'libvpx-vp9', '-acodec', 'libopus'])
+                elif target_format == 'avi':
+                    cmd.extend(['-vcodec', 'libxvid', '-acodec', 'mp3'])
+                elif target_format == 'mkv':
+                    cmd.extend(['-vcodec', 'libx264', '-acodec', 'aac'])
+                
+                # Add quality settings
+                if quality == 'high':
+                    cmd.extend(['-crf', '18'])
+                elif quality == 'low':
+                    cmd.extend(['-crf', '30'])
+                else:
+                    cmd.extend(['-crf', '23'])
+                
+                # Add resolution
+                if width or height:
+                    if width and height:
+                        cmd.extend(['-vf', f'scale={width}:{height}'])
+                    elif width:
+                        cmd.extend(['-vf', f'scale={width}:-2'])
+                    else:
+                        cmd.extend(['-vf', f'scale=-2:{height}'])
+                
+                # Add FPS
+                if fps:
+                    cmd.extend(['-r', str(fps)])
+                
+                # Add bitrate
+                cmd.extend(['-b:v', bitrate])
+                
+                # Output path
+                cmd.append(str(output_path))
+                
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=600  # 10 minutes timeout
+                )
+                
+                if result.returncode != 0:
+                    raise Exception(f"FFmpeg conversion failed: {result.stderr}")
+                    
+            except Exception as ffmpeg_error:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Video conversion failed: {str(ffmpeg_error)}'
+                })
+        
+        if output_path.exists():
+            # Move to final location
+            final_dir = Path(settings.MEDIA_ROOT) / 'videos'
+            final_dir.mkdir(exist_ok=True)
+            
+            final_video_filename = f"converted_{uuid.uuid4().hex[:8]}.{target_format}"
+            final_video_path = final_dir / final_video_filename
+            
+            import shutil
+            shutil.move(str(output_path), str(final_video_path))
+            
+            # Clean up temporary video file
+            try:
+                video_path.unlink()
+            except:
+                pass
+            
+            # Generate URL
+            video_url = f"{settings.MEDIA_URL}videos/{final_video_filename}"
+            
+            return JsonResponse({
+                'success': True,
+                'task_id': uuid.uuid4().hex,
+                'output_url': video_url,
+                'file_size': final_video_path.stat().st_size
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to convert video format'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in video to video conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Video conversion error: {str(e)}'
+        })
+
+
+def handle_audio_conversion(request, audio_file, target_format, params):
+    """Handle audio format conversion."""
+    try:
+        # Extract parameters with defaults
+        bitrate = params.get('bitrate', '192')
+        sample_rate = params.get('sample_rate', '44100')
+        channels = params.get('channels', 'stereo')
+        quality = params.get('quality', 'medium')
+        
+        # Create temporary files
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        audio_filename = f"input_audio_{uuid.uuid4().hex[:8]}{Path(audio_file.name).suffix}"
+        audio_path = temp_dir / audio_filename
+        
+        # Save uploaded audio file
+        with open(audio_path, 'wb+') as destination:
+            for chunk in audio_file.chunks():
+                destination.write(chunk)
+        
+        # Create output audio file
+        output_filename = f"converted_audio_{uuid.uuid4().hex[:8]}.{target_format}"
+        output_path = temp_dir / output_filename
+        
+        try:
+            # Try using ffmpeg-python first
+            import ffmpeg
+            
+            input_stream = ffmpeg.input(str(audio_path))
+            
+            # Audio conversion options
+            audio_options = {
+                'ab': f'{bitrate}k',
+                'ar': sample_rate,
+            }
+            
+            # Set channels
+            if channels == 'mono':
+                audio_options['ac'] = 1
+            else:  # stereo
+                audio_options['ac'] = 2
+            
+            # Set codec based on format
+            if target_format == 'mp3':
+                audio_options['acodec'] = 'libmp3lame'
+            elif target_format == 'wav':
+                audio_options['acodec'] = 'pcm_s16le'
+            elif target_format == 'flac':
+                audio_options['acodec'] = 'flac'
+            elif target_format == 'ogg':
+                audio_options['acodec'] = 'libvorbis'
+            elif target_format == 'aac':
+                audio_options['acodec'] = 'aac'
+            
+            # Quality settings
+            if target_format == 'mp3':
+                if quality == 'high':
+                    audio_options['q:a'] = 0
+                elif quality == 'low':
+                    audio_options['q:a'] = 9
+                else:  # medium
+                    audio_options['q:a'] = 4
+            
+            # Convert audio
+            output_stream = ffmpeg.output(input_stream, str(output_path), **audio_options)
+            ffmpeg.run(output_stream, overwrite_output=True, quiet=True)
+            
+        except ImportError:
+            # Try using pydub as fallback
+            try:
+                from pydub import AudioSegment
+                
+                # Load audio file
+                audio = AudioSegment.from_file(str(audio_path))
+                
+                # Set channels
+                if channels == 'mono':
+                    audio = audio.set_channels(1)
+                else:
+                    audio = audio.set_channels(2)
+                
+                # Set sample rate
+                audio = audio.set_frame_rate(int(sample_rate))
+                
+                # Export parameters
+                export_params = {
+                    'format': target_format,
+                    'bitrate': f'{bitrate}k'
+                }
+                
+                # Format-specific parameters
+                if target_format == 'mp3':
+                    export_params['codec'] = 'libmp3lame'
+                elif target_format == 'ogg':
+                    export_params['codec'] = 'libvorbis'
+                
+                # Export audio
+                audio.export(str(output_path), **export_params)
+                
+            except ImportError:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Required libraries not available for audio conversion'
+                })
+                
+        if output_path.exists():
+            # Move to final location
+            final_dir = Path(settings.MEDIA_ROOT) / 'audio'
+            final_dir.mkdir(exist_ok=True)
+            
+            final_audio_filename = f"converted_{uuid.uuid4().hex[:8]}.{target_format}"
+            final_audio_path = final_dir / final_audio_filename
+            
+            import shutil
+            shutil.move(str(output_path), str(final_audio_path))
+            
+            # Clean up temporary audio file
+            try:
+                audio_path.unlink()
+            except:
+                pass
+            
+            # Generate URL
+            audio_url = f"{settings.MEDIA_URL}audio/{final_audio_filename}"
+            
+            return JsonResponse({
+                'success': True,
+                'task_id': uuid.uuid4().hex,
+                'output_url': audio_url,
+                'file_size': final_audio_path.stat().st_size
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to convert audio format'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in audio conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Audio conversion error: {str(e)}'
+        })
+
+
+def handle_document_conversion(request, document_file, target_format, params):
+    """Handle document conversion (basic implementation)."""
+    try:
+        # For now, return a not implemented message with suggestions
+        return JsonResponse({
+            'success': False,
+            'error': 'Document conversion is not yet implemented. Coming soon: PDF to DOCX, TXT to PDF, HTML to PDF conversions.'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in document conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Document conversion error: {str(e)}'
         })
 
 
@@ -904,37 +1409,14 @@ def handle_image_conversion(request, image_file, target_format, params):
 def api_conversion_queue(request):
     """
     API endpoint for getting conversion queue status.
-    Since we don't have a persistent queue system, return mock data.
     """
     try:
-        # Mock queue data - in a real system this would come from a database
-        tasks = [
-            {
-                'id': 1,
-                'filename': 'example.mp4',
-                'source_format': 'video',
-                'target_format': 'gif',
-                'status': 'done',
-                'progress': 100,
-                'created_at': '2024-01-01T12:00:00Z',
-                'error_message': None
-            },
-            {
-                'id': 2,
-                'filename': 'image.jpg',
-                'source_format': 'image',
-                'target_format': 'png',
-                'status': 'running',
-                'progress': 75,
-                'created_at': '2024-01-01T12:05:00Z',
-                'error_message': None
-            }
-        ]
-        
+        # Возвращаем пустую очередь - реальных задач нет, всё выполняется синхронно
         return JsonResponse({
             'success': True,
-            'tasks': tasks,
-            'total': len(tasks)
+            'tasks': [],
+            'total': 0,
+            'message': 'Конвертация выполняется мгновенно. Файлы обрабатываются сразу при загрузке.'
         })
         
     except Exception as e:
@@ -1255,6 +1737,470 @@ def engine_status(request):
         return JsonResponse({
             'error': f'Server error: {str(e)}'
         }, status=500)
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def api_universal_convert(request):
+    """
+    Универсальный API endpoint для всех типов конвертации.
+    Автоматически определяет тип файла и применяет соответствующую конвертацию.
+    """
+    try:
+        if not request.FILES.get('file'):
+            return JsonResponse({
+                'success': False,
+                'error': 'No file provided'
+            })
+        
+        uploaded_file = request.FILES['file']
+        conversion_type = request.POST.get('conversion_type', 'auto')
+        output_format = request.POST.get('output_format')
+        
+        # Определяем тип файла автоматически
+        file_extension = Path(uploaded_file.name).suffix.lower()
+        detected_type = detect_file_type_by_extension(file_extension)
+        
+        if conversion_type == 'auto':
+            conversion_type = detected_type
+        
+        logger.info(f"Universal conversion: {uploaded_file.name} ({detected_type}) -> {output_format}")
+        
+        # Роутинг по типу конвертации
+        if conversion_type == 'video':
+            return handle_video_conversion_universal(request, uploaded_file)
+        elif conversion_type == 'image':
+            return handle_image_conversion_universal(request, uploaded_file)
+        elif conversion_type == 'audio':
+            if output_format == 'text':
+                return handle_audio_to_text_conversion(request, uploaded_file)
+            else:
+                return handle_audio_conversion_universal(request, uploaded_file)
+        elif conversion_type == 'document':
+            return handle_document_conversion_universal(request, uploaded_file)
+        elif conversion_type == 'archive':
+            return handle_archive_conversion_universal(request, uploaded_file)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f'Unsupported file type: {conversion_type}'
+            })
+    
+    except Exception as e:
+        logger.error(f"Error in universal conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Server error: {str(e)}'
+        })
+
+
+def detect_file_type_by_extension(extension):
+    """Определяет тип файла по расширению."""
+    type_map = {
+        # Video
+        '.mp4': 'video', '.avi': 'video', '.mov': 'video', '.mkv': 'video', 
+        '.wmv': 'video', '.flv': 'video', '.webm': 'video', '.m4v': 'video',
+        '.mpg': 'video', '.mpeg': 'video', '.3gp': 'video', '.ogv': 'video',
+        
+        # Images
+        '.jpg': 'image', '.jpeg': 'image', '.png': 'image', '.gif': 'image',
+        '.bmp': 'image', '.webp': 'image', '.tiff': 'image', '.svg': 'image',
+        '.ico': 'image', '.psd': 'image', '.raw': 'image',
+        
+        # Audio
+        '.mp3': 'audio', '.wav': 'audio', '.flac': 'audio', '.aac': 'audio',
+        '.ogg': 'audio', '.wma': 'audio', '.m4a': 'audio', '.opus': 'audio',
+        '.aiff': 'audio', '.au': 'audio',
+        
+        # Documents
+        '.pdf': 'document', '.doc': 'document', '.docx': 'document', 
+        '.rtf': 'document', '.odt': 'document', '.txt': 'document',
+        '.md': 'document', '.html': 'document', '.htm': 'document',
+        '.xls': 'document', '.xlsx': 'document', '.ppt': 'document', '.pptx': 'document',
+        
+        # Archives
+        '.zip': 'archive', '.rar': 'archive', '.7z': 'archive', '.tar': 'archive',
+        '.gz': 'archive', '.bz2': 'archive', '.xz': 'archive'
+    }
+    
+    return type_map.get(extension, 'unknown')
+
+
+def handle_video_conversion_universal(request, video_file):
+    """Обработка конвертации видео файлов."""
+    try:
+        # Получаем параметры
+        output_format = request.POST.get('output_format', 'gif')
+        width = request.POST.get('width')
+        fps = int(request.POST.get('fps', 15))
+        start_time = float(request.POST.get('start_time', 0))
+        end_time = request.POST.get('end_time')
+        grayscale = request.POST.get('grayscale') == '1'
+        reverse = request.POST.get('reverse') == '1'
+        boomerang = request.POST.get('boomerang') == '1'
+        quality = request.POST.get('quality', 'medium')
+        
+        end_time = float(end_time) if end_time else None
+        
+        if output_format != 'gif':
+            return JsonResponse({
+                'success': False,
+                'error': 'Currently only GIF output is supported for video conversion'
+            })
+        
+        # Создаём временные файлы
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        video_filename = f"video_{uuid.uuid4().hex[:8]}{Path(video_file.name).suffix}"
+        video_path = temp_dir / video_filename
+        
+        # Сохраняем видео файл
+        with open(video_path, 'wb+') as destination:
+            for chunk in video_file.chunks():
+                destination.write(chunk)
+        
+        # Создаём выходной GIF файл
+        gif_filename = f"video_to_gif_{uuid.uuid4().hex[:8]}.gif"
+        gif_path = temp_dir / gif_filename
+        
+        # Конвертируем видео в GIF
+        converter = VideoConverter()
+        success = converter.convert_to_gif(
+            input_path=str(video_path),
+            output_path=str(gif_path),
+            width=int(width) if width else None,
+            fps=fps,
+            start_time=start_time,
+            end_time=end_time,
+            grayscale=grayscale,
+            reverse=reverse,
+            boomerang=boomerang
+        )
+        
+        if success and gif_path.exists():
+            # Перемещаем в финальную директорию
+            final_dir = Path(settings.MEDIA_ROOT) / 'gifs'
+            final_dir.mkdir(exist_ok=True)
+            
+            final_gif_filename = f"converted_{uuid.uuid4().hex[:8]}.gif"
+            final_gif_path = final_dir / final_gif_filename
+            
+            import shutil
+            shutil.move(str(gif_path), str(final_gif_path))
+            
+            # Удаляем временный видео файл
+            try:
+                video_path.unlink()
+            except:
+                pass
+            
+            # Генерируем URL
+            gif_url = f"{settings.MEDIA_URL}gifs/{final_gif_filename}"
+            
+            return JsonResponse({
+                'success': True,
+                'output_url': gif_url,
+                'output_path': str(final_gif_path),
+                'file_size': final_gif_path.stat().st_size,
+                'conversion_type': 'video_to_gif'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to convert video to GIF'
+            })
+    
+    except Exception as e:
+        logger.error(f"Error in video conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Video conversion error: {str(e)}'
+        })
+
+
+def handle_image_conversion_universal(request, image_file):
+    """Обработка конвертации изображений."""
+    try:
+        # Получаем параметры
+        output_format = request.POST.get('output_format', 'jpg')
+        width = request.POST.get('width')
+        height = request.POST.get('height')
+        quality = int(request.POST.get('quality', 90))
+        
+        # Параметры для анимированного GIF
+        create_animated_gif = request.POST.get('create_animated_gif') == '1'
+        gif_effect = request.POST.get('gif_effect', 'fade')
+        gif_duration = int(request.POST.get('gif_duration', 200))
+        gif_frames = int(request.POST.get('gif_frames', 10))
+        gif_loop = request.POST.get('gif_loop') == '1'
+        
+        # Создаём временные файлы
+        temp_dir = Path(settings.MEDIA_ROOT) / 'temp'
+        temp_dir.mkdir(exist_ok=True)
+        
+        input_filename = f"input_{uuid.uuid4().hex[:8]}{Path(image_file.name).suffix}"
+        input_path = temp_dir / input_filename
+        
+        # Сохраняем загруженный файл
+        with open(input_path, 'wb+') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
+        
+        # Создаём выходной файл
+        output_filename = f"converted_{uuid.uuid4().hex[:8]}.{output_format}"
+        output_path = temp_dir / output_filename
+        
+        try:
+            from PIL import Image, ImageEnhance
+            
+            # Открываем изображение
+            with Image.open(input_path) as img:
+                # Изменяем размер если нужно
+                if width or height:
+                    new_width = int(width) if width else img.width
+                    new_height = int(height) if height else img.height
+                    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                
+                # Если нужно создать анимированный GIF
+                if create_animated_gif and output_format.lower() == 'gif':
+                    frames = create_animated_frames(img, gif_effect, gif_frames)
+                    
+                    # Сохраняем как анимированный GIF
+                    frames[0].save(
+                        output_path,
+                        format='GIF',
+                        save_all=True,
+                        append_images=frames[1:],
+                        duration=gif_duration,
+                        loop=0 if gif_loop else 1,
+                        optimize=True
+                    )
+                else:
+                    # Обычное сохранение
+                    save_kwargs = {'format': output_format.upper()}
+                    if output_format.lower() in ['jpg', 'jpeg']:
+                        save_kwargs['quality'] = quality
+                        save_kwargs['optimize'] = True
+                        # Конвертируем в RGB если есть альфа-канал
+                        if img.mode in ('RGBA', 'LA', 'P'):
+                            background = Image.new('RGB', img.size, (255, 255, 255))
+                            if img.mode == 'P':
+                                img = img.convert('RGBA')
+                            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                            img = background
+                    
+                    img.save(output_path, **save_kwargs)
+            
+            if output_path.exists():
+                # Перемещаем в финальную директорию
+                final_dir = Path(settings.MEDIA_ROOT) / 'images'
+                final_dir.mkdir(exist_ok=True)
+                
+                final_filename = f"converted_{uuid.uuid4().hex[:8]}.{output_format}"
+                final_path = final_dir / final_filename
+                
+                import shutil
+                shutil.move(str(output_path), str(final_path))
+                
+                # Удаляем временный входной файл
+                try:
+                    input_path.unlink()
+                except:
+                    pass
+                
+                # Генерируем URL
+                output_url = f"{settings.MEDIA_URL}images/{final_filename}"
+                
+                return JsonResponse({
+                    'success': True,
+                    'output_url': output_url,
+                    'output_path': str(final_path),
+                    'file_size': final_path.stat().st_size,
+                    'conversion_type': 'image_conversion'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Failed to process image'
+                })
+        
+        except ImportError:
+            return JsonResponse({
+                'success': False,
+                'error': 'PIL library not available for image processing'
+            })
+    
+    except Exception as e:
+        logger.error(f"Error in image conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Image conversion error: {str(e)}'
+        })
+
+
+def create_animated_frames(base_image, effect, num_frames):
+    """Создаёт кадры для анимированного GIF."""
+    frames = []
+    
+    try:
+        from PIL import Image, ImageEnhance, ImageFilter
+        
+        for i in range(num_frames):
+            frame = base_image.copy()
+            progress = i / max(1, num_frames - 1)  # 0 to 1
+            
+            if effect == 'fade':
+                # Эффект затухания
+                alpha = int(255 * (0.3 + 0.7 * abs(progress - 0.5) * 2))
+                if frame.mode != 'RGBA':
+                    frame = frame.convert('RGBA')
+                # Создаём маску прозрачности
+                alpha_layer = Image.new('L', frame.size, alpha)
+                frame.putalpha(alpha_layer)
+                
+            elif effect == 'zoom':
+                # Эффект масштабирования
+                scale = 0.8 + 0.4 * (0.5 + 0.5 * math.sin(progress * 2 * math.pi))
+                new_size = (int(frame.width * scale), int(frame.height * scale))
+                scaled = frame.resize(new_size, Image.Resampling.LANCZOS)
+                
+                # Центрируем изображение
+                new_frame = Image.new(frame.mode, frame.size, (255, 255, 255, 0) if frame.mode == 'RGBA' else (255, 255, 255))
+                offset = ((frame.width - scaled.width) // 2, (frame.height - scaled.height) // 2)
+                new_frame.paste(scaled, offset)
+                frame = new_frame
+                
+            elif effect == 'rotate':
+                # Эффект вращения
+                angle = progress * 360
+                frame = frame.rotate(angle, expand=False, fillcolor=(255, 255, 255, 0) if frame.mode == 'RGBA' else (255, 255, 255))
+                
+            elif effect == 'bounce':
+                # Эффект прыжков
+                offset_y = int(20 * abs(math.sin(progress * 4 * math.pi)))
+                new_frame = Image.new(frame.mode, frame.size, (255, 255, 255, 0) if frame.mode == 'RGBA' else (255, 255, 255))
+                new_frame.paste(frame, (0, offset_y))
+                frame = new_frame
+                
+            elif effect in ['pan-left', 'pan-right', 'pan-up', 'pan-down']:
+                # Эффекты панорамирования
+                if effect == 'pan-left':
+                    offset_x = int(-50 * progress)
+                    offset_y = 0
+                elif effect == 'pan-right':
+                    offset_x = int(50 * progress)
+                    offset_y = 0
+                elif effect == 'pan-up':
+                    offset_x = 0
+                    offset_y = int(-30 * progress)
+                else:  # pan-down
+                    offset_x = 0
+                    offset_y = int(30 * progress)
+                
+                new_frame = Image.new(frame.mode, frame.size, (255, 255, 255, 0) if frame.mode == 'RGBA' else (255, 255, 255))
+                new_frame.paste(frame, (offset_x, offset_y))
+                frame = new_frame
+                
+            elif effect == 'shake':
+                # Эффект тряски
+                import random
+                offset_x = random.randint(-5, 5)
+                offset_y = random.randint(-5, 5)
+                new_frame = Image.new(frame.mode, frame.size, (255, 255, 255, 0) if frame.mode == 'RGBA' else (255, 255, 255))
+                new_frame.paste(frame, (offset_x, offset_y))
+                frame = new_frame
+                
+            elif effect == 'blur':
+                # Эффект размытия
+                blur_radius = 3 * abs(math.sin(progress * math.pi))
+                if blur_radius > 0:
+                    frame = frame.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+            
+            # Конвертируем в RGB для совместимости с GIF
+            if frame.mode == 'RGBA':
+                background = Image.new('RGB', frame.size, (255, 255, 255))
+                background.paste(frame, mask=frame.split()[-1])
+                frame = background
+            elif frame.mode != 'RGB':
+                frame = frame.convert('RGB')
+            
+            frames.append(frame)
+    
+    except Exception as e:
+        logger.warning(f"Error creating animated frames: {e}")
+        # Возвращаем простые кадры как fallback
+        frames = [base_image.convert('RGB') for _ in range(num_frames)]
+    
+    return frames
+
+
+def handle_audio_conversion_universal(request, audio_file):
+    """Обработка конвертации аудио файлов."""
+    try:
+        output_format = request.POST.get('output_format', 'mp3')
+        bitrate = request.POST.get('bitrate', '192k')
+        sample_rate = request.POST.get('sample_rate')
+        channels = request.POST.get('channels')
+        
+        return JsonResponse({
+            'success': False,
+            'error': 'Audio format conversion is not yet implemented. Use audio-to-text for speech recognition.'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error in audio conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Audio conversion error: {str(e)}'
+        })
+
+
+def handle_document_conversion_universal(request, document_file):
+    """Обработка конвертации документов."""
+    try:
+        output_format = request.POST.get('output_format', 'pdf')
+        
+        return JsonResponse({
+            'success': False,
+            'error': 'Document conversion is not yet implemented'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error in document conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Document conversion error: {str(e)}'
+        })
+
+
+def handle_archive_conversion_universal(request, archive_file):
+    """Обработка конвертации архивов."""
+    try:
+        output_format = request.POST.get('output_format', 'zip')
+        
+        return JsonResponse({
+            'success': False,
+            'error': 'Archive conversion is not yet implemented'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error in archive conversion: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Archive conversion error: {str(e)}'
+        })
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def handle_audio_to_text_conversion(request, audio_file):
+    """Обработка конвертации аудио в текст."""
+    # Перенаправляем на существующий обработчик аудио в текст
+    # Создаём временный request с нужным файлом
+    temp_request = request
+    temp_request.FILES = {'audio': audio_file}
+    return api_audio_to_text_view(temp_request)
 
 
 @require_http_methods(["POST"])

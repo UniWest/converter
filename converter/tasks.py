@@ -566,43 +566,29 @@ def process_conversion_task(self, task_id):
         
         # Определяем и вызываем соответствующую задачу конвертации
         if source_format == 'video':
-            result = self.retry(
-                convert_video.s(
-                    task_id, file_path, target_format, 
-                    conversion_params.get('quality', 'medium'), 
-                    conversion_params
-                )
-            )
+            # Проверяем специальные случаи для видео
+            if target_format == 'gif':
+                # Используем специализированную задачу для видео в GIF
+                result = convert_video_to_gif_hardened.apply_async(args=[task_id, file_path], kwargs=conversion_params)
+            elif target_format == 'mp3':
+                # Видео в аудио - используем audio задачу
+                result = convert_audio.apply_async(args=[task_id, file_path, target_format, conversion_params.get('quality', 'medium'), conversion_params])
+            else:
+                # Обычная видео конвертация
+                result = convert_video.apply_async(args=[task_id, file_path, target_format, conversion_params.get('quality', 'medium'), conversion_params])
         elif source_format == 'audio':
-            result = self.retry(
-                convert_audio.s(
-                    task_id, file_path, target_format,
-                    conversion_params.get('quality', 'medium'), 
-                    conversion_params
-                )
-            )
+            result = convert_audio.apply_async(args=[task_id, file_path, target_format, conversion_params.get('quality', 'medium'), conversion_params])
         elif source_format == 'image':
-            result = self.retry(
-                convert_image.s(
-                    task_id, file_path, target_format,
-                    conversion_params.get('quality', 'medium'), 
-                    conversion_params
-                )
-            )
+            result = convert_image.apply_async(args=[task_id, file_path, target_format, conversion_params.get('quality', 'medium'), conversion_params])
         elif source_format == 'document':
-            result = self.retry(
-                convert_document.s(
-                    task_id, file_path, target_format, conversion_params
-                )
-            )
+            result = convert_document.apply_async(args=[task_id, file_path, target_format, conversion_params])
         elif source_format == 'archive':
-            result = self.retry(
-                convert_archive.s(
-                    task_id, file_path, target_format, conversion_params
-                )
-            )
+            result = convert_archive.apply_async(args=[task_id, file_path, target_format, conversion_params])
         else:
             raise Exception(f"Неподдерживаемый формат источника: {source_format}")
+            
+        # Ждем завершения подзадачи
+        conversion_result = result.get()
         
         # Завершаем задачу успешно
         task.complete()

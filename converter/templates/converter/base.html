@@ -173,7 +173,8 @@
             background: 
                 radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
-            z-index: -1;
+            z-index: -10;
+            pointer-events: none;
         }
         
         .main-container {
@@ -865,31 +866,31 @@
                         </button>
                         
                         <h1 role="banner">🎬 ➡️ 📸</h1>
-                        <h2>Конвертер видео в GIF</h2>
-                        <p class="mb-0">Быстро и легко превращайте ваши видео в анимированные GIF</p>
+                        <h2 data-translate="title">Конвертер видео в GIF</h2>
+                        <p class="mb-0" data-translate="subtitle">Быстро и легко превращайте ваши видео в анимированные GIF</p>
                         
                         <!-- Навигационное меню -->
                         <nav class="mt-3" role="navigation" aria-label="Основная навигация">
                             <div class="nav nav-pills justify-content-center">
                                 <a class="nav-link text-white" href="{% url 'converter:home' %}" tabindex="1">
                                     <i class="bi bi-house-fill" aria-hidden="true"></i>
-                                    <span class="ms-1">Главная</span>
+                                    <span class="ms-1" data-translate="home">Главная</span>
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:photos_to_gif' %}" tabindex="2">
                                     <i class="bi bi-images" aria-hidden="true"></i>
-                                    <span class="ms-1">Фото в GIF</span>
+                                    <span class="ms-1" data-translate="photos-to-gif">Фото в GIF</span>
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:audio_to_text' %}" tabindex="3">
                                     <i class="bi bi-mic-fill" aria-hidden="true"></i>
-                                    <span class="ms-1">Голос в текст</span>
+                                    <span class="ms-1" data-translate="voice-to-text">Голос в текст</span>
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:conversion_interface' %}" tabindex="4">
                                     <i class="bi bi-tools" aria-hidden="true"></i>
-                                    <span class="ms-1">Интерфейс</span>
+                                    <span class="ms-1" data-translate="interface">Интерфейс</span>
                                 </a>
                                 <a class="nav-link text-white" href="{% url 'converter:comprehensive_converter' %}" tabindex="5">
                                     <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
-                                    <span class="ms-1">Универсальный</span>
+                                    <span class="ms-1" data-translate="universal">Универсальный</span>
                                 </a>
                             </div>
                         </nav>
@@ -916,7 +917,7 @@
                 </div>
                 
                 <div class="footer">
-                    <p>&copy; 2025 Конвертер видео в GIF. Сделано с ❤️</p>
+                    <p data-translate="footer">&copy; 2025 Конвертер видео в GIF. Сделано с ❤️</p>
                 </div>
             </div>
         </div>
@@ -1254,7 +1255,175 @@
                         'skip-content': 'Перейти к основному содержанию',
                         'switched-russian': 'Переключено на русский язык',
                         'switched-english': 'Переключено на английский язык',
-                        'keyboard-shortcut': 'Клавиатурное сокращение: переключение темы'
+                        'keyboard-shortcut': 'Клавиатурное сокращение: переключение темы',
+                        // Conversion interface
+                        'conversion-interface-title': 'Интерфейс конвертации файлов',
+                        'select-conversion-type': 'Выберите тип конвертации',
+                        'from': 'ИЗ',
+                        'to': 'В',
+                        'video': 'Видео',
+                        'images': 'Изображения',
+                        'audio': 'Аудио',
+                        'documents': 'Документы',
+                        'upload-files': 'Загрузите файлы для конвертации',
+                        'drag-files': 'Перетащите файлы сюда или нажмите для выбора',
+                        'multiple-files-supported': 'Поддерживаются множественные файлы. Максимальный размер файла: 100MB',
+                        'uploaded-files': 'Загруженные файлы',
+                        'conversion-params': 'Параметры конвертации',
+                        'start-conversion': 'Начать конвертацию',
+                        'clear-list': 'Очистить список',
+                        'view-queue': 'Просмотреть очередь',
+                        // Universal converter
+                        'universal-converter-title': 'Универсальный конвертер файлов',
+                        'universal-converter-subtitle': 'Конвертируйте видео, изображения, аудио, документы и архивы с помощью современных алгоритмов',
+                        'video-card': 'Видео',
+                        'images-card': 'Изображения',
+                        'audio-card': 'Аудио',
+                        'documents-card': 'Документы',
+                        'archives-card': 'Архивы',
+                        'batch-card': 'Пакетная',
+                        'drag-video-files': 'Перетащите видео файлы сюда или нажмите для выбора',
+                        'drag-images': 'Перетащите изображения сюда или нажмите для выбора',
+                        'drag-audio-files': 'Перетащите аудио файлы сюда или нажмите для выбора',
+                        'clear-all': 'Очистить все',
+                        'new-conversion': 'Новая конвертация',
+                        'conversion-progress': 'Прогресс конвертации',
+                        'conversion-statistics': 'Статистика конвертации',
+                        'total-files': 'Всего файлов',
+                        'completed': 'Завершено',
+                        'processing-time': 'Время обработки',
+                        'total-size': 'Общий размер',
+                        'engine-status': 'Статус движков конвертации',
+                        'refresh-status': 'Обновить статус',
+                        // Additional interface elements
+                        'quality': 'Качество',
+                        'resolution': 'Разрешение',
+                        'format': 'Формат',
+                        'size': 'Размер',
+                        'duration': 'Длительность',
+                        'fps': 'FPS',
+                        'bitrate': 'Битрейт',
+                        'compression': 'Сжатие',
+                        'advanced-settings': 'Расширенные настройки',
+                        'basic-settings': 'Основные настройки',
+                        'select-files': 'Выбрать файлы',
+                        'browse': 'Обзор',
+                        'download': 'Скачать',
+                        'preview': 'Предпросмотр',
+                        'cancel': 'Отмена',
+                        'retry': 'Повторить',
+                        'progress': 'Прогресс',
+                        'status': 'Статус',
+                        'error': 'Ошибка',
+                        'success': 'Успех',
+                        'warning': 'Предупреждение',
+                        'info': 'Информация',
+                        'loading': 'Загрузка...',
+                        'processing': 'Обработка...',
+                        'converting': 'Конвертация...',
+                        'uploading': 'Загрузка...',
+                        'downloading': 'Скачивание...',
+                        'queue': 'Очередь',
+                        'history': 'История',
+                        'settings': 'Настройки',
+                        'help': 'Помощь',
+                        'about': 'О программе',
+                        'close': 'Закрыть',
+                        'save': 'Сохранить',
+                        'reset': 'Сбросить',
+                        'apply': 'Применить',
+                        
+                        // Index/Home common strings
+                        'upload-video': 'Загрузите видео файл',
+                        'click-or-drag': 'Нажмите здесь или перетащите файл',
+                        'conversion-settings-title': 'Настройки конвертации',
+                        'convert-to-gif': 'Конвертировать в GIF',
+                        'video-conversion-in-progress': 'Конвертация видео...',
+                        'please-wait-video': 'Пожалуйста, подождите. Это может занять несколько минут в зависимости от размера видео.',
+                        'effects-label': 'Эффекты:',
+                        'fast-processing': 'Быстрая обработка',
+                        'fast-processing-desc': 'Конвертация с использованием оптимизированных алгоритмов FFmpeg для максимальной производительности',
+                        'flexible-settings': 'Гибкие настройки',
+                        'flexible-settings-desc': 'Настройте размер, частоту кадров и временные рамки для получения идеального результата',
+                        'format-support': 'Поддержка форматов',
+                        'format-support-desc': 'MP4, AVI, MOV, MKV, WMV, WebM и другие популярные видео форматы',
+                        'how-to-use': 'Как использовать конвертер',
+                        'step-1-title': 'Выберите файл',
+                        'step-1-desc': 'Загрузите видео или перетащите его в область загрузки',
+                        'step-2-title': 'Настройте параметры',
+                        'step-2-desc': 'Укажите размер, FPS и временной интервал',
+                        'step-3-title': 'Запустите конвертацию',
+                        'step-3-desc': 'Нажмите кнопку и дождитесь завершения',
+                        'step-4-title': 'Скачайте результат',
+'step-4-desc': 'Получите готовый GIF файл',
+                        
+                        // History/Results/Success pages
+                        'history-title': 'История конвертации',
+                        'history-subtitle': 'Просматривайте статистику и историю всех выполненных конвертаций',
+                        'total-conversions': 'Всего конвертаций',
+                        'successful': 'Успешных',
+                        'today': 'За сегодня',
+                        'data-processed': 'Обработано данных',
+                        'popular-formats': 'Популярные форматы конвертации',
+                        'input-formats': 'Входные форматы:',
+                        'output-formats': 'Выходные форматы:',
+                        'time-activity': 'Активность по времени',
+                        'period': 'Период:',
+                        'all-time': 'Всё время',
+                        'today-short': 'Сегодня',
+                        'week': 'Неделя',
+                        'month': 'Месяц',
+                        'all-file-types': 'Все типы файлов',
+                        'all-statuses': 'Все статусы',
+                        'reset-filters': 'Сбросить фильтры',
+                        'history-list-title': 'История конвертаций',
+                        'export': 'Экспорт',
+                        'clear-history': 'Очистить',
+                        'processing-time-label': 'Время обработки:',
+                        'settings-colon': 'Настройки:',
+                        'repeat': 'Повторить',
+                        'empty-history-title': 'История пуста',
+                        'empty-history-desc': 'У вас пока нет конвертированных файлов.',
+                        'results-title': 'Результаты конвертации',
+                        'files-processed': 'Ваши файлы успешно обработаны',
+                        'search-by-name': 'Поиск по имени файла...',
+                        'search-files': 'Поиск файлов...',
+                        'gif-ready': 'Ваш видеофайл успешно конвертирован в GIF',
+                        'gif-ready-title': 'Ваш GIF готов!',
+                        'click-image-hint': 'Кликните на изображение для полноэкранного просмотра',
+                        'new-gif': 'Новый GIF',
+                        'copy-link': 'Копировать ссылку',
+                        'fullscreen': 'Полный экран',
+                        'details': 'Подробно',
+                        'file-info': 'Информация о файле',
+                        'source-file': 'Исходный файл',
+                        'animated-gif': 'Анимированный GIF',
+                        'file-size': 'Размер файла',
+'ready-to-download': 'Готов к скачиванию',
+                        'conversion-success': 'Конвертация завершена успешно!',
+                        'download-gif': 'Скачать GIF',
+'share': 'Поделиться',
+                        // Photos to GIF page
+                        'photos-to-gif-title': 'Фото в GIF',
+                        'photos-to-gif-desc': 'Загрузите 1–100 изображений, настройте параметры анимации и получите GIF. При загрузке 1 изображения кадр будет продублирован.',
+                        'images-label': 'Изображения',
+                        'dropzone-prompt': 'Перетащите файлы сюда или нажмите для выбора',
+                        'supported-formats': 'Поддерживаются: JPG, PNG, WEBP, BMP, TIFF, HEIC, GIF',
+                        'frame-duration-label': 'Длительность кадра (сек)',
+                        'gif-size-label': 'Размер GIF',
+                        'original': 'Оригинал',
+                        'colors-label': 'Цветов (палитра)',
+                        'sort-order-label': 'Порядок кадров',
+                        'sort-by-filename': 'По имени файла (A→Z)',
+                        'sort-by-upload': 'В порядке загрузки',
+                        'sort-reverse': 'Обратный порядок',
+                        'loop': 'Зациклить',
+                        'pingpong': 'Эффект пинг-понг',
+                        'optimize': 'Оптимизировать',
+                        'convert': 'Конвертировать',
+                        'clear': 'Очистить',
+                        'creating-gif': 'Создание GIF… Пожалуйста, подождите.',
+                        'done-result': 'Готово! Ниже — ваш результат.'
                     },
                     'en': {
                         'title': 'Video to GIF Converter',
@@ -1279,7 +1448,175 @@
                         'skip-content': 'Skip to main content',
                         'switched-russian': 'Switched to Russian language',
                         'switched-english': 'Switched to English language',
-                        'keyboard-shortcut': 'Keyboard shortcut: theme toggle'
+                        'keyboard-shortcut': 'Keyboard shortcut: theme toggle',
+                        // Conversion interface
+                        'conversion-interface-title': 'File Conversion Interface',
+                        'select-conversion-type': 'Select conversion type',
+                        'from': 'FROM',
+                        'to': 'TO',
+                        'video': 'Video',
+                        'images': 'Images',
+                        'audio': 'Audio',
+                        'documents': 'Documents',
+                        'upload-files': 'Upload files for conversion',
+                        'drag-files': 'Drag files here or click to select',
+                        'multiple-files-supported': 'Multiple files supported. Maximum file size: 100MB',
+                        'uploaded-files': 'Uploaded files',
+                        'conversion-params': 'Conversion parameters',
+                        'start-conversion': 'Start conversion',
+                        'clear-list': 'Clear list',
+                        'view-queue': 'View Queue',
+                        // Universal converter
+                        'universal-converter-title': 'Universal File Converter',
+                        'universal-converter-subtitle': 'Convert videos, images, audio, documents and archives using modern algorithms',
+                        'video-card': 'Video',
+                        'images-card': 'Images',
+                        'audio-card': 'Audio',
+                        'documents-card': 'Documents',
+                        'archives-card': 'Archives',
+                        'batch-card': 'Batch',
+                        'drag-video-files': 'Drag video files here or click to select',
+                        'drag-images': 'Drag images here or click to select',
+                        'drag-audio-files': 'Drag audio files here or click to select',
+                        'clear-all': 'Clear All',
+                        'new-conversion': 'New Conversion',
+                        'conversion-progress': 'Conversion Progress',
+                        'conversion-statistics': 'Conversion Statistics',
+                        'total-files': 'Total Files',
+                        'completed': 'Completed',
+                        'processing-time': 'Processing Time',
+                        'total-size': 'Total Size',
+                        'engine-status': 'Conversion Engines Status',
+                        'refresh-status': 'Refresh Status',
+                        // Additional interface elements
+                        'quality': 'Quality',
+                        'resolution': 'Resolution',
+                        'format': 'Format',
+                        'size': 'Size',
+                        'duration': 'Duration',
+                        'fps': 'FPS',
+                        'bitrate': 'Bitrate',
+                        'compression': 'Compression',
+                        'advanced-settings': 'Advanced Settings',
+                        'basic-settings': 'Basic Settings',
+                        'select-files': 'Select Files',
+                        'browse': 'Browse',
+                        'download': 'Download',
+                        'preview': 'Preview',
+                        'cancel': 'Cancel',
+                        'retry': 'Retry',
+                        'progress': 'Progress',
+                        'status': 'Status',
+                        'error': 'Error',
+                        'success': 'Success',
+                        'warning': 'Warning',
+                        'info': 'Information',
+                        'loading': 'Loading...',
+                        'processing': 'Processing...',
+                        'converting': 'Converting...',
+                        'uploading': 'Uploading...',
+                        'downloading': 'Downloading...',
+                        'queue': 'Queue',
+                        'history': 'History',
+                        'settings': 'Settings',
+                        'help': 'Help',
+                        'about': 'About',
+                        'close': 'Close',
+                        'save': 'Save',
+                        'reset': 'Reset',
+                        'apply': 'Apply',
+                        
+                        // Index/Home common strings
+                        'upload-video': 'Upload video file',
+                        'click-or-drag': 'Click here or drag a file',
+                        'conversion-settings-title': 'Conversion settings',
+                        'convert-to-gif': 'Convert to GIF',
+                        'video-conversion-in-progress': 'Video conversion...',
+                        'please-wait-video': 'Please wait. This may take a few minutes depending on the video size.',
+                        'effects-label': 'Effects:',
+                        'fast-processing': 'Fast processing',
+                        'fast-processing-desc': 'Conversion using optimized FFmpeg algorithms for maximum performance',
+                        'flexible-settings': 'Flexible settings',
+                        'flexible-settings-desc': 'Set size, FPS, and time range to get the ideal result',
+                        'format-support': 'Format support',
+                        'format-support-desc': 'MP4, AVI, MOV, MKV, WMV, WebM and other popular video formats',
+                        'how-to-use': 'How to use the converter',
+                        'step-1-title': 'Choose a file',
+                        'step-1-desc': 'Upload a video or drag it into the upload area',
+                        'step-2-title': 'Adjust parameters',
+                        'step-2-desc': 'Specify size, FPS, and time interval',
+                        'step-3-title': 'Start conversion',
+                        'step-3-desc': 'Click the button and wait for completion',
+                        'step-4-title': 'Download the result',
+'step-4-desc': 'Get the ready GIF file',
+                        
+                        // History/Results/Success pages
+                        'history-title': 'Conversion History',
+                        'history-subtitle': 'View statistics and history of all conversions',
+                        'total-conversions': 'Total conversions',
+                        'successful': 'Successful',
+                        'today': 'Today',
+                        'data-processed': 'Data processed',
+                        'popular-formats': 'Popular conversion formats',
+                        'input-formats': 'Input formats:',
+                        'output-formats': 'Output formats:',
+                        'time-activity': 'Activity over time',
+                        'period': 'Period:',
+                        'all-time': 'All time',
+                        'today-short': 'Today',
+                        'week': 'Week',
+                        'month': 'Month',
+                        'all-file-types': 'All file types',
+                        'all-statuses': 'All statuses',
+                        'reset-filters': 'Reset filters',
+                        'history-list-title': 'Conversion history',
+                        'export': 'Export',
+                        'clear-history': 'Clear',
+                        'processing-time-label': 'Processing time:',
+                        'settings-colon': 'Settings:',
+                        'repeat': 'Repeat',
+                        'empty-history-title': 'History is empty',
+                        'empty-history-desc': 'You don\'t have converted files yet.',
+                        'results-title': 'Conversion results',
+                        'files-processed': 'Your files have been processed successfully',
+                        'search-by-name': 'Search by file name...',
+                        'search-files': 'Search files...',
+                        'gif-ready': 'Your video file has been successfully converted to GIF',
+                        'gif-ready-title': 'Your GIF is ready!',
+                        'click-image-hint': 'Click the image to view in fullscreen',
+                        'new-gif': 'New GIF',
+                        'copy-link': 'Copy link',
+                        'fullscreen': 'Fullscreen',
+                        'details': 'Details',
+                        'file-info': 'File information',
+                        'source-file': 'Source file',
+                        'animated-gif': 'Animated GIF',
+                        'file-size': 'File size',
+'ready-to-download': 'Ready to download',
+                        'conversion-success': 'Conversion completed successfully!',
+                        'download-gif': 'Download GIF',
+'share': 'Share',
+                        // Photos to GIF page
+                        'photos-to-gif-title': 'Photos to GIF',
+                        'photos-to-gif-desc': 'Upload 1–100 images, set animation parameters and get a GIF. If you upload 1 image, the frame will be duplicated.',
+                        'images-label': 'Images',
+                        'dropzone-prompt': 'Drag files here or click to select',
+                        'supported-formats': 'Supported: JPG, PNG, WEBP, BMP, TIFF, HEIC, GIF',
+                        'frame-duration-label': 'Frame duration (sec)',
+                        'gif-size-label': 'GIF size',
+                        'original': 'Original',
+                        'colors-label': 'Colors (palette)',
+                        'sort-order-label': 'Frame order',
+                        'sort-by-filename': 'By filename (A→Z)',
+                        'sort-by-upload': 'By upload order',
+                        'sort-reverse': 'Reverse order',
+                        'loop': 'Loop',
+                        'pingpong': 'Ping-pong effect',
+                        'optimize': 'Optimize',
+                        'convert': 'Convert',
+                        'clear': 'Clear',
+                        'creating-gif': 'Creating GIF… Please wait.',
+                        'done-result': 'Done! Your result is below.'
                     }
                 };
                 
@@ -1316,6 +1653,14 @@
                     const key = element.getAttribute('data-translate');
                     if (translations[key]) {
                         element.textContent = translations[key];
+                    }
+                });
+
+                // Update placeholders
+                document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-translate-placeholder');
+                    if (translations[key]) {
+                        element.setAttribute('placeholder', translations[key]);
                     }
                 });
                 
@@ -1386,12 +1731,13 @@
             
             attachEventListeners() {
                 // Обработчик клика по кнопкам языков
-                document.querySelectorAll('.lang-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('lang-btn') || e.target.closest('.lang-btn')) {
                         e.preventDefault();
-                        const lang = e.currentTarget.getAttribute('data-lang');
+                        const btn = e.target.classList.contains('lang-btn') ? e.target : e.target.closest('.lang-btn');
+                        const lang = btn.getAttribute('data-lang');
                         this.switchLanguage(lang);
-                    });
+                    }
                 });
             }
         }

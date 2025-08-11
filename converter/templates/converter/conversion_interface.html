@@ -132,15 +132,40 @@
         color: #ffffff;
     }
     
+    [data-theme="dark"] .format-card strong {
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card small {
+        color: #d1d5db !important;
+    }
+    
     [data-theme="dark"] .format-card:hover {
         background: rgba(102, 126, 234, 0.2);
         border-color: #667eea;
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card:hover strong {
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card:hover small {
+        color: #e5e7eb !important;
     }
     
     [data-theme="dark"] .format-card.selected {
         background: rgba(102, 126, 234, 0.3);
         border-color: #667eea;
         color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card.selected strong {
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .format-card.selected small {
+        color: #e5e7eb !important;
     }
     
     [data-theme="dark"] .file-drop-zone {
@@ -214,38 +239,40 @@
 {% block content %}
 {% csrf_token %}
 <div class="container-fluid">
-    <h1 class="mb-4">
-        <i class="bi bi-arrow-left-right"></i>
-        Интерфейс конвертации файлов
-    </h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="bi bi-arrow-left-right"></i>
+            <span data-translate="conversion-interface-title">Интерфейс конвертации файлов</span>
+        </h1>
+    </div>
 
     <!-- Выбор типа конвертации -->
     <div class="row mb-4">
         <div class="col-12">
-            <h3>Выберите тип конвертации</h3>
+            <h3 data-translate="select-conversion-type">Выберите тип конвертации</h3>
             <div class="conversion-selector" id="conversion-selector">
                 <div class="row">
                     <div class="col-md-5">
-                        <h5>ИЗ</h5>
+                        <h5 data-translate="from">ИЗ</h5>
                         <div class="format-grid" id="source-formats">
                             <div class="format-card" data-format="video">
                                 <span class="format-icon">🎬</span>
-                                <strong>Видео</strong>
+                                <strong data-translate="video">Видео</strong>
                                 <small class="d-block text-muted">MP4, AVI, MOV, MKV</small>
                             </div>
                             <div class="format-card" data-format="image">
                                 <span class="format-icon">🖼️</span>
-                                <strong>Изображения</strong>
+                                <strong data-translate="images">Изображения</strong>
                                 <small class="d-block text-muted">JPG, PNG, BMP, TIFF</small>
                             </div>
                             <div class="format-card" data-format="audio">
                                 <span class="format-icon">🎵</span>
-                                <strong>Аудио</strong>
+                                <strong data-translate="audio">Аудио</strong>
                                 <small class="d-block text-muted">MP3, WAV, FLAC, AAC</small>
                             </div>
                             <div class="format-card" data-format="document">
                                 <span class="format-icon">📄</span>
-                                <strong>Документы</strong>
+                                <strong data-translate="documents">Документы</strong>
                                 <small class="d-block text-muted">PDF, DOC, DOCX, TXT</small>
                             </div>
                         </div>
@@ -256,7 +283,7 @@
                         </div>
                     </div>
                     <div class="col-md-5">
-                        <h5>В</h5>
+                        <h5 data-translate="to">В</h5>
                         <div class="format-grid" id="target-formats">
                             <!-- Динамически заполняется в зависимости от выбора источника -->
                         </div>
@@ -269,11 +296,11 @@
     <!-- Зона загрузки файлов -->
     <div class="row mb-4" id="upload-section" style="display: none;">
         <div class="col-12">
-            <h3>Загрузите файлы для конвертации</h3>
+            <h3 data-translate="upload-files">Загрузите файлы для конвертации</h3>
             <div class="file-drop-zone" id="file-drop-zone">
                 <i class="bi bi-cloud-upload display-1 text-primary"></i>
-                <h4>Перетащите файлы сюда или нажмите для выбора</h4>
-                <p class="text-muted">Поддерживаются множественные файлы. Максимальный размер файла: 100MB</p>
+                <h4 data-translate="drag-files">Перетащите файлы сюда или нажмите для выбора</h4>
+                <p class="text-muted" data-translate="multiple-files-supported">Поддерживаются множественные файлы. Максимальный размер файла: 100MB</p>
                 <input type="file" id="file-input" multiple accept="" style="display: none;">
             </div>
         </div>
@@ -282,7 +309,7 @@
     <!-- Список загруженных файлов -->
     <div class="row mb-4" id="files-section" style="display: none;">
         <div class="col-12">
-            <h3>Загруженные файлы (<span id="file-count">0</span>)</h3>
+            <h3><span data-translate="uploaded-files">Загруженные файлы</span> (<span id="file-count">0</span>)</h3>
             <div class="file-list" id="file-list">
                 <!-- Динамически заполняется -->
             </div>
@@ -293,7 +320,7 @@
     <div class="row mb-4" id="params-section" style="display: none;">
         <div class="col-12">
             <div class="conversion-params">
-                <h3>Параметры конвертации</h3>
+                <h3 data-translate="conversion-params">Параметры конвертации</h3>
                 <div id="conversion-parameters">
                     <!-- Динамически заполняется в зависимости от типа конвертации -->
                 </div>
@@ -307,47 +334,40 @@
             <div class="d-flex gap-3">
                 <button class="btn btn-primary btn-lg" id="start-conversion" disabled>
                     <i class="bi bi-play-fill"></i>
-                    Начать конвертацию
+                    <span data-translate="start-conversion">Начать конвертацию</span>
                 </button>
                 <button class="btn btn-secondary" id="clear-files">
                     <i class="bi bi-trash"></i>
-                    Очистить список
+                    <span data-translate="clear-list">Очистить список</span>
                 </button>
-                <button class="btn btn-info" id="view-queue">
+                <button class="btn btn-info" id="refresh-queue">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span data-translate="refresh-queue">Обновить очередь</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Секция очереди задач -->
+    <div class="row mb-4" id="queue-section" style="display: none;">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>
                     <i class="bi bi-list-task"></i>
-                    Посмотреть очередь
+                    <span data-translate="conversion-queue">Очередь конвертации</span>
+                </h3>
+                <button class="btn btn-outline-secondary btn-sm" id="toggle-queue">
+                    <i class="bi bi-chevron-up"></i>
+                    Свернуть
                 </button>
+            </div>
+            <div id="queue-content" class="conversion-params">
+                <!-- Содержимое очереди загружается здесь -->
             </div>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно для просмотра очереди задач -->
-<div class="modal fade" id="queue-modal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-list-task"></i>
-                    Очередь задач конвертации
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="queue-content">
-                    <!-- Загружается через AJAX -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary" id="refresh-queue">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    Обновить
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -357,6 +377,8 @@ class ConversionInterface {
         this.selectedSourceFormat = null;
         this.selectedTargetFormat = null;
         this.uploadedFiles = [];
+        this.currentModal = null;
+        this.modalCleanupTimer = null;
         this.conversionTypes = {
             video: {
                 name: 'Видео',
@@ -364,7 +386,8 @@ class ConversionInterface {
                     'gif': { name: 'GIF', icon: '🎞️', description: 'Анимированное изображение' },
                     'mp4': { name: 'MP4', icon: '🎬', description: 'Видео формат' },
                     'webm': { name: 'WebM', icon: '🎥', description: 'Веб-видео' },
-                    'avi': { name: 'AVI', icon: '📹', description: 'Классический формат' }
+                    'avi': { name: 'AVI', icon: '📹', description: 'Классический формат' },
+                    'mp3': { name: 'MP3', icon: '🎵', description: 'Извлечь звук из видео' }
                 },
                 accept: 'video/*',
                 maxSize: 100 * 1024 * 1024 // 100MB
@@ -438,13 +461,14 @@ class ConversionInterface {
             this.clearFiles();
         });
         
-        document.getElementById('view-queue').addEventListener('click', () => {
-            this.showQueue();
+        document.getElementById('toggle-queue').addEventListener('click', () => {
+            this.toggleQueue();
         });
         
         document.getElementById('refresh-queue').addEventListener('click', () => {
             this.refreshQueue();
         });
+        
     }
     
     setupDragAndDrop() {
@@ -572,6 +596,14 @@ class ConversionInterface {
                     </div>
                     <div>
                         <span class="badge bg-${this.getStatusColor(fileData.status)}">${this.getStatusText(fileData.status)}</span>
+                        ${fileData.status === 'done' && fileData.outputUrl ? `
+                            <a href="${fileData.outputUrl}" class="btn btn-sm btn-success ms-2" download title="Скачать файл">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-primary ms-1" onclick="window.open('${fileData.outputUrl}', '_blank')" title="Предварительный просмотр">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        ` : ''}
                         <button class="btn btn-sm btn-outline-danger ms-2" onclick="conversionInterface.removeFile('${fileData.id}')">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -601,6 +633,11 @@ class ConversionInterface {
         document.getElementById('params-section').style.display = hasFormats ? 'block' : 'none';
         document.getElementById('actions-section').style.display = hasFiles && hasFormats ? 'block' : 'none';
         document.getElementById('start-conversion').disabled = !hasFiles || !hasFormats;
+        
+        // Показываем очередь, если пользователь начал работу
+        if (hasFiles && hasFormats) {
+            this.showQueueSection();
+        }
     }
     
     updateConversionParameters() {
@@ -678,6 +715,41 @@ class ConversionInterface {
                     </div>
                 </div>
             `;
+        } else if (sourceFormat === 'video' && targetFormat === 'mp3') {
+            parametersHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Битрейт (kbps)</label>
+                            <select class="form-select" id="audio-bitrate">
+                                <option value="128">128</option>
+                                <option value="192" selected>192</option>
+                                <option value="256">256</option>
+                                <option value="320">320</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Качество</label>
+                            <select class="form-select" id="audio-quality">
+                                <option value="low">Низкое</option>
+                                <option value="medium" selected>Среднее</option>
+                                <option value="high">Высокое</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="param-group">
+                            <label class="form-label">Каналы</label>
+                            <select class="form-select" id="audio-channels">
+                                <option value="mono">Моно</option>
+                                <option value="stereo" selected>Стерео</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
         } else if (sourceFormat === 'audio') {
             parametersHTML = `
                 <div class="row">
@@ -742,10 +814,11 @@ class ConversionInterface {
         // Показываем уведомление об успешной отправке
         this.showNotification('Задачи успешно отправлены на обработку!', 'success');
         
-        // Предлагаем пользователю посмотреть очередь (но не открываем автоматически)
+        // Автоматически показываем и обновляем очередь
         setTimeout(() => {
-            this.showNotification('Нажмите "Посмотреть очередь" чтобы отследить прогресс', 'info');
-        }, 2000);
+            this.showQueueSection();
+            this.showNotification('Очередь задач обновлена', 'info');
+        }, 1000);
     }
     
     getConversionParams() {
@@ -785,16 +858,29 @@ class ConversionInterface {
                 }
             });
             
-            if (response.ok) {
-                const result = await response.json();
-                fileData.status = 'queued';
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                fileData.status = 'done';
                 fileData.taskId = result.task_id;
+                fileData.outputUrl = result.output_url;
+                fileData.fileSize = result.file_size;
+                
+                // Показываем уведомление об успехе
+                this.showNotification(`Файл ${fileData.file.name} успешно конвертирован!`, 'success');
+                
+                // Автоматически показываем результат
+                this.showConversionResult(fileData);
             } else {
                 fileData.status = 'error';
+                fileData.errorMessage = result.error || 'Неизвестная ошибка';
+                this.showNotification(`Ошибка конвертации ${fileData.file.name}: ${fileData.errorMessage}`, 'error');
             }
         } catch (error) {
             console.error('Error submitting task:', error);
             fileData.status = 'error';
+            fileData.errorMessage = error.message;
+            this.showNotification(`Ошибка при отправке файла ${fileData.file.name}: ${error.message}`, 'error');
         }
         
         this.updateFileList();
@@ -808,6 +894,9 @@ class ConversionInterface {
     
     async showQueue() {
         try {
+            // Сначала полностью очищаем любые остатки модальных окон
+            this.forceCleanupModal();
+            
             const modalElement = document.getElementById('queue-modal');
             if (!modalElement) {
                 console.error('Queue modal element not found');
@@ -822,14 +911,9 @@ class ConversionInterface {
                 return;
             }
             
-            // Уничтожаем предыдущий экземпляр модального окна если он есть
-            const existingModalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (existingModalInstance) {
-                existingModalInstance.dispose();
-            }
-            
+            // Создаем новый экземпляр модального окна
             const modal = new bootstrap.Modal(modalElement, {
-                backdrop: true,
+                backdrop: 'static',  // Не позволяем закрыть кликом вне модального окна
                 keyboard: true,
                 focus: true
             });
@@ -839,63 +923,236 @@ class ConversionInterface {
             
             // Обработчик открытия модального окна
             const onModalShown = async () => {
+                console.log('[DEBUG] Modal shown event triggered');
                 try {
+                    console.log('[DEBUG] Starting queue refresh from modal shown handler');
                     await this.refreshQueue();
+                    console.log('[DEBUG] Queue refresh completed successfully');
+                    // Устанавливаем таймер автоматического восстановления
+                    this.modalCleanupTimer = setTimeout(() => {
+                        console.warn('[DEBUG] Modal cleanup timer triggered - forcing cleanup');
+                        this.forceCleanupModal();
+                    }, 30000); // 30 секунд
+                    console.log('[DEBUG] Modal shown handler completed successfully');
                 } catch (error) {
-                    console.error('Error refreshing queue:', error);
+                    console.error('[DEBUG] Error in modal shown handler:', error);
                 }
             };
             
             // Обработчик закрытия модального окна
             const onModalHidden = () => {
                 try {
-                    // Очищаем ссылку на модальное окно
-                    this.currentModal = null;
-                    
-                    // Убираем все event listener'ы
-                    modalElement.removeEventListener('shown.bs.modal', onModalShown);
-                    modalElement.removeEventListener('hidden.bs.modal', onModalHidden);
-                    
-                    // Принудительно убираем backdrop если он остался
-                    const backdrop = document.querySelector('.modal-backdrop');
-                    if (backdrop) {
-                        backdrop.remove();
+                    console.log('[DEBUG] Modal hidden event triggered');
+                    // Очищаем таймер
+                    if (this.modalCleanupTimer) {
+                        console.log('[DEBUG] Clearing modal cleanup timer');
+                        clearTimeout(this.modalCleanupTimer);
+                        this.modalCleanupTimer = null;
                     }
-                    
-                    // Восстанавливаем прокрутку body
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                    
+                    // Принудительная очистка с задержкой
+                    console.log('[DEBUG] Scheduling forced cleanup in 100ms');
+                    setTimeout(() => {
+                        console.log('[DEBUG] Executing delayed forced cleanup');
+                        this.forceCleanupModal();
+                    }, 100);
                 } catch (error) {
-                    console.error('Error in modal cleanup:', error);
+                    console.error('[DEBUG] Error in modal cleanup:', error);
+                    // Принудительная очистка даже при ошибке
+                    this.forceCleanupModal();
                 }
             };
             
-            // Добавляем обработчики событий
+            // Добавляем дополнительные обработчики для диагностики
+            modalElement.addEventListener('hide.bs.modal', () => {
+                console.log('[DEBUG] Modal hide event triggered (about to close)');
+            }, { once: true });
+            
             modalElement.addEventListener('shown.bs.modal', onModalShown, { once: true });
             modalElement.addEventListener('hidden.bs.modal', onModalHidden, { once: true });
             
+            // Проверяем кнопки закрытия
+            const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+            closeButtons.forEach((btn, index) => {
+                console.log(`[DEBUG] Found close button ${index}:`, btn);
+                btn.addEventListener('click', () => {
+                    console.log(`[DEBUG] Close button ${index} clicked`);
+                }, { once: true });
+            });
+            
             // Показываем модальное окно
+            console.log('[DEBUG] About to show modal...');
             modal.show();
+            console.log('[DEBUG] Modal.show() called');
+            
+            // Проверяем состояние модального окна через небольшую задержку
+            setTimeout(() => {
+                const isVisible = modalElement.classList.contains('show');
+                const hasBackdrop = document.querySelector('.modal-backdrop') !== null;
+                const bodyHasModalClass = document.body.classList.contains('modal-open');
+                console.log(`[DEBUG] Modal state check: visible=${isVisible}, backdrop=${hasBackdrop}, bodyModalClass=${bodyHasModalClass}`);
+                
+                if (!isVisible) {
+                    console.error('[DEBUG] Modal failed to show properly!');
+                    this.showNotification('Модальное окно не открылось корректно', 'warning');
+                }
+            }, 500);
             
         } catch (error) {
-            console.error('Error showing queue modal:', error);
+            console.error('[DEBUG] Exception in showQueue:', error);
             this.showNotification('Ошибка открытия очереди', 'error');
+            // Очистка при ошибке
+            this.forceCleanupModal();
+        }
+    }
+    
+    // Принудительная очистка модального окна и восстановление интерфейса
+    forceCleanupModal() {
+        try {
+            console.log('Starting force cleanup of modal...');
+            
+            // Очищаем ссылку на модальное окно
+            this.currentModal = null;
+            
+            // Убираем таймер очистки если он есть
+            if (this.modalCleanupTimer) {
+                clearTimeout(this.modalCleanupTimer);
+                this.modalCleanupTimer = null;
+            }
+            
+            const modalElement = document.getElementById('queue-modal');
+            if (modalElement) {
+                // Убираем все event listener'ы
+                modalElement.removeEventListener('shown.bs.modal', () => {});
+                modalElement.removeEventListener('hidden.bs.modal', () => {});
+                
+                // Принудительно закрываем модальное окно
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                    modalInstance.dispose();
+                }
+                
+                // Убираем все Bootstrap классы с элемента
+                modalElement.classList.remove('show', 'fade');
+                modalElement.style.display = 'none';
+                modalElement.setAttribute('aria-hidden', 'true');
+                modalElement.removeAttribute('aria-modal');
+            }
+            
+            // Принудительно убираем ВСЕ backdrop'ы
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Восстанавливаем body полностью
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.body.style.marginRight = '';
+            
+            // Убираем любые overlay'и или блокирующие элементы
+            const overlays = document.querySelectorAll('.modal, .modal-backdrop, .fade');
+            overlays.forEach(overlay => {
+                if (overlay.style) {
+                    overlay.style.display = 'none';
+                }
+            });
+            
+            // Принудительно восстанавливаем события на странице
+            this.restorePageInteractivity();
+            
+            console.log('Force cleanup completed successfully');
+            
+        } catch (error) {
+            console.error('Error in force cleanup:', error);
+            // Последний шанс - перезагружаем обработчики событий
+            setTimeout(() => {
+                this.restorePageInteractivity();
+            }, 100);
+        }
+    }
+    
+    // Восстановление интерактивности страницы
+    restorePageInteractivity() {
+        try {
+            console.log('Restoring page interactivity...');
+            
+            // Убираем любые pointer-events блокировки
+            document.body.style.pointerEvents = '';
+            document.documentElement.style.pointerEvents = '';
+            
+            // Проверяем, что все кнопки активны
+            document.querySelectorAll('button, .btn').forEach(button => {
+                button.style.pointerEvents = '';
+                button.disabled = button.hasAttribute('data-disabled');
+            });
+            
+            // Проверяем, что все ссылки активны
+            document.querySelectorAll('a').forEach(link => {
+                link.style.pointerEvents = '';
+            });
+            
+            // Принудительно перерегистрируем обработчики событий основного интерфейса
+            this.reattachEventListeners();
+            
+            console.log('Page interactivity restored');
+            
+        } catch (error) {
+            console.error('Error restoring page interactivity:', error);
+        }
+    }
+    
+    // Перерегистрация обработчиков событий
+    reattachEventListeners() {
+        try {
+            // Кнопки действий
+            const startButton = document.getElementById('start-conversion');
+            const clearButton = document.getElementById('clear-files');
+            const queueButton = document.getElementById('view-queue');
+            const refreshButton = document.getElementById('refresh-queue');
+            
+            // Убираем старые обработчики и добавляем новые
+            if (startButton) {
+                startButton.onclick = () => this.startConversion();
+            }
+            
+            if (clearButton) {
+                clearButton.onclick = () => this.clearFiles();
+            }
+            
+            if (queueButton) {
+                queueButton.onclick = () => this.showQueue();
+            }
+            
+            if (refreshButton) {
+                refreshButton.onclick = () => this.refreshQueue();
+            }
+            
+            // Карточки форматов
+            document.querySelectorAll('#source-formats .format-card').forEach(card => {
+                card.onclick = (e) => this.selectSourceFormat(e.currentTarget.dataset.format);
+            });
+            
+            console.log('Event listeners reattached successfully');
+            
+        } catch (error) {
+            console.error('Error reattaching event listeners:', error);
         }
     }
     
     async refreshQueue() {
+        console.log('[DEBUG] refreshQueue() started');
         const queueContent = document.getElementById('queue-content');
         if (!queueContent) {
             console.error('Queue content element not found');
             return;
         }
         
+        console.log('[DEBUG] Setting loading spinner');
         queueContent.innerHTML = '<div class="text-center p-3"><div class="spinner-border" role="status"></div><p class="mt-2 mb-0">Загрузка очереди...</p></div>';
         
         try {
-            console.log('Fetching queue from:', '/app/api/conversion/queue/');
+            console.log('[DEBUG] Starting fetch request to:', '/app/api/conversion/queue/');
             const response = await fetch('/app/api/conversion/queue/', {
                 method: 'GET',
                 headers: {
@@ -904,39 +1161,55 @@ class ConversionInterface {
                 }
             });
             
-            console.log('Queue response status:', response.status);
+            console.log('[DEBUG] Queue response received, status:', response.status);
             
             if (response.ok) {
+                console.log('[DEBUG] Response OK, parsing JSON...');
                 const data = await response.json();
-                console.log('Queue data received:', data);
+                console.log('[DEBUG] Queue data parsed successfully:', data);
                 
                 if (data.success !== false) {
+                    console.log('[DEBUG] Rendering queue with tasks:', data.tasks?.length || 0);
                     this.renderQueue(data.tasks || []);
+                    console.log('[DEBUG] Queue rendered successfully');
                 } else {
+                    console.error('[DEBUG] Server returned error:', data.error);
                     queueContent.innerHTML = `<div class="alert alert-danger">Ошибка сервера: ${data.error || 'Неизвестная ошибка'}</div>`;
                 }
             } else {
+                console.error('[DEBUG] Response not OK, reading error text...');
                 const errorText = await response.text();
-                console.error('Queue fetch error response:', errorText);
+                console.error('[DEBUG] Queue fetch error response:', errorText);
                 queueContent.innerHTML = `<div class="alert alert-danger">Ошибка загрузки очереди (${response.status})</div>`;
             }
         } catch (error) {
-            console.error('Error fetching queue:', error);
+            console.error('[DEBUG] Exception in refreshQueue:', error);
             queueContent.innerHTML = `<div class="alert alert-danger">Ошибка подключения: ${error.message}</div>`;
         }
+        
+        console.log('[DEBUG] refreshQueue() completed');
     }
     
     renderQueue(tasks) {
+        console.log('[DEBUG] renderQueue() started with tasks:', tasks);
         const queueContent = document.getElementById('queue-content');
         
+        if (!queueContent) {
+            console.error('[DEBUG] Queue content element not found in renderQueue');
+            return;
+        }
+        
         if (!Array.isArray(tasks) || tasks.length === 0) {
+            console.log('[DEBUG] No tasks to render, showing empty message');
             queueContent.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Очередь пуста или задачи ещё не отправлены</div>';
             return;
         }
         
         try {
+            console.log('[DEBUG] Building HTML for', tasks.length, 'tasks');
             let html = '<div class="list-group">';
             tasks.forEach((task, index) => {
+                console.log(`[DEBUG] Processing task ${index}:`, task);
                 // Безопасно обрабатываем данные
                 const filename = this.escapeHtml(task.filename || 'Неизвестный файл');
                 const sourceFormat = this.escapeHtml(task.source_format || 'unknown');
@@ -967,11 +1240,15 @@ class ConversionInterface {
             });
             html += '</div>';
             
+            console.log('[DEBUG] Setting innerHTML with generated HTML');
             queueContent.innerHTML = html;
+            console.log('[DEBUG] Queue rendered successfully');
         } catch (error) {
-            console.error('Error rendering queue:', error);
+            console.error('[DEBUG] Error rendering queue:', error);
             queueContent.innerHTML = '<div class="alert alert-danger">Ошибка отображения очереди</div>';
         }
+        
+        console.log('[DEBUG] renderQueue() completed');
     }
     
     getStatusColor(status) {
@@ -1041,6 +1318,267 @@ class ConversionInterface {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+    
+    
+    // Убираем все возможные блокировки интерфейса
+    clearAllBlockers() {
+        try {
+            // Убираем все overlay'и и backdrop'ы
+            const overlays = document.querySelectorAll('.modal-backdrop, .overlay, .loading-overlay, .blocker');
+            overlays.forEach(overlay => overlay.remove());
+            
+            // Убираем все модальные окна
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                modal.removeAttribute('aria-modal');
+            });
+            
+            // Восстанавливаем body
+            document.body.classList.remove('modal-open', 'overflow-hidden');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.body.style.marginRight = '';
+            document.body.style.pointerEvents = '';
+            
+            // Убираем любые дополнительные стили, которые могут блокировать интерфейс
+            document.documentElement.style.pointerEvents = '';
+            
+            console.log('All blockers cleared');
+            
+        } catch (error) {
+            console.error('Error clearing blockers:', error);
+        }
+    }
+    
+    // Мониторинг состояния интерфейса
+    setupInterfaceMonitoring() {
+        try {
+            // Мониторинг каждые 3 секунды
+            this.interfaceMonitor = setInterval(() => {
+                this.checkInterfaceHealth();
+            }, 3000);
+            
+            // Слушатель изменений в DOM для отслеживания проблемных элементов
+            this.domObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                if (node.classList && node.classList.contains('modal-backdrop')) {
+                                    console.warn('Modal backdrop detected by observer');
+                                    // Проверяем через короткое время, не осталось ли backdrop
+                                    setTimeout(() => {
+                                        this.checkForOrphanBackdrops();
+                                    }, 1000);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Начинаем наблюдение за изменениями в body
+            this.domObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('Interface monitoring setup completed');
+            
+        } catch (error) {
+            console.error('Error setting up interface monitoring:', error);
+        }
+    }
+    
+    // Проверка здоровья интерфейса
+    checkInterfaceHealth() {
+        try {
+            let issuesFound = false;
+            
+            // Проверяем наличие orphan backdrop'ов
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            const visibleModals = document.querySelectorAll('.modal.show');
+            
+            if (backdrops.length > 0 && visibleModals.length === 0) {
+                console.warn('Found orphan modal backdrops without visible modals');
+                issuesFound = true;
+            }
+            
+            // Проверяем, заблокирован ли body
+            if (document.body.classList.contains('modal-open') && visibleModals.length === 0) {
+                console.warn('Body has modal-open class but no visible modals');
+                issuesFound = true;
+            }
+            
+            // Проверяем pointer events
+            const bodyStyle = window.getComputedStyle(document.body);
+            if (bodyStyle.pointerEvents === 'none' && visibleModals.length === 0) {
+                console.warn('Body pointer events disabled but no visible modals');
+                issuesFound = true;
+            }
+            
+            
+        } catch (error) {
+            console.error('Error checking interface health:', error);
+        }
+    }
+    
+    // Проверка orphan backdrop'ов
+    checkForOrphanBackdrops() {
+        try {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            const visibleModals = document.querySelectorAll('.modal.show');
+            
+            if (backdrops.length > 0 && visibleModals.length === 0) {
+                console.warn('Removing orphan modal backdrops');
+                backdrops.forEach(backdrop => backdrop.remove());
+                
+                // Также восстанавливаем body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        } catch (error) {
+            console.error('Error checking orphan backdrops:', error);
+        }
+    }
+    
+    // Показать секцию очереди
+    showQueueSection() {
+        try {
+            const queueSection = document.getElementById('queue-section');
+            if (queueSection && queueSection.style.display === 'none') {
+                console.log('Showing queue section');
+                queueSection.style.display = 'block';
+                // Автоматически загружаем очередь при первом показе
+                this.refreshQueue();
+            }
+        } catch (error) {
+            console.error('Error showing queue section:', error);
+        }
+    }
+    
+    // Переключить отображение очереди (свернуть/развернуть)
+    toggleQueue() {
+        try {
+            const queueContent = document.getElementById('queue-content');
+            const toggleButton = document.getElementById('toggle-queue');
+            const icon = toggleButton.querySelector('i');
+            
+            if (queueContent.style.display === 'none') {
+                // Разворачиваем
+                queueContent.style.display = 'block';
+                icon.className = 'bi bi-chevron-up';
+                toggleButton.innerHTML = '<i class="bi bi-chevron-up"></i> Свернуть';
+                // Обновляем очередь при разворачивании
+                this.refreshQueue();
+            } else {
+                // Сворачиваем
+                queueContent.style.display = 'none';
+                icon.className = 'bi bi-chevron-down';
+                toggleButton.innerHTML = '<i class="bi bi-chevron-down"></i> Развернуть';
+            }
+        } catch (error) {
+            console.error('Error toggling queue:', error);
+        }
+    }
+    
+    
+    // Показать результат конвертации с кнопкой скачивания
+    showConversionResult(fileData) {
+        try {
+            const resultModal = this.createResultModal(fileData);
+            document.body.appendChild(resultModal);
+            
+            // Показываем модальное окно
+            const modal = new bootstrap.Modal(resultModal);
+            modal.show();
+            
+            // Удаляем модальное окно после закрытия
+            resultModal.addEventListener('hidden.bs.modal', () => {
+                resultModal.remove();
+            });
+            
+        } catch (error) {
+            console.error('Error showing conversion result:', error);
+        }
+    }
+    
+    // Создать модальное окно с результатом
+    createResultModal(fileData) {
+        const modalId = `result-modal-${fileData.id}`;
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = modalId;
+        modal.setAttribute('tabindex', '-1');
+        
+        const fileSize = fileData.fileSize ? this.formatFileSize(fileData.fileSize) : 'Неизвестно';
+        const fileName = fileData.file.name;
+        const outputUrl = fileData.outputUrl;
+        
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Конвертация завершена!
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <h4>Ваш файл готов!</h4>
+                        <p class="text-muted">Исходный файл: <strong>${this.escapeHtml(fileName)}</strong></p>
+                        <p class="text-muted">Размер: <strong>${fileSize}</strong></p>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="${outputUrl}" class="btn btn-success btn-lg" download>
+                                <i class="bi bi-download me-2"></i>
+                                Скачать файл
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" onclick="window.open('${outputUrl}', '_blank')">
+                                <i class="bi bi-eye me-2"></i>
+                                Предварительный просмотр
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return modal;
+    }
+    
+    // Очистка мониторинга при выгрузке страницы
+    cleanup() {
+        try {
+            if (this.interfaceMonitor) {
+                clearInterval(this.interfaceMonitor);
+                this.interfaceMonitor = null;
+            }
+            
+            if (this.domObserver) {
+                this.domObserver.disconnect();
+                this.domObserver = null;
+            }
+            
+            if (this.modalCleanupTimer) {
+                clearTimeout(this.modalCleanupTimer);
+                this.modalCleanupTimer = null;
+            }
+            
+            console.log('Interface monitoring cleanup completed');
+            
+        } catch (error) {
+            console.error('Error in cleanup:', error);
+        }
+    }
 }
 
 // Инициализация при загрузке страницы
@@ -1048,5 +1586,13 @@ let conversionInterface;
 document.addEventListener('DOMContentLoaded', () => {
     conversionInterface = new ConversionInterface();
 });
+
+// Очистка при выгрузке страницы
+window.addEventListener('beforeunload', () => {
+    if (conversionInterface) {
+        conversionInterface.cleanup();
+    }
+});
+
 </script>
 {% endblock %}

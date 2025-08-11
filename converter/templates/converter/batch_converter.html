@@ -93,8 +93,8 @@
 <div class="container">
     <div class="row mb-4">
         <div class="col-12 text-center">
-            <h1 class="display-4 mb-3">⚡ Пакетная конвертация</h1>
-            <p class="lead text-muted">
+            <h1 class="display-4 mb-3">⚡ <span data-translate="batch-title">Пакетная конвертация</span></h1>
+            <p class="lead text-muted" data-translate="batch-desc">
                 Конвертируйте множество файлов одновременно с автоматическим определением настроек
             </p>
         </div>
@@ -106,11 +106,11 @@
             <div class="batch-upload-zone" id="batch-upload-zone">
                 <div class="text-center">
                     <div style="font-size: 4rem; margin-bottom: 1rem;">📂</div>
-                    <h4>Перетащите файлы сюда для пакетной обработки</h4>
-                    <p class="text-muted">Поддерживается множественная загрузка различных типов файлов</p>
+                    <h4 data-translate="drop-here-batch">Перетащите файлы сюда для пакетной обработки</h4>
+                    <p class="text-muted" data-translate="batch-multi-supported">Поддерживается множественная загрузка различных типов файлов</p>
                     <input type="file" id="batch-file-input" multiple style="display: none;" accept="*/*">
                     <button type="button" class="btn btn-primary btn-lg mt-3" onclick="document.getElementById('batch-file-input').click()">
-                        <i class="bi bi-folder-plus"></i> Выбрать файлы
+                        <i class="bi bi-folder-plus"></i> <span data-translate="choose-files">Выбрать файлы</span>
                     </button>
                 </div>
             </div>
@@ -120,7 +120,7 @@
     <!-- Очередь файлов -->
     <div class="row mb-4" id="file-queue-section" style="display: none;">
         <div class="col-12">
-            <h5><i class="bi bi-list-ol"></i> Очередь обработки</h5>
+            <h5><i class="bi bi-list-ol"></i> <span data-translate="queue-title">Очередь обработки</span></h5>
             <div class="file-queue" id="file-queue"></div>
         </div>
     </div>
@@ -129,12 +129,12 @@
     <div class="conversion-controls" id="conversion-controls" style="display: none;">
         <div class="row">
             <div class="col-md-6">
-                <h5><i class="bi bi-gear-fill"></i> Настройки пакетной обработки</h5>
+                <h5><i class="bi bi-gear-fill"></i> <span data-translate="batch-settings">Настройки пакетной обработки</span></h5>
                 
                 <div class="mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="auto-detect-settings" checked>
-                        <label class="form-check-label" for="auto-detect-settings">
+                        <label class="form-check-label" for="auto-detect-settings" data-translate="autodetect-optimal">
                             Автоопределение оптимальных настроек
                         </label>
                     </div>
@@ -143,7 +143,7 @@
                 <div class="mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="preserve-quality" checked>
-                        <label class="form-check-label" for="preserve-quality">
+                        <label class="form-check-label" for="preserve-quality" data-translate="preserve-quality">
                             Сохранить максимальное качество
                         </label>
                     </div>
@@ -152,7 +152,7 @@
                 <div class="mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="compress-output">
-                        <label class="form-check-label" for="compress-output">
+                        <label class="form-check-label" for="compress-output" data-translate="compress-output">
                             Сжать выходные файлы
                         </label>
                     </div>
@@ -160,10 +160,10 @@
             </div>
 
             <div class="col-md-6">
-                <h5><i class="bi bi-speedometer2"></i> Производительность</h5>
+                <h5><i class="bi bi-speedometer2"></i> <span data-translate="performance">Производительность</span></h5>
                 
                 <div class="mb-3">
-                    <label for="concurrent-jobs" class="form-label">Параллельных задач</label>
+                    <label for="concurrent-jobs" class="form-label" data-translate="concurrent-jobs">Параллельных задач</label>
                     <select class="form-select" id="concurrent-jobs">
                         <option value="1">1 (медленно, безопасно)</option>
                         <option value="2" selected>2 (оптимально)</option>
@@ -173,11 +173,11 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="priority-mode" class="form-label">Приоритет</label>
+                    <label for="priority-mode" class="form-label" data-translate="priority">Приоритет</label>
                     <select class="form-select" id="priority-mode">
-                        <option value="quality" selected>Качество</option>
-                        <option value="speed">Скорость</option>
-                        <option value="size">Размер файла</option>
+                        <option value="quality" selected data-translate="priority-quality">Качество</option>
+                        <option value="speed" data-translate="priority-speed">Скорость</option>
+                        <option value="size" data-translate="priority-size">Размер файла</option>
                     </select>
                 </div>
             </div>
@@ -185,40 +185,40 @@
 
         <div class="text-center mt-4">
             <button type="button" class="btn btn-success btn-lg" id="start-batch-conversion">
-                <i class="bi bi-play-circle-fill"></i> Начать пакетную конвертацию
+                <i class="bi bi-play-circle-fill"></i> <span data-translate="start-batch">Начать пакетную конвертацию</span>
             </button>
             <button type="button" class="btn btn-outline-secondary btn-lg ms-3" id="clear-queue">
-                <i class="bi bi-trash"></i> Очистить очередь
+                <i class="bi bi-trash"></i> <span data-translate="clear-queue">Очистить очередь</span>
             </button>
         </div>
     </div>
 
     <!-- Статистика -->
     <div class="batch-stats" id="batch-stats" style="display: none;">
-        <h4 class="text-center mb-4">Статистика пакетной обработки</h4>
+        <h4 class="text-center mb-4" data-translate="batch-stats-title">Статистика пакетной обработки</h4>
         <div class="row">
             <div class="col-md-3">
                 <div class="stat-box">
                     <span class="stat-number" id="total-queued">0</span>
-                    <span class="stat-label">Всего в очереди</span>
+                    <span class="stat-label" data-translate="total-queued">Всего в очереди</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-box">
                     <span class="stat-number" id="currently-processing">0</span>
-                    <span class="stat-label">Обрабатывается</span>
+                    <span class="stat-label" data-translate="currently-processing">Обрабатывается</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-box">
                     <span class="stat-number" id="completed-jobs">0</span>
-                    <span class="stat-label">Завершено</span>
+                    <span class="stat-label" data-translate="completed-status">Завершено</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-box">
                     <span class="stat-number" id="failed-jobs">0</span>
-                    <span class="stat-label">Ошибок</span>
+                    <span class="stat-label" data-translate="errors">Ошибок</span>
                 </div>
             </div>
         </div>
@@ -227,19 +227,19 @@
             <div class="progress" style="height: 10px;">
                 <div class="progress-bar" id="overall-progress" style="width: 0%"></div>
             </div>
-            <small class="mt-2 d-block">Общий прогресс обработки</small>
+            <small class="mt-2 d-block" data-translate="overall-progress">Общий прогресс обработки</small>
         </div>
     </div>
 
     <!-- Результаты -->
     <div class="row mt-4" id="batch-results" style="display: none;">
         <div class="col-12">
-            <h5><i class="bi bi-check-circle-fill text-success"></i> Результаты конвертации</h5>
+            <h5><i class="bi bi-check-circle-fill text-success"></i> <span data-translate="conversion-results">Результаты конвертации</span></h5>
             <div id="results-container" class="row"></div>
             
             <div class="text-center mt-4">
                 <button type="button" class="btn btn-primary btn-lg" id="download-all">
-                    <i class="bi bi-download"></i> Скачать все результаты
+                    <i class="bi bi-download"></i> <span data-translate="download-all-results">Скачать все результаты</span>
                 </button>
             </div>
         </div>
@@ -320,7 +320,7 @@ function updateQueueDisplay() {
     const queueContainer = document.getElementById('file-queue');
     
     if (batchQueue.length === 0) {
-        queueContainer.innerHTML = '<p class="text-muted text-center">Очередь пуста</p>';
+        queueContainer.innerHTML = '<p class="text-muted text-center" data-translate="queue-empty">Очередь пуста</p>';
         return;
     }
 

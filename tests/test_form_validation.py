@@ -24,7 +24,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedF
 from django.core.exceptions import ValidationError
 from io import StringIO
 
-from forms import VideoUploadForm, VideoProcessingForm, AudioToTextForm, ImagesToGifForm
+import forms
 
 
 class VideoUploadFormTests(TestCase):
@@ -70,7 +70,7 @@ class VideoUploadFormTests(TestCase):
             'dither': 'bayer'
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertTrue(form.is_valid(), f"Form should be valid, errors: {form.errors}")
     
     def test_file_too_big_validation(self):
@@ -86,7 +86,7 @@ class VideoUploadFormTests(TestCase):
                 'Размер загруженного файла: 600.0 МБ'
             )
             
-            form = VideoUploadForm(data=form_data, files={'video': large_file})
+            form = forms.VideoUploadForm(data=form_data, files={'video': large_file})
             self.assertFalse(form.is_valid())
             mock_clean.assert_called_once()
     
@@ -99,7 +99,7 @@ class VideoUploadFormTests(TestCase):
         )
         
         form_data = {'width': 720, 'fps': 30, 'speed': '1.0'}
-        form = VideoUploadForm(data=form_data, files={'video': wrong_format_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': wrong_format_file})
         
         self.assertFalse(form.is_valid())
         self.assertIn('video', form.errors)
@@ -116,21 +116,21 @@ class VideoUploadFormTests(TestCase):
         
         # Test minimum width boundary
         form_data = {'width': 143, 'fps': 30, 'speed': '1.0'}  # Below minimum
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertFalse(form.is_valid())
         self.assertIn('width', form.errors)
         
         # Test maximum width boundary
         video_file.seek(0)
         form_data = {'width': 3841, 'fps': 30, 'speed': '1.0'}  # Above maximum
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertFalse(form.is_valid())
         self.assertIn('width', form.errors)
         
         # Test odd width (should fail - must be even)
         video_file.seek(0)
         form_data = {'width': 721, 'fps': 30, 'speed': '1.0'}  # Odd number
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertFalse(form.is_valid())
         self.assertIn('width', form.errors)
         self.assertIn('четным числом', str(form.errors['width']))
@@ -146,14 +146,14 @@ class VideoUploadFormTests(TestCase):
         
         # Test minimum FPS boundary
         form_data = {'width': 720, 'fps': 14, 'speed': '1.0'}  # Below minimum
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertFalse(form.is_valid())
         self.assertIn('fps', form.errors)
         
         # Test maximum FPS boundary
         video_file.seek(0)
         form_data = {'width': 720, 'fps': 61, 'speed': '1.0'}  # Above maximum
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertFalse(form.is_valid())
         self.assertIn('fps', form.errors)
     
@@ -181,7 +181,7 @@ class VideoUploadFormTests(TestCase):
                     'speed': '1.0'
                 }
                 
-                form = VideoUploadForm(data=form_data, files={'video': video_file})
+                form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
                 self.assertFalse(form.is_valid(), f"Should fail for: {case['error']}")
                 
                 # Check specific error messages
@@ -206,7 +206,7 @@ class VideoUploadFormTests(TestCase):
             'end_time': 600,  # Exactly 10 minutes
             'speed': '1.0'   # Required field
         }
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         if not form.is_valid():
             print(f"Form errors: {form.errors}")
         self.assertTrue(form.is_valid())
@@ -214,7 +214,7 @@ class VideoUploadFormTests(TestCase):
         # Test 10 minutes + 1 second (should fail)
         video_file2 = SimpleUploadedFile('test2.mp4', video_content)
         form_data.update({'end_time': 601, 'speed': '1.0'})
-        form = VideoUploadForm(data=form_data, files={'video': video_file2})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file2})
         self.assertFalse(form.is_valid())
         self.assertIn('end_time', form.errors)
     
@@ -236,7 +236,7 @@ class VideoUploadFormTests(TestCase):
             'dither': 'floyd_steinberg'
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         self.assertTrue(form.is_valid())
         
         settings = form.get_conversion_settings()
@@ -273,7 +273,7 @@ class AudioToTextFormTests(TestCase):
                 'Размер файла слишком большой. Максимальный размер: 200 МБ'
             )
             
-            form = AudioToTextForm(data=form_data, files={'audio': large_audio})
+            form = forms.AudioToTextForm(data=form_data, files={'audio': large_audio})
             self.assertFalse(form.is_valid())
     
     def test_invalid_audio_format(self):
@@ -291,7 +291,7 @@ class AudioToTextFormTests(TestCase):
         }
         
         # The form should validate the audio file extension
-        form = AudioToTextForm(data=form_data, files={'audio': wrong_format_file})
+        form = forms.AudioToTextForm(data=form_data, files={'audio': wrong_format_file})
         # Note: This would fail in clean_audio method during actual validation
 
 
@@ -316,7 +316,7 @@ class ImagesToGifFormTests(TestCase):
         
         # Note: The actual validation would fail in clean_images() during form processing
         # This test documents the expected behavior
-        form = ImagesToGifForm(data=form_data, files={'images': single_image})
+        form = forms.ImagesToGifForm(data=form_data, files={'images': single_image})
         # In actual usage, this would be validated in the view or clean_images method
         self.assertTrue(True)  # Test passes to document expected behavior
     
@@ -331,7 +331,7 @@ class ImagesToGifFormTests(TestCase):
         
         # Note: The actual validation would fail in clean_images() during form processing
         # This test documents the expected behavior for > 100 images
-        form = ImagesToGifForm(data=form_data)
+        form = forms.ImagesToGifForm(data=form_data)
         # In actual usage, this would be validated in the view or clean_images method
         self.assertTrue(True)  # Test passes to document expected behavior
     
@@ -345,13 +345,13 @@ class ImagesToGifFormTests(TestCase):
             'output_size': '480',
             'colors': '128'
         }
-        form = ImagesToGifForm(data=form_data)
+        form = forms.ImagesToGifForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('frame_duration', form.errors)
         
         # Test maximum boundary (5.0 seconds)
         form_data['frame_duration'] = 5.1  # Above maximum
-        form = ImagesToGifForm(data=form_data)
+        form = forms.ImagesToGifForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('frame_duration', form.errors)
 
@@ -372,7 +372,7 @@ class VideoProcessingFormTests(TestCase):
                 'Для быстрой обработки размер файла не должен превышать 200 МБ'
             )
             
-            form = VideoProcessingForm(data=form_data, files={'video': large_file})
+            form = forms.VideoProcessingForm(data=form_data, files={'video': large_file})
             self.assertFalse(form.is_valid())
     
     def test_quality_settings_mapping(self):
@@ -389,7 +389,7 @@ class VideoProcessingFormTests(TestCase):
         for quality, expected_settings in quality_tests:
             with self.subTest(quality=quality):
                 form_data = {'quality': quality}
-                form = VideoProcessingForm(data=form_data, files={'video': video_file})
+                form = forms.VideoProcessingForm(data=form_data, files={'video': video_file})
                 
                 if form.is_valid():
                     settings = form.get_quality_settings()

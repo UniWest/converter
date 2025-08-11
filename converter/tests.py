@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.test.utils import override_settings
 
 from .utils import VideoConverter, save_uploaded_video, save_converted_gif, cleanup_temp_files
-from forms import VideoUploadForm, VideoProcessingForm
+import forms
 
 
 class VideoConverterTests(TestCase):
@@ -281,7 +281,7 @@ class FormsTests(TestCase):
             'end_time': 60
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': test_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': test_file})
         self.assertTrue(form.is_valid())
     
     def test_video_upload_form_invalid_file_size(self):
@@ -300,7 +300,7 @@ class FormsTests(TestCase):
             from django.core.exceptions import ValidationError
             mock_clean.side_effect = ValidationError('Размер файла слишком большой')
             
-            form = VideoUploadForm(data=form_data, files={'video': large_file})
+            form = forms.VideoUploadForm(data=form_data, files={'video': large_file})
             self.assertFalse(form.is_valid())
     
     def test_video_upload_form_invalid_extension(self):
@@ -316,7 +316,7 @@ class FormsTests(TestCase):
             'fps': 30,
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': test_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': test_file})
         self.assertFalse(form.is_valid())
         self.assertIn('video', form.errors)
     
@@ -333,7 +333,7 @@ class FormsTests(TestCase):
             'fps': 30,
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': test_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': test_file})
         self.assertFalse(form.is_valid())
         self.assertIn('width', form.errors)
     
@@ -352,7 +352,7 @@ class FormsTests(TestCase):
             'end_time': 30  # Меньше начального времени
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': test_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': test_file})
         self.assertFalse(form.is_valid())
         self.assertIn('end_time', form.errors)
     
@@ -368,7 +368,7 @@ class FormsTests(TestCase):
             'quality': '1080p'
         }
         
-        form = VideoProcessingForm(data=form_data, files={'video': test_file})
+        form = forms.VideoProcessingForm(data=form_data, files={'video': test_file})
         self.assertTrue(form.is_valid())
         
         # Проверяем настройки качества
@@ -392,7 +392,7 @@ class FormsTests(TestCase):
             'end_time': 70
         }
         
-        form = VideoUploadForm(data=form_data, files={'video': test_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': test_file})
         self.assertTrue(form.is_valid())
         
         settings = form.get_conversion_settings()

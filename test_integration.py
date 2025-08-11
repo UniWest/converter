@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.conf import settings
 
 from converter.utils import VideoConverter, save_uploaded_video, save_converted_gif, cleanup_temp_files
-from forms import VideoUploadForm, VideoProcessingForm
+import forms
 
 
 class VideoConverterIntegrationTests(TestCase):
@@ -227,7 +227,7 @@ class VideoConverterIntegrationTests(TestCase):
             'end_time': 60
         }
         
-        form = VideoUploadForm(
+        form = forms.VideoUploadForm(
             data=valid_form_data,
             files={'video': self.test_video_file}
         )
@@ -247,7 +247,7 @@ class VideoConverterIntegrationTests(TestCase):
             'quality': '720p'
         }
         
-        processing_form = VideoProcessingForm(
+        processing_form = forms.VideoProcessingForm(
             data=processing_form_data,
             files={'video': self.test_video_file}
         )

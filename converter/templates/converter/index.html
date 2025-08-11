@@ -30,9 +30,9 @@
             <div class="mb-4">
                 <div class="file-input-wrapper" onclick="document.getElementById('{{ form.video.id_for_label }}').click()" role="button" tabindex="0" aria-label="Область загрузки файла" onkeydown="if(event.key==='Enter'||event.key===' '){this.click()}">
                     <div class="upload-icon" aria-hidden="true">📹</div>
-                    <h5>Загрузите видео файл</h5>
-                    <p class="text-muted">Нажмите здесь или перетащите файл</p>
-                    <p class="file-name text-primary fw-bold" id="selected-file-name" aria-live="polite">Файл не выбран</p>
+                    <h5 data-translate="upload-video">Загрузите видео файл</h5>
+                    <p class="text-muted" data-translate="click-or-drag">Нажмите здесь или перетащите файл</p>
+                    <p class="file-name text-primary fw-bold" id="selected-file-name" aria-live="polite" data-translate="file-not-selected">Файл не выбран</p>
                     <!-- Прогресс бар загрузки -->
                     <div class="upload-progress mt-2" id="upload-progress" style="display: none;">
                         <div class="progress">
@@ -57,7 +57,7 @@
             
             <!-- Настройки конвертации -->
             <div class="conversion-settings slide-in-left">
-                <h5><i class="bi bi-gear-fill" aria-hidden="true"></i> Настройки конвертации</h5>
+                <h5><i class="bi bi-gear-fill" aria-hidden="true"></i> <span data-translate="conversion-settings-title">Настройки конвертации</span></h5>
                 
                 <!-- Оригинальные размеры -->
                 <div class="mb-3">
@@ -159,7 +159,7 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="settings-group">
-                            <label class="form-label">Эффекты:</label>
+                            <label class="form-label" data-translate="effects-label">Эффекты:</label>
                             <div class="d-flex flex-wrap gap-3 mt-2">
                                 <div class="form-check form-check-inline">
                                     {{ form.grayscale }}
@@ -242,7 +242,7 @@
             <div class="text-center slide-in-right">
                 <button type="submit" class="btn btn-primary btn-lg" id="convert-btn">
                     <i class="bi bi-play-circle-fill me-2"></i>
-                    Конвертировать в GIF
+                    <span data-translate="convert-to-gif">Конвертировать в GIF</span>
                 </button>
             </div>
         </form>
@@ -250,10 +250,10 @@
         <!-- Спиннер загрузки -->
         <div class="loading-spinner" id="loading-spinner">
             <div class="spinner-border" role="status">
-                <span class="visually-hidden">Конвертация...</span>
+                <span class="visually-hidden" data-translate="converting">Конвертация...</span>
             </div>
-            <h5 class="mt-3">Конвертация видео...</h5>
-            <p class="text-muted">Пожалуйста, подождите. Это может занять несколько минут в зависимости от размера видео.</p>
+            <h5 class="mt-3" data-translate="video-conversion-in-progress">Конвертация видео...</h5>
+            <p class="text-muted" data-translate="please-wait-video">Пожалуйста, подождите. Это может занять несколько минут в зависимости от размера видео.</p>
             
             <!-- Прогресс бар (если нужен) -->
             <div class="progress mt-3" style="display: none;">
@@ -268,22 +268,22 @@
     <div class="col-md-4">
         <div class="feature-card fade-in">
             <div class="feature-icon">⚡</div>
-            <h5>Быстрая обработка</h5>
-            <p class="text-muted mb-0">Конвертация с использованием оптимизированных алгоритмов FFmpeg для максимальной производительности</p>
+            <h5 data-translate="fast-processing">Быстрая обработка</h5>
+            <p class="text-muted mb-0" data-translate="fast-processing-desc">Конвертация с использованием оптимизированных алгоритмов FFmpeg для максимальной производительности</p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="feature-card fade-in">
             <div class="feature-icon">🔧</div>
-            <h5>Гибкие настройки</h5>
-            <p class="text-muted mb-0">Настройте размер, частоту кадров и временные рамки для получения идеального результата</p>
+            <h5 data-translate="flexible-settings">Гибкие настройки</h5>
+            <p class="text-muted mb-0" data-translate="flexible-settings-desc">Настройте размер, частоту кадров и временные рамки для получения идеального результата</p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="feature-card fade-in">
             <div class="feature-icon">📱</div>
-            <h5>Поддержка форматов</h5>
-            <p class="text-muted mb-0">MP4, AVI, MOV, MKV, WMV, WebM и другие популярные видео форматы</p>
+            <h5 data-translate="format-support">Поддержка форматов</h5>
+            <p class="text-muted mb-0" data-translate="format-support-desc">MP4, AVI, MOV, MKV, WMV, WebM и другие популярные видео форматы</p>
         </div>
     </div>
 </div>
@@ -294,28 +294,28 @@
         <div class="conversion-settings fade-in">
             <h5 class="mb-3">
                 <i class="bi bi-info-circle me-2"></i>
-                Как использовать конвертер
+                <span data-translate="how-to-use">Как использовать конвертер</span>
             </h5>
             <div class="row">
                 <div class="col-md-3 text-center mb-3">
                     <div class="feature-icon">1️⃣</div>
-                    <h6>Выберите файл</h6>
-                    <small class="text-muted">Загрузите видео или перетащите его в область загрузки</small>
+                    <h6 data-translate="step-1-title">Выберите файл</h6>
+                    <small class="text-muted" data-translate="step-1-desc">Загрузите видео или перетащите его в область загрузки</small>
                 </div>
                 <div class="col-md-3 text-center mb-3">
                     <div class="feature-icon">2️⃣</div>
-                    <h6>Настройте параметры</h6>
-                    <small class="text-muted">Укажите размер, FPS и временной интервал</small>
+                    <h6 data-translate="step-2-title">Настройте параметры</h6>
+                    <small class="text-muted" data-translate="step-2-desc">Укажите размер, FPS и временной интервал</small>
                 </div>
                 <div class="col-md-3 text-center mb-3">
                     <div class="feature-icon">3️⃣</div>
-                    <h6>Запустите конвертацию</h6>
-                    <small class="text-muted">Нажмите кнопку и дождитесь завершения</small>
+                    <h6 data-translate="step-3-title">Запустите конвертацию</h6>
+                    <small class="text-muted" data-translate="step-3-desc">Нажмите кнопку и дождитесь завершения</small>
                 </div>
                 <div class="col-md-3 text-center mb-3">
                     <div class="feature-icon">4️⃣</div>
-                    <h6>Скачайте результат</h6>
-                    <small class="text-muted">Получите готовый GIF файл</small>
+                    <h6 data-translate="step-4-title">Скачайте результат</h6>
+                    <small class="text-muted" data-translate="step-4-desc">Получите готовый GIF файл</small>
                 </div>
             </div>
         </div>

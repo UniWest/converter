@@ -162,8 +162,8 @@
 <div class="container-fluid">
     <!-- Заголовок результатов -->
     <div class="results-header text-center">
-        <h1><i class="bi bi-check-circle"></i> Результаты конвертации</h1>
-        <p class="lead mb-0">Ваши файлы успешно обработаны</p>
+        <h1><i class="bi bi-check-circle"></i> <span data-translate="results-title">Результаты конвертации</span></h1>
+        <p class="lead mb-0" data-translate="files-processed">Ваши файлы успешно обработаны</p>
     </div>
 
     <!-- Статистика -->
@@ -172,28 +172,28 @@
             <div class="stats-card text-center">
                 <span class="stats-icon">📊</span>
                 <h3 id="total-files">{{ total_files|default:0 }}</h3>
-                <p class="text-muted mb-0">Всего файлов</p>
+                <p class="text-muted mb-0" data-translate="total-files">Всего файлов</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stats-card text-center">
                 <span class="stats-icon">✅</span>
                 <h3 id="completed-files" class="text-success">{{ completed_files|default:0 }}</h3>
-                <p class="text-muted mb-0">Завершено</p>
+                <p class="text-muted mb-0" data-translate="completed">Завершено</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stats-card text-center">
                 <span class="stats-icon">⏳</span>
                 <h3 id="processing-files" class="text-warning">{{ processing_files|default:0 }}</h3>
-                <p class="text-muted mb-0">Обрабатывается</p>
+                <p class="text-muted mb-0" data-translate="processing">Обрабатывается</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stats-card text-center">
                 <span class="stats-icon">❌</span>
                 <h3 id="failed-files" class="text-danger">{{ failed_files|default:0 }}</h3>
-                <p class="text-muted mb-0">Ошибка</p>
+                <p class="text-muted mb-0" data-translate="error">Ошибка</p>
             </div>
         </div>
     </div>
@@ -205,12 +205,12 @@
                 <div class="search-box">
                     <i class="bi bi-search"></i>
                     <input type="text" class="form-control" id="search-input" 
-                           placeholder="Поиск файлов...">
+                           placeholder="Поиск файлов..." data-translate-placeholder="search-files">
                 </div>
             </div>
             <div class="col-md-3">
                 <select class="form-select" id="status-filter">
-                    <option value="">Все статусы</option>
+                    <option value="" data-translate="all-statuses">Все статусы</option>
                     <option value="done">Завершено</option>
                     <option value="running">Обрабатывается</option>
                     <option value="queued">В очереди</option>

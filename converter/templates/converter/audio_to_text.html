@@ -373,15 +373,6 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-10 mx-auto">
-        <!-- System Status Alert -->
-        <div class="alert alert-warning alert-dismissible fade show" role="alert" id="systemStatusAlert">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <strong>Уведомление о совместимости:</strong>
-            Некоторые библиотеки для распознавания речи не установлены. 
-            Система работает в ограниченном режиме.
-            <a href="#" class="alert-link" onclick="showLibraryInfo()">Подробнее »</a>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
         
         <!-- File Upload Zone -->
         <div class="audio-drop-zone fade-in" id="dropZone">
@@ -1666,104 +1657,13 @@ function formatDuration(seconds) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-// Функция для показа информации о библиотеках
-function showLibraryInfo() {
-    const modalHtml = `
-        <div class="modal fade" id="libraryInfoModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="bi bi-info-circle"></i>
-                            Информация о системе распознавания речи
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <h6><i class="bi bi-exclamation-triangle-fill"></i> Текущее состояние системы</h6>
-                            <p>Система работает в режиме совместимости с отсутствующими библиотеками:</p>
-                            <ul>
-                                <li><strong>Celery:</strong> Недоступен - асинхронная обработка отключена</li>
-                                <li><strong>pydub:</strong> Недоступен - предварительная обработка аудио ограничена</li>
-                                <li><strong>speech_recognition:</strong> Недоступен - распознавание речи недоступно</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-check-circle text-success"></i> Что работает</h6>
-                                <ul>
-                                    <li>Загрузка аудиофайлов</li>
-                                    <li>Интерфейс пользователя</li>
-                                    <li>Базовая обработка форм</li>
-                                    <li>Система обработки ошибок</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-x-circle text-danger"></i> Что не работает</h6>
-                                <ul>
-                                    <li>Распознавание речи из аудио</li>
-                                    <li>Асинхронная обработка файлов</li>
-                                    <li>Предварительная обработка аудио</li>
-                                    <li>Генерация субтитров</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <hr>
-                        
-                        <h6><i class="bi bi-tools"></i> Для полной функциональности установите:</h6>
-                        <div class="bg-dark text-light p-3 rounded">
-                            <code>
-                                pip install celery[redis]<br>
-                                pip install pydub<br>
-                                pip install SpeechRecognition<br>
-                                pip install ffmpeg-python
-                            </code>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <small class="text-muted">
-                                <i class="bi bi-lightbulb"></i>
-                                <strong>Совет:</strong> После установки библиотек перезапустите Django сервер для применения изменений.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Удаляем предыдущий модал если есть
-    const existingModal = document.getElementById('libraryInfoModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Добавляем модал в DOM
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
-    // Показываем модал
-    const modal = new bootstrap.Modal(document.getElementById('libraryInfoModal'));
-    modal.show();
-    
-    // Удаляем модал после закрытия
-    document.getElementById('libraryInfoModal').addEventListener('hidden.bs.modal', function() {
-        this.remove();
-    });
-}
 
 // Экспорт функций для глобального использования
 window.audioToTextApp = {
     setLanguage,
     downloadResult,
     copyToClipboard,
-    startRecognition,
-    showLibraryInfo
+    startRecognition
 };
 </script>
 {% endblock %}

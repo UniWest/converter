@@ -7,24 +7,226 @@
     /* Основные стили для интерфейса с поддержкой темной темы */
     .converter-card {
         transition: all 0.2s ease;
-        border: 1px solid var(--bs-border-color);
+        border: 1px solid #dee2e6;
         border-radius: 12px;
         padding: 1rem 1rem;
         height: 100%;
-        background: var(--bs-body-bg);
-        color: var(--text-primary);
+        background: #ffffff;
+        color: #333333;
+        position: relative;
+        z-index: 1;
+        pointer-events: auto;
+        cursor: pointer;
     }
 
     .converter-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        border-color: var(--bs-primary);
+        border-color: #0d6efd;
     }
 
     .converter-card.active {
-        border-color: var(--bs-primary);
+        border-color: #0d6efd;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
+    }
+    
+    /* Темная тема для карточек конвертера */
+    [data-theme="dark"] .converter-card {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: rgba(102, 126, 234, 0.4);
+        color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .converter-card:hover {
+        background: rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+        color: #ffffff;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    [data-theme="dark"] .converter-card.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+    }
+    
+    /* Темная тема для всех текстовых элементов */
+    [data-theme="dark"] h1,
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h3,
+    [data-theme="dark"] h4,
+    [data-theme="dark"] h5,
+    [data-theme="dark"] h6,
+    [data-theme="dark"] p,
+    [data-theme="dark"] span,
+    [data-theme="dark"] div,
+    [data-theme="dark"] label,
+    [data-theme="dark"] strong,
+    [data-theme="dark"] .display-4 {
+        color: #ffffff !important;
+    }
+    
+    [data-theme="dark"] .text-muted,
+    [data-theme="dark"] .small,
+    [data-theme="dark"] small {
+        color: #e5e7eb !important;
+    }
+    
+    [data-theme="dark"] .lead {
+        color: #e5e7eb !important;
+    }
+    
+    /* Темная тема для панелей настроек */
+    [data-theme="dark"] .settings-panel {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .progress-step {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .file-item {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .result-card {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .result-preview {
+        background: rgba(31, 41, 55, 0.8);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .adapter-status {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .alert-info {
+        background: rgba(102, 126, 234, 0.2);
+        border-color: rgba(102, 126, 234, 0.4);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .form-control {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .form-control:focus {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: #667eea;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+    
+    [data-theme="dark"] .form-select {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .form-select:focus {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: #667eea;
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .form-check-input {
+        background-color: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.4);
+    }
+    
+    [data-theme="dark"] .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    [data-theme="dark"] .form-check-label {
+        color: #ffffff !important;
+    }
+    
+    [data-theme="dark"] .btn-outline-secondary {
+        color: #ffffff;
+        border-color: rgba(102, 126, 234, 0.4);
+    }
+    
+    [data-theme="dark"] .btn-outline-secondary:hover {
+        background: rgba(102, 126, 234, 0.2);
+        color: #ffffff;
+        border-color: #667eea;
+    }
+    
+    [data-theme="dark"] .btn-outline-danger {
+        color: #f87171;
+        border-color: rgba(248, 113, 113, 0.4);
+    }
+    
+    [data-theme="dark"] .btn-outline-danger:hover {
+        background: rgba(248, 113, 113, 0.2);
+        color: #ffffff;
+        border-color: #f87171;
+    }
+    
+    [data-theme="dark"] .btn-outline-primary {
+        color: #667eea;
+        border-color: rgba(102, 126, 234, 0.4);
+    }
+    
+    [data-theme="dark"] .btn-outline-primary:hover {
+        background: #667eea;
+        color: #ffffff;
+        border-color: #667eea;
+    }
+    
+    /* Автоматическая темная тема при системных настройках */
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .converter-card {
+            background: rgba(55, 65, 81, 0.9);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #ffffff;
+        }
+        
+        :root:not([data-theme="light"]) h1,
+        :root:not([data-theme="light"]) h2,
+        :root:not([data-theme="light"]) h3,
+        :root:not([data-theme="light"]) h4,
+        :root:not([data-theme="light"]) h5,
+        :root:not([data-theme="light"]) h6,
+        :root:not([data-theme="light"]) p,
+        :root:not([data-theme="light"]) span,
+        :root:not([data-theme="light"]) div,
+        :root:not([data-theme="light"]) label,
+        :root:not([data-theme="light"]) .display-4 {
+            color: #ffffff !important;
+        }
+        
+        :root:not([data-theme="light"]) .text-muted,
+        :root:not([data-theme="light"]) .small,
+        :root:not([data-theme="light"]) small {
+            color: #e5e7eb !important;
+        }
+        
+        :root:not([data-theme="light"]) .form-control,
+        :root:not([data-theme="light"]) .form-select {
+            background: rgba(55, 65, 81, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            color: #ffffff;
+        }
     }
 
     .file-type-icon {
@@ -34,13 +236,13 @@
     }
 
     .upload-zone {
-        border: 2px dashed var(--bs-border-color);
+        border: 2px dashed #dee2e6;
         border-radius: 12px;
         padding: 1.25rem;
         text-align: center;
         transition: all 0.2s ease;
-        background: var(--bs-secondary-bg);
-        color: var(--text-primary);
+        background: #f8f9fa;
+        color: #333333;
         min-height: 140px;
         display: flex;
         flex-direction: column;
@@ -49,15 +251,34 @@
     }
 
     .upload-zone.dragover {
-        border-color: var(--bs-primary);
+        border-color: #0d6efd;
         background: rgba(13, 110, 253, 0.1);
-        color: var(--text-primary);
+        color: #333333;
     }
 
     .upload-zone.has-files {
-        border-color: var(--bs-success);
+        border-color: #198754;
         background: rgba(25, 135, 84, 0.1);
-        color: var(--text-primary);
+        color: #333333;
+    }
+    
+    /* Темная тема для зоны загрузки */
+    [data-theme="dark"] .upload-zone {
+        background: rgba(55, 65, 81, 0.8);
+        border-color: rgba(102, 126, 234, 0.5);
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .upload-zone.dragover {
+        background: rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+        color: #ffffff;
+    }
+    
+    [data-theme="dark"] .upload-zone.has-files {
+        background: rgba(34, 197, 94, 0.2);
+        border-color: #22c55e;
+        color: #ffffff;
     }
 
     .conversion-progress {
@@ -257,8 +478,8 @@
     <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col-12 text-center">
-            <h1 class="display-4 mb-3">🔄 Универсальный конвертер файлов</h1>
-            <p class="lead text-muted">
+<h1 class="display-4 mb-3" data-translate="universal-converter-title">🔄 Универсальный конвертер файлов</h1>
+<p class="lead text-muted" data-translate="converter-description">
                 Конвертируйте видео, изображения, аудио, документы и архивы с помощью современных алгоритмов
             </p>
         </div>
@@ -273,10 +494,10 @@
                         <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
                     </svg>
                 </div>
-                <h5>Видео</h5>
-                <p class="small">MP4, AVI, MOV в GIF</p>
+<h5 data-translate="video">Видео</h5>
+                <p class="small" data-translate="video-formats">MP4, AVI, MOV в GIF</p>
                 <div class="mt-auto">
-                    <small class="text-muted">Поддержка MoviePy/FFmpeg</small>
+                    <small class="text-muted" data-translate="video-support">Поддержка MoviePy/FFmpeg</small>
                 </div>
             </div>
         </div>
@@ -284,10 +505,10 @@
         <div class="col-md-2 col-sm-4 col-6 mb-3">
             <div class="converter-card text-center h-100" data-type="image">
                 <div class="file-type-icon">🖼️</div>
-                <h5>Изображения</h5>
-                <p class="small">JPG, PNG, GIF, WebP</p>
+<h5 data-translate="images">Изображения</h5>
+                <p class="small" data-translate="image-formats">JPG, PNG, GIF, WebP</p>
                 <div class="mt-auto">
-                    <small class="text-muted">Поддержка PIL/Pillow</small>
+                    <small class="text-muted" data-translate="image-support">Поддержка PIL/Pillow</small>
                 </div>
             </div>
         </div>
@@ -295,10 +516,10 @@
         <div class="col-md-2 col-sm-4 col-6 mb-3">
             <div class="converter-card text-center h-100" data-type="audio">
                 <div class="file-type-icon">🎵</div>
-                <h5>Аудио</h5>
-                <p class="small">MP3, WAV + Speech-to-Text</p>
+<h5 data-translate="audio">Аудио</h5>
+                <p class="small" data-translate="audio-formats">MP3, WAV + Speech-to-Text</p>
                 <div class="mt-auto">
-                    <small class="text-muted">Поддержка Whisper/PyDub</small>
+                    <small class="text-muted" data-translate="audio-support">Поддержка Whisper/PyDub</small>
                 </div>
             </div>
         </div>
@@ -306,10 +527,10 @@
         <div class="col-md-2 col-sm-4 col-6 mb-3">
             <div class="converter-card text-center h-100" data-type="document">
                 <div class="file-type-icon">📄</div>
-                <h5>Документы</h5>
-                <p class="small">PDF, DOCX, RTF</p>
+<h5 data-translate="documents">Документы</h5>
+                <p class="small" data-translate="document-formats">PDF, DOCX, RTF</p>
                 <div class="mt-auto">
-                    <small class="text-success">Доступно</small>
+                    <small class="text-success" data-translate="available">Доступно</small>
                 </div>
             </div>
         </div>
@@ -317,10 +538,10 @@
         <div class="col-md-2 col-sm-4 col-6 mb-3">
             <div class="converter-card text-center h-100" data-type="archive">
                 <div class="file-type-icon">🗜️</div>
-                <h5>Архивы</h5>
-                <p class="small">ZIP, RAR, 7Z</p>
+<h5 data-translate="archives">Архивы</h5>
+                <p class="small" data-translate="archive-formats">ZIP, RAR, 7Z</p>
                 <div class="mt-auto">
-                    <small class="text-success">Доступно</small>
+                    <small class="text-success" data-translate="available">Доступно</small>
                 </div>
             </div>
         </div>
@@ -328,10 +549,10 @@
         <div class="col-md-2 col-sm-4 col-6 mb-3">
             <div class="converter-card text-center h-100" data-type="batch">
                 <div class="file-type-icon">⚡</div>
-                <h5>Пакетная</h5>
-                <p class="small">Множество файлов</p>
+<h5 data-translate="batch">Пакетная</h5>
+                <p class="small" data-translate="batch-formats">Множество файлов</p>
                 <div class="mt-auto">
-                    <small class="text-muted">Автоопределение</small>
+                    <small class="text-muted" data-translate="auto-detection">Автоопределение</small>
                 </div>
             </div>
         </div>
@@ -343,11 +564,11 @@
             <div class="upload-zone" id="upload-zone">
                 <div class="upload-content">
                     <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
-                    <h4>Перетащите файлы сюда или нажмите для выбора</h4>
-                    <p class="text-muted">Поддерживаются множественная загрузка и различные форматы</p>
+<h4 data-translate="drag-files">Перетащите файлы сюда или нажмите для выбора</h4>
+                    <p class="text-muted" data-translate="multiple-files-supported">Поддерживаются множественная загрузка и различные форматы</p>
                     <input type="file" id="file-input" multiple style="display: none;" accept="*/*">
                     <button type="button" class="btn btn-primary btn-lg mt-3" onclick="document.getElementById('file-input').click()">
-                        <i class="bi bi-upload"></i> Выбрать файлы
+                        <i class="bi bi-upload"></i> <span data-translate="choose-files">Выбрать файлы</span>
                     </button>
                 </div>
                 
@@ -360,14 +581,14 @@
     <div id="settings-panels">
         <!-- Настройки видео конвертации -->
         <div class="settings-panel" id="video-settings">
-            <h5><i class="bi bi-gear-fill"></i> Настройки конвертации видео</h5>
+            <h5><i class="bi bi-gear-fill"></i> <span data-translate="video-settings-title">Настройки конвертации видео</span></h5>
             
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="video-width" class="form-label">Ширина (пиксели)</label>
+                        <label for="video-width" class="form-label" data-translate="video-width-label">Ширина (пиксели)</label>
                         <select class="form-select" id="video-width">
-                            <option value="">Сохранить оригинальную</option>
+                            <option value="" data-translate="keep-original">Сохранить оригинальную</option>
                             <option value="320">320px (мини)</option>
                             <option value="480">480px (мобильное)</option>
                             <option value="720" selected>720px (стандартное)</option>
@@ -378,7 +599,7 @@
                 
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="video-fps" class="form-label">FPS (кадров/сек)</label>
+                        <label for="video-fps" class="form-label" data-translate="video-fps-label">FPS (кадров/сек)</label>
                         <select class="form-select" id="video-fps">
                             <option value="10">10 fps (низкое)</option>
                             <option value="15" selected>15 fps (оптимальное)</option>
@@ -392,14 +613,14 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="video-start-time" class="form-label">Начальное время (сек)</label>
+                        <label for="video-start-time" class="form-label" data-translate="start-time-label">Начальное время (сек)</label>
                         <input type="number" class="form-control" id="video-start-time" min="0" value="0">
                     </div>
                 </div>
                 
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="video-end-time" class="form-label">Конечное время (сек)</label>
+                        <label for="video-end-time" class="form-label" data-translate="end-time-label">Конечное время (сек)</label>
                         <input type="number" class="form-control" id="video-end-time" min="1" placeholder="Оставьте пустым для всего видео">
                     </div>
                 </div>
@@ -409,7 +630,7 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="video-grayscale">
-                        <label class="form-check-label" for="video-grayscale">
+                        <label class="form-check-label" for="video-grayscale" data-translate="grayscale">
                             Черно-белое
                         </label>
                     </div>
@@ -418,7 +639,7 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="video-reverse">
-                        <label class="form-check-label" for="video-reverse">
+                        <label class="form-check-label" for="video-reverse" data-translate="reverse">
                             Реверс
                         </label>
                     </div>
@@ -427,7 +648,7 @@
                 <div class="col-md-4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="video-boomerang">
-                        <label class="form-check-label" for="video-boomerang">
+                        <label class="form-check-label" for="video-boomerang" data-translate="boomerang">
                             Бумеранг
                         </label>
                     </div>
@@ -437,19 +658,19 @@
 
         <!-- Настройки изображений -->
         <div class="settings-panel" id="image-settings">
-            <h5><i class="bi bi-gear-fill"></i> Настройки обработки изображений</h5>
+            <h5><i class="bi bi-gear-fill"></i> <span data-translate="image-settings-title">Настройки обработки изображений</span></h5>
             
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="image-width" class="form-label">Ширина</label>
+                        <label for="image-width" class="form-label" data-translate="width">Ширина</label>
                         <input type="number" class="form-control" id="image-width" min="1" placeholder="Оригинальный размер">
                     </div>
                 </div>
                 
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="image-height" class="form-label">Высота</label>
+                        <label for="image-height" class="form-label" data-translate="height">Высота</label>
                         <input type="number" class="form-control" id="image-height" min="1" placeholder="Оригинальный размер">
                     </div>
                 </div>
@@ -458,9 +679,9 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="image-format" class="form-label">Выходной формат</label>
+                        <label for="image-format" class="form-label" data-translate="output-format">Выходной формат</label>
                         <select class="form-select" id="image-format">
-                            <option value="">Сохранить исходный</option>
+                            <option value="" data-translate="keep-original">Сохранить исходный</option>
                             <option value="jpg">JPEG</option>
                             <option value="png">PNG</option>
                             <option value="webp">WebP</option>
@@ -471,7 +692,7 @@
                 
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="image-quality" class="form-label">Качество (для JPEG)</label>
+                        <label for="image-quality" class="form-label" data-translate="jpeg-quality">Качество (для JPEG)</label>
                         <input type="range" class="form-range" id="image-quality" min="1" max="100" value="90">
                         <span id="quality-value">90%</span>
                     </div>
@@ -554,23 +775,23 @@
 
         <!-- Настройки аудио -->
         <div class="settings-panel" id="audio-settings">
-            <h5><i class="bi bi-gear-fill"></i> Настройки аудио конвертации</h5>
+            <h5><i class="bi bi-gear-fill"></i> <span data-translate="audio-settings-title">Настройки аудио конвертации</span></h5>
             
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="audio-action" class="form-label">Действие</label>
+                        <label for="audio-action" class="form-label" data-translate="action">Действие</label>
                         <select class="form-select" id="audio-action">
-                            <option value="convert" selected>Конвертировать формат</option>
-                            <option value="speech-to-text">Распознать речь → Текст</option>
-                            <option value="extract-from-video">Извлечь из видео</option>
+                            <option value="convert" selected data-translate="convert-format">Конвертировать формат</option>
+                            <option value="speech-to-text" data-translate="speech-to-text">Распознать речь → Текст</option>
+                            <option value="extract-from-video" data-translate="extract-from-video">Извлечь из видео</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="col-md-6" id="audio-output-format-group">
                     <div class="mb-3">
-                        <label for="audio-output-format" class="form-label">Выходной формат</label>
+                        <label for="audio-output-format" class="form-label" data-translate="output-format">Выходной формат</label>
                         <select class="form-select" id="audio-output-format">
                             <option value="mp3" selected>MP3</option>
                             <option value="wav">WAV</option>
@@ -649,12 +870,12 @@
                         <div class="mb-3">
                             <label for="stt-language" class="form-label">Язык распознавания</label>
                             <select class="form-select" id="stt-language">
-                                <option value="ru" selected>Русский</option>
-                                <option value="en">English</option>
-                                <option value="de">Deutsch</option>
-                                <option value="fr">Français</option>
-                                <option value="es">Español</option>
-                                <option value="auto">Автоопределение</option>
+                                <option value="ru" selected data-translate="russian">Русский</option>
+                                <option value="en" data-translate="english">English</option>
+                                <option value="de" data-translate="german">Deutsch</option>
+                                <option value="fr" data-translate="french">Français</option>
+                                <option value="es" data-translate="spanish">Español</option>
+                                <option value="auto" data-translate="auto-detect">Автоопределение</option>
                             </select>
                         </div>
                     </div>
@@ -663,9 +884,9 @@
                         <div class="mb-3">
                             <label for="stt-engine" class="form-label">Движок распознавания</label>
                             <select class="form-select" id="stt-engine">
-                                <option value="whisper" selected>Whisper (рекомендуется)</option>
-                                <option value="speech_recognition">Google Speech API</option>
-                                <option value="auto">Автовыбор</option>
+                                <option value="whisper" selected data-translate="whisper-recommended">Whisper (рекомендуется)</option>
+                                <option value="speech_recognition" data-translate="google-speech-api">Google Speech API</option>
+                                <option value="auto" data-translate="auto-select">Автовыбор</option>
                             </select>
                         </div>
                     </div>
@@ -676,10 +897,10 @@
                         <div class="mb-3">
                             <label for="stt-output-format" class="form-label">Формат результата</label>
                             <select class="form-select" id="stt-output-format">
-                                <option value="txt" selected>Обычный текст (.txt)</option>
-                                <option value="json">JSON с метаданными</option>
-                                <option value="srt">Субтитры SRT</option>
-                                <option value="vtt">Субтитры WebVTT</option>
+                                <option value="txt" selected data-translate="plain-text">Обычный текст (.txt)</option>
+                                <option value="json" data-translate="json-metadata">JSON с метаданными</option>
+                                <option value="srt" data-translate="srt-subtitles">Субтитры SRT</option>
+                                <option value="vtt" data-translate="webvtt-subtitles">Субтитры WebVTT</option>
                             </select>
                         </div>
                     </div>
@@ -688,10 +909,10 @@
                         <div class="mb-3">
                             <label for="whisper-model-size" class="form-label">Размер модели Whisper</label>
                             <select class="form-select" id="whisper-model-size">
-                                <option value="tiny">Tiny (быстро, низкая точность)</option>
-                                <option value="base" selected>Base (баланс)</option>
-                                <option value="small">Small (медленно, хорошая точность)</option>
-                                <option value="medium">Medium (очень медленно, высокая точность)</option>
+                                <option value="tiny" data-translate="whisper-model-tiny">Tiny (быстро, низкая точность)</option>
+                                <option value="base" selected data-translate="whisper-model-base">Base (баланс)</option>
+                                <option value="small" data-translate="whisper-model-small">Small (медленно, хорошая точность)</option>
+                                <option value="medium" data-translate="whisper-model-medium">Medium (очень медленно, высокая точность)</option>
                             </select>
                         </div>
                     </div>
@@ -701,20 +922,11 @@
                     <div class="col-md-6">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="stt-timestamps">
-                            <label class="form-check-label" for="stt-timestamps">
+                            <label class="form-check-label" for="stt-timestamps" data-translate="add-timestamps">
                                 Добавить временные метки
                             </label>
                         </div>
                     </div>
-                </div>
-                
-                <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle"></i>
-                    <strong>Информация:</strong> Для работы функции распознавания речи требуются дополнительные библиотеки:
-                    <ul class="mb-0 mt-2">
-                        <li><code>pip install openai-whisper</code> - для максимального качества</li>
-                        <li><code>pip install SpeechRecognition</code> - как альтернатива</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -745,12 +957,17 @@
     <!-- Кнопка запуска конвертации -->
     <div class="row mt-4">
         <div class="col-12 text-center">
-            <button type="button" class="btn btn-success btn-lg" id="start-conversion" disabled>
-                <i class="bi bi-play-circle-fill"></i> Начать конвертацию
+<button type="button" class="btn btn-success btn-lg" id="start-conversion" disabled>
+                <i class="bi bi-play-circle-fill"></i> <span data-translate="start-conversion">Начать конвертацию</span>
             </button>
             
-            <button type="button" class="btn btn-outline-secondary btn-lg ms-3" id="clear-all">
-                <i class="bi bi-trash"></i> Очистить все
+<button type="button" class="btn btn-outline-secondary btn-lg ms-3" id="clear-all">
+                <i class="bi bi-trash"></i> <span data-translate="clear-all">Очистить все</span>
+            </button>
+            
+            <!-- Кнопка для новой конвертации (показывается после завершения) -->
+<button type="button" class="btn btn-primary btn-lg ms-3" id="new-conversion" style="display: none;">
+                <i class="bi bi-plus-circle-fill"></i> <span data-translate="new-conversion">Новая конвертация</span>
             </button>
         </div>
     </div>
@@ -759,15 +976,15 @@
     <div class="conversion-progress" id="conversion-progress">
         <div class="row">
             <div class="col-12">
-                <h5>Прогресс конвертации</h5>
+<h5 data-translate="conversion-progress">Прогресс конвертации</h5>
                 
                 <div class="progress-step" id="step-validate">
                     <div class="me-3">
                         <i class="bi bi-file-earmark-check" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <div><strong>Валидация файлов</strong></div>
-                        <small class="text-muted">Проверка поддерживаемых форматов</small>
+<div><strong data-translate="file-validation">Валидация файлов</strong></div>
+                        <small class="text-muted" data-translate="format-check">Проверка поддерживаемых форматов</small>
                     </div>
                     <div class="status-indicator status-pending"></div>
                 </div>
@@ -777,8 +994,8 @@
                         <i class="bi bi-arrow-repeat" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <div><strong>Конвертация</strong></div>
-                        <small class="text-muted">Обработка файлов</small>
+<div><strong data-translate="conversion">Конвертация</strong></div>
+                        <small class="text-muted" data-translate="file-processing">Обработка файлов</small>
                     </div>
                     <div class="status-indicator status-pending"></div>
                 </div>
@@ -788,8 +1005,8 @@
                         <i class="bi bi-download" style="font-size: 1.5rem;"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <div><strong>Сохранение</strong></div>
-                        <small class="text-muted">Подготовка результатов</small>
+<div><strong data-translate="saving">Сохранение</strong></div>
+                        <small class="text-muted" data-translate="result-preparation">Подготовка результатов</small>
                     </div>
                     <div class="status-indicator status-pending"></div>
                 </div>
@@ -799,30 +1016,30 @@
 
     <!-- Статистика конвертации -->
     <div class="conversion-stats" id="conversion-stats" style="display: none;">
-        <h4>Статистика конвертации</h4>
+<h4 data-translate="conversion-stats">Статистика конвертации</h4>
         <div class="row">
             <div class="col-md-3">
                 <div class="stat-item">
                     <span class="stat-number" id="total-files">0</span>
-                    <span class="stat-label">Всего файлов</span>
+<span class="stat-label" data-translate="total-files">Всего файлов</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-item">
                     <span class="stat-number" id="completed-files">0</span>
-                    <span class="stat-label">Завершено</span>
+<span class="stat-label" data-translate="completed">Завершено</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-item">
                     <span class="stat-number" id="processing-time">0s</span>
-                    <span class="stat-label">Время обработки</span>
+<span class="stat-label" data-translate="processing-time">Время обработки</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-item">
                     <span class="stat-number" id="total-size">0MB</span>
-                    <span class="stat-label">Общий размер</span>
+<span class="stat-label" data-translate="total-size">Общий размер</span>
                 </div>
             </div>
         </div>
@@ -833,10 +1050,10 @@
 
     <!-- Статус адаптеров -->
     <div class="adapter-status">
-        <h5><i class="bi bi-cpu"></i> Статус движков конвертации</h5>
+<h5 data-translate="engine-status"><i class="bi bi-cpu"></i> Статус движков конвертации</h5>
         <div id="engine-status-list"></div>
-        <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="refreshEngineStatus()">
-            <i class="bi bi-arrow-clockwise"></i> Обновить статус
+<button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="refreshEngineStatus()">
+            <i class="bi bi-arrow-clockwise"></i> <span data-translate="refresh-status">Обновить статус</span>
         </button>
     </div>
 </div>
@@ -844,6 +1061,219 @@
 
 {% block extra_js %}
 <script>
+// Система переводов
+const translations = {
+    ru: {
+        'universal-converter-title': 'Универсальный конвертер файлов',
+        'converter-description': 'Конвертируйте видео, изображения, аудио, документы и архивы с помощью современных алгоритмов',
+        'video': 'Видео',
+        'video-formats': 'MP4, AVI, MOV в GIF',
+        'video-support': 'Поддержка MoviePy/FFmpeg',
+        'images': 'Изображения',
+        'image-formats': 'JPG, PNG, GIF, WebP',
+        'image-support': 'Поддержка PIL/Pillow',
+        'audio': 'Аудио',
+        'audio-formats': 'MP3, WAV + Speech-to-Text',
+        'audio-support': 'Поддержка Whisper/PyDub',
+        'documents': 'Документы',
+        'document-formats': 'PDF, DOCX, RTF',
+        'available': 'Доступно',
+        'archives': 'Архивы',
+        'archive-formats': 'ZIP, RAR, 7Z',
+        'batch': 'Пакетная',
+        'batch-formats': 'Множество файлов',
+        'auto-detection': 'Автоопределение',
+        'drag-files': 'Перетащите файлы сюда или нажмите для выбора',
+        'multiple-files-supported': 'Поддерживаются множественная загрузка и различные форматы',
+        'choose-files': 'Выбрать файлы',
+        'start-conversion': 'Начать конвертацию',
+        'clear-all': 'Очистить все',
+        'new-conversion': 'Новая конвертация',
+        'conversion-progress': 'Прогресс конвертации',
+        'file-validation': 'Валидация файлов',
+        'format-check': 'Проверка поддерживаемых форматов',
+        'conversion': 'Конвертация',
+        'file-processing': 'Обработка файлов',
+        'saving': 'Сохранение',
+        'result-preparation': 'Подготовка результатов',
+        'conversion-stats': 'Статистика конвертации',
+        'total-files': 'Всего файлов',
+        'completed': 'Завершено',
+        'processing-time': 'Время обработки',
+        'total-size': 'Общий размер',
+        'engine-status': 'Статус движков конвертации',
+        'refresh-status': 'Обновить статус',
+        'download': 'Скачать',
+        'share': 'Поделиться',
+        'speech-to-text': 'Распознать речь → Текст',
+        'convert-format': 'Конвертировать формат',
+        'extract-from-video': 'Извлечь из видео',
+        'speech-recognition': 'Распознавание речи',
+        'audio-conversion': 'Конвертация аудио',
+        'russian': 'Русский',
+        'english': 'English',
+        'german': 'Deutsch',
+        'french': 'Français',
+        'spanish': 'Español',
+        'auto-detect': 'Автоопределение',
+        'whisper-recommended': 'Whisper (рекомендуется)',
+        'google-speech-api': 'Google Speech API',
+        'auto-select': 'Автовыбор',
+        'plain-text': 'Обычный текст (.txt)',
+        'json-metadata': 'JSON с метаданными',
+        'srt-subtitles': 'Субтитры SRT',
+        'webvtt-subtitles': 'Субтитры WebVTT',
+        'whisper-model-tiny': 'Tiny (быстро, низкая точность)',
+        'whisper-model-base': 'Base (баланс)',
+        'whisper-model-small': 'Small (медленно, хорошая точность)',
+        'whisper-model-medium': 'Medium (очень медленно, высокая точность)',
+        'add-timestamps': 'Добавить временные метки',
+        'video-settings-title': 'Настройки конвертации видео',
+        'video-width-label': 'Ширина (пиксели)',
+        'keep-original': 'Сохранить оригинальную',
+        'video-fps-label': 'FPS (кадров/сек)',
+        'start-time-label': 'Начальное время (сек)',
+        'end-time-label': 'Конечное время (сек)',
+        'grayscale': 'Черно-белое',
+        'reverse': 'Реверс',
+        'boomerang': 'Бумеранг',
+        'image-settings-title': 'Настройки обработки изображений',
+        'width': 'Ширина',
+        'height': 'Высота',
+        'output-format': 'Выходной формат',
+        'jpeg-quality': 'Качество (для JPEG)',
+        'audio-settings-title': 'Настройки аудио конвертации',
+        'action': 'Действие'
+    },
+    en: {
+        'universal-converter-title': 'Universal File Converter',
+        'converter-description': 'Convert video, images, audio, documents and archives using modern algorithms',
+        'video': 'Video',
+        'video-formats': 'MP4, AVI, MOV to GIF',
+        'video-support': 'MoviePy/FFmpeg support',
+        'images': 'Images',
+        'image-formats': 'JPG, PNG, GIF, WebP',
+        'image-support': 'PIL/Pillow support',
+        'audio': 'Audio',
+        'audio-formats': 'MP3, WAV + Speech-to-Text',
+        'audio-support': 'Whisper/PyDub support',
+        'documents': 'Documents',
+        'document-formats': 'PDF, DOCX, RTF',
+        'available': 'Available',
+        'archives': 'Archives',
+        'archive-formats': 'ZIP, RAR, 7Z',
+        'batch': 'Batch',
+        'batch-formats': 'Multiple files',
+        'auto-detection': 'Auto-detection',
+        'drag-files': 'Drag files here or click to select',
+        'multiple-files-supported': 'Multiple files and various formats are supported',
+        'choose-files': 'Choose files',
+        'start-conversion': 'Start conversion',
+        'clear-all': 'Clear all',
+        'new-conversion': 'New conversion',
+        'conversion-progress': 'Conversion progress',
+        'file-validation': 'File validation',
+        'format-check': 'Checking supported formats',
+        'conversion': 'Conversion',
+        'file-processing': 'Processing files',
+        'saving': 'Saving',
+        'result-preparation': 'Preparing results',
+        'conversion-stats': 'Conversion statistics',
+        'total-files': 'Total files',
+        'completed': 'Completed',
+        'processing-time': 'Processing time',
+        'total-size': 'Total size',
+        'engine-status': 'Conversion engines status',
+        'refresh-status': 'Refresh status',
+        'download': 'Download',
+        'share': 'Share',
+        'speech-to-text': 'Speech to Text Recognition',
+        'convert-format': 'Convert Format',
+        'extract-from-video': 'Extract from Video',
+        'speech-recognition': 'Speech Recognition',
+        'audio-conversion': 'Audio Conversion',
+        'russian': 'Russian',
+        'english': 'English',
+        'german': 'German',
+        'french': 'French',
+        'spanish': 'Spanish',
+        'auto-detect': 'Auto-detect',
+        'whisper-recommended': 'Whisper (recommended)',
+        'google-speech-api': 'Google Speech API',
+        'auto-select': 'Auto-select',
+        'plain-text': 'Plain text (.txt)',
+        'json-metadata': 'JSON with metadata',
+        'srt-subtitles': 'SRT Subtitles',
+        'webvtt-subtitles': 'WebVTT Subtitles',
+        'whisper-model-tiny': 'Tiny (fast, low accuracy)',
+        'whisper-model-base': 'Base (balanced)',
+        'whisper-model-small': 'Small (slow, good accuracy)',
+        'whisper-model-medium': 'Medium (very slow, high accuracy)',
+        'add-timestamps': 'Add timestamps',
+        'video-settings-title': 'Video Conversion Settings',
+        'video-width-label': 'Width (pixels)',
+        'keep-original': 'Keep original',
+        'video-fps-label': 'FPS (frames/sec)',
+        'start-time-label': 'Start time (sec)',
+        'end-time-label': 'End time (sec)',
+        'grayscale': 'Grayscale',
+        'reverse': 'Reverse',
+        'boomerang': 'Boomerang',
+        'image-settings-title': 'Image Processing Settings',
+        'width': 'Width',
+        'height': 'Height',
+        'output-format': 'Output format',
+        'jpeg-quality': 'Quality (for JPEG)',
+        'audio-settings-title': 'Audio Conversion Settings',
+        'action': 'Action'
+    }
+};
+
+let currentLanguage = localStorage.getItem('preferred-language') || 'ru';
+
+    // Применение переводов
+    function applyTranslations() {
+        const elements = document.querySelectorAll('[data-translate]');
+        const currentTranslations = translations[currentLanguage] || translations.ru;
+        
+        elements.forEach(element => {
+            const key = element.getAttribute('data-translate');
+            if (currentTranslations[key]) {
+                element.textContent = currentTranslations[key];
+            }
+        });
+    }
+    
+    // Слушаем системные изменения языка из базового шаблона
+    function listenForLanguageChanges() {
+        const langButtons = document.querySelectorAll('.lang-btn');
+        
+        langButtons.forEach(btn => {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (btn.classList.contains('active')) {
+                            const lang = btn.getAttribute('data-lang');
+                            if (lang && lang !== currentLanguage) {
+                                currentLanguage = lang;
+                                localStorage.setItem('preferred-language', lang);
+                                applyTranslations();
+                                
+                                // Dispatch custom event
+                                const event = new CustomEvent('languageChanged', {
+                                    detail: { language: lang }
+                                });
+                                window.dispatchEvent(event);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(btn, { attributes: true });
+        });
+    }
+
 // Глобальные переменные
 let selectedFiles = [];
 let currentConverterType = 'video';
@@ -852,6 +1282,18 @@ let completedFiles = 0;
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
+    // Применяем переводы
+    applyTranslations();
+    
+    // Слушаем изменения языка
+    window.addEventListener('languageChanged', function(e) {
+        currentLanguage = e.detail.language;
+        applyTranslations();
+    });
+    
+    // Инициализируем слушатель изменений языка
+    setTimeout(listenForLanguageChanges, 500);
+    
     initializeInterface();
     loadEngineStatus();
     setupEventListeners();
@@ -961,6 +1403,7 @@ function setupEventListeners() {
     // Кнопки управления
     document.getElementById('start-conversion').addEventListener('click', startConversion);
     document.getElementById('clear-all').addEventListener('click', clearAllFiles);
+    document.getElementById('new-conversion').addEventListener('click', startNewConversion);
 
 }
 
@@ -1197,15 +1640,26 @@ async function startConversion() {
     
     // Показываем результаты
     displayResults();
+    
+    // После завершения конвертации показываем кнопку "Новая конвертация"
+    showNewConversionButton();
 }
 
-// Конвертация одного файла
+// Конвертация одного файла через универсальный API
 async function convertFile(fileInfo) {
     const formData = new FormData();
     
+    // Добавляем файл в formData
+    formData.append('file', fileInfo.file);
+    
+    // Определяем тип конвертации и выходной формат
+    let conversionType, outputFormat;
+    
     if (fileInfo.type === 'video') {
-        // Используем существующий API для видео
-        formData.append('video', fileInfo.file);
+        conversionType = 'video';
+        outputFormat = 'gif';
+        
+        // Добавляем параметры видео конвертации
         formData.append('width', document.getElementById('video-width').value);
         formData.append('fps', document.getElementById('video-fps').value);
         formData.append('start_time', document.getElementById('video-start-time').value);
@@ -1213,22 +1667,13 @@ async function convertFile(fileInfo) {
         formData.append('grayscale', document.getElementById('video-grayscale').checked ? '1' : '0');
         formData.append('reverse', document.getElementById('video-reverse').checked ? '1' : '0');
         formData.append('boomerang', document.getElementById('video-boomerang').checked ? '1' : '0');
-        
-        const response = await fetch('/converter/ajax_convert/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCsrfToken()
-            }
-        });
-        
-        return await response.json();
+        formData.append('quality', document.getElementById('video-quality').value || 'medium');
         
     } else if (fileInfo.type === 'image') {
-        // Используем новый API адаптеров для изображений
-        formData.append('file', fileInfo.file);
-        formData.append('output_format', document.getElementById('image-format').value || 'jpg');
+        conversionType = 'image';
+        outputFormat = document.getElementById('image-format').value || 'jpg';
         
+        // Добавляем параметры изображения
         const width = document.getElementById('image-width').value;
         const height = document.getElementById('image-height').value;
         if (width) formData.append('width', width);
@@ -1237,7 +1682,7 @@ async function convertFile(fileInfo) {
         
         // Добавляем параметры для анимированного GIF
         const createAnimatedGif = document.getElementById('create-animated-gif');
-        if (createAnimatedGif && createAnimatedGif.checked) {
+        if (createAnimatedGif && createAnimatedGif.checked && outputFormat.toLowerCase() === 'gif') {
             formData.append('create_animated_gif', '1');
             formData.append('gif_effect', document.getElementById('gif-effect').value);
             formData.append('gif_duration', document.getElementById('gif-duration').value);
@@ -1245,7 +1690,53 @@ async function convertFile(fileInfo) {
             formData.append('gif_loop', document.getElementById('gif-loop').checked ? '1' : '0');
         }
         
-        const response = await fetch('/converter/convert_with_adapters/', {
+    } else if (fileInfo.type === 'audio') {
+        const audioAction = document.getElementById('audio-action').value;
+        
+        if (audioAction === 'speech-to-text') {
+            // Распознавание речи
+            conversionType = 'audio';
+            outputFormat = 'text';
+            
+            // Параметры распознавания речи
+            formData.append('engine', document.getElementById('stt-engine').value || 'whisper');
+            formData.append('language', document.getElementById('stt-language').value || 'ru');
+            formData.append('quality', 'high');
+            formData.append('include_timestamps', document.getElementById('stt-timestamps').checked ? 'true' : 'false');
+            formData.append('output_format', document.getElementById('stt-output-format').value || 'text');
+        } else {
+            // Конвертация аудио формата
+            conversionType = 'audio';
+            outputFormat = document.getElementById('audio-output-format').value || 'mp3';
+            
+            // Параметры аудио конвертации
+            formData.append('bitrate', document.getElementById('audio-bitrate').value || '192k');
+            const sampleRate = document.getElementById('audio-sample-rate').value;
+            if (sampleRate) formData.append('sample_rate', sampleRate);
+            const channels = document.getElementById('audio-channels').value;
+            if (channels) formData.append('channels', channels);
+        }
+        
+    } else if (fileInfo.type === 'document') {
+        conversionType = 'document';
+        outputFormat = 'pdf'; // По умолчанию
+        
+    } else if (fileInfo.type === 'archive') {
+        conversionType = 'archive';
+        outputFormat = 'zip'; // По умолчанию
+        
+    } else {
+        return { success: false, error: 'Неподдерживаемый тип файла: ' + fileInfo.type };
+    }
+    
+    // Добавляем основные параметры
+    formData.append('conversion_type', conversionType);
+    formData.append('output_format', outputFormat);
+    
+    console.log(`Конвертируем файл: ${fileInfo.file.name} (${conversionType} -> ${outputFormat})`);
+    
+    try {
+        const response = await fetch('/converter/api/universal-convert/', {
             method: 'POST',
             body: formData,
             headers: {
@@ -1253,11 +1744,15 @@ async function convertFile(fileInfo) {
             }
         });
         
-        return await response.json();
+        const result = await response.json();
+        console.log('Результат конвертации:', result);
+        
+        return result;
+        
+    } catch (error) {
+        console.error('Ошибка при отправке запроса:', error);
+        return { success: false, error: 'Ошибка сети: ' + error.message };
     }
-    
-    // Для неподдерживаемых типов
-    return { success: false, error: 'Неподдерживаемый тип файла' };
 }
 
 // Отображение результатов
@@ -1268,13 +1763,29 @@ function displayResults() {
     const html = completedFiles.map(fileInfo => {
         const result = fileInfo.result;
         let previewContent = '';
+        let downloadUrl = '';
         
         if (fileInfo.type === 'video') {
-            previewContent = `<img src="${result.gif_url}" alt="Converted GIF" class="result-preview">`;
+            previewContent = `<img src="${result.output_url || result.gif_url}" alt="Converted GIF" class="result-preview">`;
+            downloadUrl = result.output_url || result.gif_url;
         } else if (fileInfo.type === 'image') {
-            previewContent = `<img src="${result.output_url || result.output_path}" alt="Converted Image" class="result-preview">`;
+            const outputUrl = result.output_url || result.output_path;
+            previewContent = `<img src="${outputUrl}" alt="Converted Image" class="result-preview">`;
+            downloadUrl = outputUrl;
+        } else if (fileInfo.type === 'audio' && result.text) {
+            // Результат распознавания речи
+            const textPreview = result.text.length > 100 ? result.text.substring(0, 100) + '...' : result.text;
+            previewContent = `
+                <div class="result-preview text-start p-3 bg-light" style="font-size: 0.9rem; line-height: 1.3;">
+                    📝 "${textPreview}"
+                </div>
+            `;
+            // Создаем blob URL для скачивания текста
+            const blob = new Blob([result.text], { type: 'text/plain' });
+            downloadUrl = URL.createObjectURL(blob);
         } else {
             previewContent = `<div class="result-preview">📄</div>`;
+            downloadUrl = result.output_url || result.output_path || '#';
         }
         
         return `
@@ -1283,11 +1794,11 @@ function displayResults() {
                 <h6>${fileInfo.file.name}</h6>
                 <p class="small text-muted">${fileInfo.type} → ${getOutputFormat(fileInfo)}</p>
                 <div class="btn-group btn-group-sm w-100">
-                    <button type="button" class="btn btn-outline-primary" onclick="downloadResult('${result.gif_url || result.output_url}')">
-                        <i class="bi bi-download"></i> Скачать
+                    <button type="button" class="btn btn-outline-primary" onclick="downloadResult('${downloadUrl}')">
+                        <i class="bi bi-download"></i> ${translations[currentLanguage]['download'] || 'Скачать'}
                     </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="shareResult('${result.gif_url || result.output_url}')">
-                        <i class="bi bi-share"></i> Поделиться
+                    <button type="button" class="btn btn-outline-secondary" onclick="shareResult('${downloadUrl}')">
+                        <i class="bi bi-share"></i> ${translations[currentLanguage]['share'] || 'Поделиться'}
                     </button>
                 </div>
             </div>
@@ -1479,6 +1990,187 @@ function getCsrfToken() {
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Показать кнопку "Новая конвертация" после завершения
+function showNewConversionButton() {
+    // Скрываем кнопку "Начать конвертацию" и показываем "Новая конвертация"
+    document.getElementById('start-conversion').style.display = 'none';
+    document.getElementById('new-conversion').style.display = 'inline-block';
+}
+
+// Функция для начала новой конвертации
+function startNewConversion() {
+    // Полностью сбрасываем интерфейс
+    resetInterface();
+    
+    // Скроллим к началу страницы для лучшего UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Показываем уведомление
+    showNotification('Интерфейс сброшен. Загрузите новые файлы для конвертации.', 'success');
+}
+
+// Полный сброс интерфейса
+function resetInterface() {
+    // Очищаем файлы и состояние
+    selectedFiles = [];
+    completedFiles = 0;
+    conversionStartTime = null;
+    
+    // Обновляем все элементы интерфейса
+    updateFileList();
+    updateUploadZoneStatus();
+    updateStartButton();
+    
+    // Скрываем прогресс, результаты и статистику
+    hideConversionProgress();
+    document.getElementById('results-gallery').innerHTML = '';
+    document.getElementById('conversion-stats').style.display = 'none';
+    
+    // Возвращаем кнопки в исходное состояние
+    document.getElementById('start-conversion').style.display = 'inline-block';
+    document.getElementById('new-conversion').style.display = 'none';
+    
+    // Сбрасываем формы к значениям по умолчанию
+    resetFormDefaults();
+}
+
+// Сброс форм к значениям по умолчанию
+function resetFormDefaults() {
+    // Сброс настроек видео
+    const videoWidth = document.getElementById('video-width');
+    if (videoWidth) videoWidth.value = '720';
+    
+    const videoFps = document.getElementById('video-fps');
+    if (videoFps) videoFps.value = '15';
+    
+    const videoStartTime = document.getElementById('video-start-time');
+    if (videoStartTime) videoStartTime.value = '0';
+    
+    const videoEndTime = document.getElementById('video-end-time');
+    if (videoEndTime) videoEndTime.value = '';
+    
+    // Сброс чекбоксов видео
+    ['video-grayscale', 'video-reverse', 'video-boomerang'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = false;
+    });
+    
+    // Сброс настроек изображений
+    const imageWidth = document.getElementById('image-width');
+    if (imageWidth) imageWidth.value = '';
+    
+    const imageHeight = document.getElementById('image-height');
+    if (imageHeight) imageHeight.value = '';
+    
+    const imageFormat = document.getElementById('image-format');
+    if (imageFormat) imageFormat.value = '';
+    
+    const imageQuality = document.getElementById('image-quality');
+    if (imageQuality) {
+        imageQuality.value = '90';
+        const qualityValue = document.getElementById('quality-value');
+        if (qualityValue) qualityValue.textContent = '90%';
+    }
+    
+    // Сброс настроек GIF
+    const createAnimatedGif = document.getElementById('create-animated-gif');
+    if (createAnimatedGif) {
+        createAnimatedGif.checked = false;
+        toggleGifSettings(false);
+    }
+    
+    const gifEffect = document.getElementById('gif-effect');
+    if (gifEffect) gifEffect.value = 'fade';
+    
+    const gifDuration = document.getElementById('gif-duration');
+    if (gifDuration) {
+        gifDuration.value = '200';
+        const gifDurationValue = document.getElementById('gif-duration-value');
+        if (gifDurationValue) gifDurationValue.textContent = '200мс';
+    }
+    
+    const gifFrames = document.getElementById('gif-frames');
+    if (gifFrames) {
+        gifFrames.value = '10';
+        const gifFramesValue = document.getElementById('gif-frames-value');
+        if (gifFramesValue) gifFramesValue.textContent = '10';
+    }
+    
+    const gifLoop = document.getElementById('gif-loop');
+    if (gifLoop) gifLoop.checked = true;
+    
+    // Сброс настроек аудио
+    const audioAction = document.getElementById('audio-action');
+    if (audioAction) {
+        audioAction.value = 'convert';
+        toggleAudioParams('convert');
+    }
+    
+    const audioOutputFormat = document.getElementById('audio-output-format');
+    if (audioOutputFormat) audioOutputFormat.value = 'mp3';
+    
+    const audioBitrate = document.getElementById('audio-bitrate');
+    if (audioBitrate) audioBitrate.value = '192k';
+    
+    const audioSampleRate = document.getElementById('audio-sample-rate');
+    if (audioSampleRate) audioSampleRate.value = '';
+    
+    const audioChannels = document.getElementById('audio-channels');
+    if (audioChannels) audioChannels.value = '';
+    
+    const audioVolume = document.getElementById('audio-volume');
+    if (audioVolume) {
+        audioVolume.value = '0';
+        const audioVolumeValue = document.getElementById('audio-volume-value');
+        if (audioVolumeValue) audioVolumeValue.textContent = '0 дБ';
+    }
+    
+    const audioNormalize = document.getElementById('audio-normalize');
+    if (audioNormalize) audioNormalize.checked = false;
+    
+    // Сброс настроек speech-to-text
+    const sttLanguage = document.getElementById('stt-language');
+    if (sttLanguage) sttLanguage.value = 'ru';
+    
+    const sttEngine = document.getElementById('stt-engine');
+    if (sttEngine) sttEngine.value = 'whisper';
+    
+    const sttOutputFormat = document.getElementById('stt-output-format');
+    if (sttOutputFormat) sttOutputFormat.value = 'txt';
+    
+    const whisperModelSize = document.getElementById('whisper-model-size');
+    if (whisperModelSize) whisperModelSize.value = 'base';
+    
+    const sttTimestamps = document.getElementById('stt-timestamps');
+    if (sttTimestamps) sttTimestamps.checked = false;
+}
+
+// Показать уведомление пользователю
+function showNotification(message, type = 'info') {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Добавляем в DOM
+    document.body.appendChild(notification);
+    
+    // Автоматически удаляем через 5 секунд
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
 }
 </script>
 {% endblock %}

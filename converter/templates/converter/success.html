@@ -8,8 +8,8 @@
         <!-- Иконка успеха -->
         <div class="mb-4">
             <div style="font-size: 5rem; color: #28a745;">✅</div>
-            <h2 class="text-success">Конвертация завершена успешно!</h2>
-            <p class="text-muted">Ваш видеофайл "{{ original_filename }}" успешно конвертирован в GIF</p>
+            <h2 class="text-success" data-translate="conversion-success">Конвертация завершена успешно!</h2>
+            <p class="text-muted"><span data-translate="gif-ready">Ваш видеофайл успешно конвертирован в GIF</span></p>
         </div>
         
         <!-- Предпросмотр и загрузка -->
@@ -32,7 +32,7 @@
                              tabindex="0"
                              aria-label="Кликните для полноэкранного просмотра">
                         <div class="mt-2">
-                            <small class="text-muted">Кликните на изображение для полноэкранного просмотра</small>
+                            <small class="text-muted" data-translate="click-image-hint">Кликните на изображение для полноэкранного просмотра</small>
                         </div>
                     </div>
                     
@@ -42,7 +42,7 @@
                             <div class="col-md-4">
                                 <button onclick="downloadGif()" class="btn btn-success btn-lg w-100 download-btn">
                                     <i class="bi bi-download me-2"></i>
-                                    Скачать GIF
+                                    <span data-translate="download-gif">Скачать GIF</span>
                                     <div class="download-progress mt-1" style="display: none;">
                                         <div class="progress" style="height: 4px;">
                                             <div class="progress-bar bg-white" style="width: 0%"></div>
@@ -53,13 +53,13 @@
                             <div class="col-md-4">
                                 <button onclick="shareGif()" class="btn btn-primary btn-lg w-100">
                                     <i class="bi bi-share me-2"></i>
-                                    Поделиться
+                                    <span data-translate="share">Поделиться</span>
                                 </button>
                             </div>
                             <div class="col-md-4">
                                 <a href="{% url 'converter:home' %}" class="btn btn-outline-secondary btn-lg w-100">
                                     <i class="bi bi-arrow-left me-2"></i>
-                                    Новый GIF
+                                    <span data-translate="new-gif">Новый GIF</span>
                                 </a>
                             </div>
                         </div>
@@ -70,15 +70,15 @@
                         <div class="btn-group" role="group" aria-label="Дополнительные действия">
                             <button onclick="copyLink()" class="btn btn-outline-primary">
                                 <i class="bi bi-link-45deg"></i>
-                                Копировать ссылку
+                                <span data-translate="copy-link">Копировать ссылку</span>
                             </button>
                             <button onclick="viewFullscreen()" class="btn btn-outline-info">
                                 <i class="bi bi-arrows-fullscreen"></i>
-                                Полный экран
+                                <span data-translate="fullscreen">Полный экран</span>
                             </button>
                             <button onclick="showInfo()" class="btn btn-outline-secondary">
                                 <i class="bi bi-info-circle"></i>
-                                Подробно
+                                <span data-translate="details">Подробно</span>
                             </button>
                         </div>
                     </div>
@@ -89,30 +89,30 @@
         <!-- Информация о файле -->
         <div class="card border-0 bg-light">
             <div class="card-body">
-                <h6 class="card-title">Информация о файле</h6>
+                <h6 class="card-title" data-translate="file-info">Информация о файле</h6>
                 <div class="row text-center">
                     <div class="col-md-3">
                         <div class="p-2">
-                            <div class="text-primary fw-bold">Исходный файл</div>
+                            <div class="text-primary fw-bold" data-translate="source-file">Исходный файл</div>
                             <small class="text-muted">{{ original_filename }}</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-2">
-                            <div class="text-primary fw-bold">Формат</div>
-                            <small class="text-muted">Анимированный GIF</small>
+                            <div class="text-primary fw-bold" data-translate="format">Формат</div>
+                            <small class="text-muted" data-translate="animated-gif">Анимированный GIF</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-2">
-                            <div class="text-primary fw-bold" id="file-size">Размер файла</div>
-                            <small class="text-muted">Загружается...</small>
+                            <div class="text-primary fw-bold" id="file-size" data-translate="file-size">Размер файла</div>
+                            <small class="text-muted" data-translate="loading">Загружается...</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-2">
-                            <div class="text-primary fw-bold">Статус</div>
-                            <small class="text-success">Готов к скачиванию</small>
+                            <div class="text-primary fw-bold" data-translate="status">Статус</div>
+                            <small class="text-success" data-translate="ready-to-download">Готов к скачиванию</small>
                         </div>
                     </div>
                 </div>

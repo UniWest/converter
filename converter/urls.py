@@ -30,4 +30,7 @@ urlpatterns = [
     path("ajax_convert/", views.ajax_convert_video, name="ajax_convert"),
     path("convert_with_adapters/", views.convert_with_adapters, name="convert_with_adapters"),
     path("engine_status/", views.engine_status, name="engine_status"),
+    
+    # Новый универсальный API endpoint
+    path("api/universal-convert/", views.api_universal_convert, name="api_universal_convert"),
 ]

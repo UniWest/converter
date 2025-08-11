@@ -506,6 +506,105 @@ class VideoConverter:
         except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
             return False
     
+    def extract_audio(self, input_path, output_path, bitrate='192', channels=2):
+        """
+        Извлекает аудио из видео файла.
+        
+        Args:
+            input_path: Путь к входному видеофайлу
+            output_path: Путь для сохранения аудио (MP3)
+            bitrate: Битрейт аудио (строка, например '192')
+            channels: Количество каналов (1=моно, 2=стерео)
+            
+        Returns:
+            bool: True если извлечение прошло успешно
+        """
+        try:
+            # Попробуем сначала FFmpeg
+            ffmpeg_path = getattr(settings, 'FFMPEG_BINARY', 'ffmpeg')
+            
+            if self._check_ffmpeg(ffmpeg_path):
+                # Строим команду FFmpeg для извлечения аудио
+                cmd = [
+                    ffmpeg_path,
+                    '-i', input_path,
+                    '-vn',  # Отключаем видео
+                    '-acodec', 'libmp3lame',  # Используем MP3 кодек
+                    '-ab', f'{bitrate}k',  # Битрейт
+                    '-ac', str(channels),  # Количество каналов
+                    '-ar', '44100',  # Частота дискретизации
+                    '-y',  # Перезаписать выходной файл
+                    output_path
+                ]
+                
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 минут таймаут
+                )
+                
+                if result.returncode == 0:
+                    logger.info(f"Аудио успешно извлечено: {output_path}")
+                    return True
+                else:
+                    logger.error(f"Ошибка FFmpeg при извлечении аудио: {result.stderr}")
+                    # Fallback на MoviePy
+                    return self._extract_audio_with_moviepy(input_path, output_path, bitrate, channels)
+            else:
+                # FFmpeg недоступен, используем MoviePy
+                return self._extract_audio_with_moviepy(input_path, output_path, bitrate, channels)
+                
+        except subprocess.TimeoutExpired:
+            logger.error("Таймаут при извлечении аудио")
+            return False
+        except Exception as e:
+            logger.error(f"Ошибка при извлечении аудио: {str(e)}")
+            return False
+    
+    def _extract_audio_with_moviepy(self, input_path, output_path, bitrate='192', channels=2):
+        """
+        Извлекает аудио с помощью MoviePy.
+        """
+        try:
+            try:
+                from moviepy.editor import VideoFileClip
+            except ImportError:
+                from moviepy import VideoFileClip
+            
+            # Загружаем видео и извлекаем аудио
+            with VideoFileClip(input_path) as clip:
+                if clip.audio is None:
+                    logger.error("Видео не содержит аудиодорожки")
+                    return False
+                
+                audio = clip.audio
+                
+                # Параметры экспорта
+                export_params = {
+                    'codec': 'libmp3lame',
+                    'bitrate': f'{bitrate}k',
+                    'verbose': False
+                }
+                
+                # Устанавливаем количество каналов
+                if channels == 1:
+                    # Конвертируем в моно
+                    audio = audio.set_fps(audio.fps).to_mono()
+                
+                # Экспортируем аудио
+                audio.write_audiofile(output_path, **export_params)
+                
+                logger.info(f"Аудио успешно извлечено с MoviePy: {output_path}")
+                return True
+                
+        except ImportError:
+            logger.error("MoviePy не установлен для извлечения аудио")
+            return False
+        except Exception as e:
+            logger.error(f"Ошибка MoviePy при извлечении аудио: {str(e)}")
+            return False
+    
     def get_video_info(self, video_file):
         """
         Получает информацию о видео файле.

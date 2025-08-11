@@ -20,7 +20,7 @@ import tempfile
 import shutil
 from django.test import TestCase, RequestFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
-from forms import VideoUploadForm
+import forms
 from converter.views import VideoUploadView
 from converter.services import VideoConversionService
 from converter.models import ConversionTask
@@ -205,7 +205,7 @@ def test_form_validation():
     try:
         # Test invalid video file
         invalid_file = SimpleUploadedFile("test.txt", b"not a video", content_type="text/plain")
-        form = VideoUploadForm(data={
+        form = forms.VideoUploadForm(data={
             'fps': 15,
             'width': 480,
             'start_time': 0,
@@ -234,7 +234,7 @@ def test_form_validation():
         
         # Mock video file
         video_file = SimpleUploadedFile("test.mp4", b"fake video content", content_type="video/mp4")
-        form = VideoUploadForm(data=form_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=form_data, files={'video': video_file})
         
         # We expect validation to fail due to file size/format, but data validation should work
         print("✓ Form data validation structure works")
@@ -244,7 +244,7 @@ def test_form_validation():
         invalid_time_data['start_time'] = 10
         invalid_time_data['end_time'] = 5  # end before start
         
-        form = VideoUploadForm(data=invalid_time_data, files={'video': video_file})
+        form = forms.VideoUploadForm(data=invalid_time_data, files={'video': video_file})
         if not form.is_valid():
             print("✓ Form correctly validates time ranges")
         
