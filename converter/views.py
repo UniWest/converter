@@ -450,21 +450,25 @@ class VideoUploadView(View):
                 
                 logger.info(f"Video uploaded to temporary location: {tmp_file_path}")
                 
-                # Create conversion task
-                task = ConversionTask.objects.create(
-                    status=ConversionTask.STATUS_QUEUED
-                )
-                
-                # Set task metadata
-                task.set_metadata(
-                    original_filename=uploaded_file.name,
-                    input_path=str(tmp_file_path),
-                    file_size=uploaded_file.size,
-                    conversion_params=conversion_settings,
-                    file_type='video',
-                    input_format=file_extension.lstrip('.').lower()
-                )
-                task.save()
+                # Create conversion task (best-effort, do not fail upload if DB is not available)
+                task = None
+                try:
+                    task = ConversionTask.objects.create(
+                        status=ConversionTask.STATUS_QUEUED
+                    )
+                    # Set task metadata
+                    task.set_metadata(
+                        original_filename=uploaded_file.name,
+                        input_path=str(tmp_file_path),
+                        file_size=uploaded_file.size,
+                        conversion_params=conversion_settings,
+                        file_type='video',
+                        input_format=file_extension.lstrip('.').lower()
+                    )
+                    task.save()
+                except Exception as db_err:
+                    # Continue without a DB task if migrations are not applied or DB is unavailable
+                    logger.warning(f"Could not create ConversionTask (continuing without DB): {db_err}")
                 
                 # Initialize conversion service
                 conversion_service = VideoConversionService()
@@ -491,8 +495,12 @@ class VideoUploadView(View):
                     messages.error(request, error_msg)
                     logger.error(f"Conversion exception for task {task.id}: {e}")
                     
-                    # Update task status
-                    task.fail(str(e))
+                    # Update task status if task exists
+                    try:
+                        if task:
+                            task.fail(str(e))
+                    except Exception:
+                        pass
                 
             except Exception as e:
                 error_msg = f'Ошибка при загрузке файла: {str(e)}'
