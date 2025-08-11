@@ -225,7 +225,11 @@ if not DEBUG:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # FFmpeg configuration
-FFMPEG_BINARY = config('FFMPEG_BINARY', default=r'C:\ffmpeg\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe')
+# Default to system ffmpeg on Linux/Docker, fallback to Windows path
+if os.name == 'posix':  # Linux/Unix/Docker
+    FFMPEG_BINARY = config('FFMPEG_BINARY', default='ffmpeg')
+else:  # Windows
+    FFMPEG_BINARY = config('FFMPEG_BINARY', default=r'C:\ffmpeg\ffmpeg-7.1.1-essentials_build\bin\ffmpeg.exe')
 
 # ===================
 # UPLOAD SIZE LIMITS
@@ -360,8 +364,19 @@ if hasattr(os, 'chmod'):
     os.chmod(TEMP_DIR, 0o750)  # rwxr-x---
 
 # ===================
+# DEPLOYMENT CONFIGURATION
+# ===================
+
+# Port configuration for deployment platforms (Render, Heroku, etc.)
+PORT = config('PORT', default=8000, cast=int)
+
+# ===================
 # LOGGING CONFIGURATION
 # ===================
+
+# Create logs directory if needed
+LOGS_DIR = BASE_DIR / 'logs'
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 LOGGING = {
     'version': 1,
@@ -377,12 +392,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.StreamHandler',
@@ -394,18 +403,35 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'converter': {
-            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },
 }
 
-# Create logs directory if it doesn't exist
+# Add file logging only in production if logs directory is writable
 if not DEBUG:
-    os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+    try:
+        # Test if we can write to logs directory
+        test_file = LOGS_DIR / '.write_test'
+        test_file.write_text('test')
+        test_file.unlink()
+        
+        # If successful, add file handler
+        LOGGING['handlers']['file'] = {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'django.log',
+            'formatter': 'verbose',
+        }
+        LOGGING['loggers']['django']['handlers'].append('file')
+        LOGGING['loggers']['converter']['handlers'].append('file')
+    except (OSError, PermissionError):
+        # If can't write to logs directory, just use console logging
+        pass
