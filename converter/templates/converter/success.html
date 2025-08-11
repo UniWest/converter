@@ -12,30 +12,76 @@
             <p class="text-muted">Ваш видеофайл "{{ original_filename }}" успешно конвертирован в GIF</p>
         </div>
         
-        <!-- Предпросмотр GIF -->
+        <!-- Предпросмотр и загрузка -->
         <div class="mb-4">
-            <div class="card border-0 shadow">
-                <div class="card-body">
-                    <h5 class="card-title">Предпросмотр GIF</h5>
-                    <img src="{{ gif_url }}" alt="Конвертированный GIF" class="gif-preview img-fluid">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient text-white text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-image me-2" aria-hidden="true"></i>
+                        Ваш GIF готов!
+                    </h5>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Действия -->
-        <div class="mb-4">
-            <div class="row g-3 justify-content-center">
-                <div class="col-md-4">
-                    <a href="{{ gif_url }}" download class="btn btn-success btn-lg w-100">
-                        <i class="bi bi-download"></i>
-                        Скачать GIF
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <a href="{% url 'converter:home' %}" class="btn btn-outline-secondary btn-lg w-100">
-                        <i class="bi bi-arrow-left"></i>
-                        Новая конвертация
-                    </a>
+                <div class="card-body text-center">
+                    <!-- Превью область -->
+                    <div class="preview-area mb-4">
+                        <img src="{{ gif_url }}" alt="Конвертированный GIF" 
+                             class="gif-preview img-fluid" 
+                             style="max-height: 400px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);"
+                             onclick="openLightbox('{{ gif_url }}')"
+                             role="button" 
+                             tabindex="0"
+                             aria-label="Кликните для полноэкранного просмотра">
+                        <div class="mt-2">
+                            <small class="text-muted">Кликните на изображение для полноэкранного просмотра</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Основные действия -->
+                    <div class="action-buttons mb-4">
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-md-4">
+                                <button onclick="downloadGif()" class="btn btn-success btn-lg w-100 download-btn">
+                                    <i class="bi bi-download me-2"></i>
+                                    Скачать GIF
+                                    <div class="download-progress mt-1" style="display: none;">
+                                        <div class="progress" style="height: 4px;">
+                                            <div class="progress-bar bg-white" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button onclick="shareGif()" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-share me-2"></i>
+                                    Поделиться
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'converter:home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                    <i class="bi bi-arrow-left me-2"></i>
+                                    Новый GIF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Дополнительные опции -->
+                    <div class="additional-actions">
+                        <div class="btn-group" role="group" aria-label="Дополнительные действия">
+                            <button onclick="copyLink()" class="btn btn-outline-primary">
+                                <i class="bi bi-link-45deg"></i>
+                                Копировать ссылку
+                            </button>
+                            <button onclick="viewFullscreen()" class="btn btn-outline-info">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                                Полный экран
+                            </button>
+                            <button onclick="showInfo()" class="btn btn-outline-secondary">
+                                <i class="bi bi-info-circle"></i>
+                                Подробно
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -109,14 +155,233 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 
-// Функции поделиться удалены
+// Функции для работы с GIF
+function downloadGif() {
+    const btn = document.querySelector('.download-btn');
+    const progress = btn.querySelector('.download-progress');
+    const progressBar = progress.querySelector('.progress-bar');
+    
+    // Показать прогресс
+    progress.style.display = 'block';
+    btn.disabled = true;
+    
+    // Создать ссылку для скачивания
+    const a = document.createElement('a');
+    a.href = '{{ gif_url }}';
+    a.download = '{{ original_filename }}'.replace(/\.[^/.]+$/, "") + '.gif';
+    
+    // Симуляция прогресса загрузки
+    let progressValue = 0;
+    const interval = setInterval(() => {
+        progressValue += Math.random() * 25;
+        if (progressValue >= 100) {
+            progressValue = 100;
+            clearInterval(interval);
+            
+            // Скачать файл
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Скрыть прогресс через секунду
+            setTimeout(() => {
+                progress.style.display = 'none';
+                btn.disabled = false;
+                showNotification('GIF успешно скачан!', 'success');
+            }, 1000);
+        }
+        progressBar.style.width = progressValue + '%';
+    }, 200);
+}
 
-// Автоматическое скачивание через 3 секунды (опционально)
-// setTimeout(() => {
-//     const downloadLink = document.querySelector('a[download]');
-//     if (downloadLink && confirm('Хотите скачать GIF автоматически?')) {
-//         downloadLink.click();
-//     }
-// }, 3000);
+function shareGif() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Мой GIF',
+            text: 'Посмотрите на этот GIF, который я создал!',
+            url: '{{ gif_url }}'
+        });
+    } else {
+        copyLink();
+    }
+}
+
+function copyLink() {
+    const gifUrl = '{{ gif_url }}';
+    const fullUrl = window.location.origin + gifUrl;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(fullUrl).then(() => {
+            showNotification('Ссылка скопирована в буфер обмена!', 'success');
+        });
+    } else {
+        // Fallback для старых браузеров
+        const textArea = document.createElement('textarea');
+        textArea.value = fullUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('Ссылка скопирована в буфер обмена!', 'success');
+    }
+}
+
+function viewFullscreen() {
+    openLightbox('{{ gif_url }}');
+}
+
+function showInfo() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Подробная информация</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Исходный файл:</h6>
+                            <p>{{ original_filename }}</p>
+                            
+                            <h6>Формат вывода:</h6>
+                            <p>Анимированный GIF</p>
+                            
+                            <h6>Статус:</h6>
+                            <p class="text-success">✓ Конвертация завершена</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Ссылка на файл:</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" value="{{ gif_url }}" readonly id="gif-url-input">
+                                <button class="btn btn-outline-primary" onclick="copyFromInput()">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            
+                            <h6>Размер файла:</h6>
+                            <p id="modal-file-size">Загружается...</p>
+                            
+                            <h6>Дата создания:</h6>
+                            <p>${new Date().toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Обновить размер файла в модальном окне
+    const fileSize = document.querySelector('#file-size small').textContent;
+    document.getElementById('modal-file-size').textContent = fileSize;
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+function copyFromInput() {
+    const input = document.getElementById('gif-url-input');
+    input.select();
+    document.execCommand('copy');
+    showNotification('Ссылка скопирована!', 'success');
+}
+
+// Лайтбокс для полноэкранного просмотра
+function openLightbox(url) {
+    const lightbox = document.createElement('div');
+    lightbox.className = 'lightbox-overlay';
+    lightbox.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    `;
+    
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    `;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 40px;
+        cursor: pointer;
+        z-index: 10000;
+    `;
+    
+    lightbox.appendChild(img);
+    lightbox.appendChild(closeBtn);
+    document.body.appendChild(lightbox);
+    
+    // Закрытие лайтбокса
+    function closeLightbox() {
+        document.body.removeChild(lightbox);
+    }
+    
+    lightbox.addEventListener('click', closeLightbox);
+    closeBtn.addEventListener('click', closeLightbox);
+    
+    // Закрытие по Escape
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeLightbox();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+}
+
+// Функция уведомлений
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            const bsAlert = new bootstrap.Alert(notification);
+            bsAlert.close();
+        }
+    }, 5000);
+}
 </script>
 {% endblock %}

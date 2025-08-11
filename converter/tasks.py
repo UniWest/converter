@@ -175,6 +175,56 @@ def convert_video(self, task_id: str, input_path: str, output_format: str,
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def convert_video_to_gif_hardened(self, task_id: int, input_path: str, **conversion_options):
+    """
+    Hardened video to GIF conversion task with advanced FFmpeg backend.
+    
+    Args:
+        task_id: ConversionTask ID for progress tracking
+        input_path: Path to input video file  
+        **conversion_options: All conversion parameters from VideoUploadForm
+    """
+    from .services import VideoConversionService
+    
+    try:
+        update_task_progress(task_id, 5, "Запуск защищённой конвертации видео в GIF")
+        
+        # Initialize conversion service
+        conversion_service = VideoConversionService()
+        
+        # Perform conversion
+        result = conversion_service.convert_video_to_gif(
+            task_id=task_id,
+            input_path=input_path,
+            **conversion_options
+        )
+        
+        if result['success']:
+            update_task_progress(task_id, 100, "Конвертация успешно завершена")
+            return result
+        else:
+            # Task failure is already handled in the service
+            raise Exception(result.get('error_message', 'Неизвестная ошибка конвертации'))
+            
+    except Exception as exc:
+        logger.error(f'Ошибка в задаче convert_video_to_gif_hardened {task_id}: {exc}')
+        
+        # Update task status
+        try:
+            conversion_task = ConversionTask.objects.get(id=task_id)
+            conversion_task.fail(str(exc))
+        except:
+            pass
+        
+        # Retry logic
+        if self.request.retries < self.max_retries:
+            logger.info(f'Повторная попытка конвертации GIF {task_id} через {self.default_retry_delay} секунд')
+            raise self.retry(exc=exc)
+        else:
+            raise exc
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def convert_audio(self, task_id: str, input_path: str, output_format: str,
                   quality: str = 'medium', custom_options: Optional[Dict[str, Any]] = None):
     """
