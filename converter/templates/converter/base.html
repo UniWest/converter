@@ -931,6 +931,9 @@
     
     <!-- Custom JS -->
     <script>
+        // Глобальный базовый префикс приложения (учитывает подключение под /app/)
+        window.APP_BASE = '/app';
+        
         // Обновление имени файла в кастомном input
         function updateFileName(input) {
             const fileName = input.files[0] ? input.files[0].name : 'Файл не выбран';

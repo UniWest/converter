@@ -23,6 +23,12 @@ urlpatterns = [
     # API endpoints for conversion interface
     path("api/conversion/submit/", views.api_conversion_submit, name="api_conversion_submit"),
     path("api/conversion/queue/", views.api_conversion_queue, name="api_conversion_queue"),
+
+    # API endpoints for conversion results management (used by results.html)
+    path("api/conversion/results/", api_views_extended.get_conversion_results, name="api_conversion_results"),
+    path("api/conversion/download-batch/", api_views_extended.download_batch_results, name="api_conversion_download_batch"),
+    path("api/conversion/clear-completed/", api_views_extended.clear_completed_tasks, name="api_conversion_clear_completed"),
+    path("api/conversion/results/<int:result_id>/", api_views_extended.delete_conversion_result, name="api_conversion_delete_result"),
     
     path("conversion-interface/", views.conversion_interface_view, name="conversion_interface"),
     path("comprehensive/", views.comprehensive_converter_view, name="comprehensive_converter"),
@@ -38,4 +44,8 @@ urlpatterns = [
 
     # Одноразовая загрузка (скачать и удалить)
     path("download/<str:category>/<str:filename>/", views.download_and_delete, name="download_once"),
+    
+    # Оптимизированные маршруты скачивания для облачных платформ
+    path("download-optimized/<str:category>/<str:filename>/", views.optimized_download, name="optimized_download"),
+    path("download-test/", views.download_test, name="download_test"),
 ]

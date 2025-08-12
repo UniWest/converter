@@ -488,11 +488,22 @@ class VideoUploadView(View):
                     )
                     
                     if result['success']:
-                        # Return file download response
+                        # Return file download response using optimized handler
                         # Attach request onto self for cookie access
                         self.request = request
                         self._download_token = request.POST.get('download_token')
-                        return self._serve_converted_file(result['output_path'])
+                        
+                        # Use optimized download handler for cloud platforms
+                        try:
+                            from .download_handlers import get_download_handler
+                            downloader = get_download_handler()
+                            return downloader.serve_file(
+                                file_path=result['output_path'],
+                                delete_after=True  # Clean up after download
+                            )
+                        except ImportError:
+                            # Fallback to original method
+                            return self._serve_converted_file(result['output_path'])
                     else:
                         # Handle conversion error
                         error_msg = result.get('error_message', 'Неизвестная ошибка конвертации')
@@ -525,21 +536,42 @@ class VideoUploadView(View):
         return render(request, 'converter/home.html', {'form': form})
     
     def _serve_converted_file(self, file_path):
-        """Serve the converted GIF file for download."""
+        """Serve the converted GIF file for download with Render cloud compatibility."""
         if not os.path.exists(file_path):
             raise Http404("Конвертированный файл не найден")
         
         filename = os.path.basename(file_path)
-        response = FileResponse(
-            open(file_path, 'rb'),
-            as_attachment=True,
-            filename=filename,
+        file_size = os.path.getsize(file_path)
+        
+        # For cloud platforms like Render, use streaming response to avoid memory issues
+        def file_iterator():
+            try:
+                with open(file_path, 'rb') as f:
+                    while True:
+                        chunk = f.read(8192)  # 8KB chunks
+                        if not chunk:
+                            break
+                        yield chunk
+            except Exception as e:
+                logger.error(f"Error reading file {file_path}: {e}")
+                raise
+        
+        response = StreamingHttpResponse(
+            file_iterator(),
             content_type='image/gif'
         )
         
-        # Add headers for better download experience
+        # Critical headers for proper download on cloud platforms
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        response['Content-Length'] = os.path.getsize(file_path)
+        response['Content-Length'] = str(file_size)
+        response['Accept-Ranges'] = 'bytes'
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        
+        # Headers for Render compatibility
+        response['X-Content-Type-Options'] = 'nosniff'
+        response['X-Frame-Options'] = 'DENY'
         
         # If client sent a download token, reflect it in a cookie so front-end can detect completion
         token = self.request.POST.get('download_token') if hasattr(self, 'request') else None
@@ -549,7 +581,10 @@ class VideoUploadView(View):
         except Exception:
             token = None
         if token:
-            response.set_cookie('download_token', token, max_age=120, samesite='Lax', path='/')
+            response.set_cookie('download_token', token, max_age=120, samesite='Lax', path='/', secure=not settings.DEBUG)
+        
+        # Log successful file serving for debugging
+        logger.info(f"Serving file {filename} ({file_size} bytes) for download")
         
         return response
 
@@ -2326,6 +2361,35 @@ def handle_audio_to_text_conversion(request, audio_file):
     temp_request = request
     temp_request.FILES = {'audio': audio_file}
     return api_audio_to_text_view(temp_request)
+
+
+# Оптимизированные обработчики скачивания для Render
+@require_http_methods(["GET"])
+def optimized_download(request, category, filename):
+    """Оптимизированное скачивание файлов для облачных платформ."""
+    try:
+        from .download_handlers import download_converted_file
+        return download_converted_file(request, category, filename)
+    except Exception as e:
+        logger.error(f"Optimized download error: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Ошибка при оптимизированном скачивании файла'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def download_test(request):
+    """Тестирование системы скачивания файлов."""
+    try:
+        from .download_handlers import download_test_view
+        return download_test_view(request)
+    except Exception as e:
+        logger.error(f"Download test error: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка тестирования скачивания: {str(e)}'
+        }, status=500)
 
 
 @require_http_methods(["POST"])

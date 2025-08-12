@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.__progressPoller) clearInterval(window.__progressPoller);
         window.__progressPoller = setInterval(async () => {
             try {
-                const res = await fetch('/app/api/latest-progress/');
+                const res = await fetch(`${window.APP_BASE}/api/latest-progress/`);
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data && data.task) {

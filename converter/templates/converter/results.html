@@ -321,7 +321,7 @@ class ResultsManager {
         }
         
         try {
-            const response = await fetch('/api/conversion/results/');
+            const response = await fetch(`${window.APP_BASE}/api/conversion/results/`);
             if (response.ok) {
                 const data = await response.json();
                 this.results = data.results || [];
@@ -538,7 +538,7 @@ class ResultsManager {
         
         // Создаем zip-архив на сервере
         try {
-            const response = await fetch('/api/conversion/download-batch/', {
+            const response = await fetch(`${window.APP_BASE}/api/conversion/download-batch/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -565,7 +565,7 @@ class ResultsManager {
         if (!confirm('Удалить все завершенные задачи?')) return;
         
         try {
-            const response = await fetch('/api/conversion/clear-completed/', {
+            const response = await fetch(`${window.APP_BASE}/api/conversion/clear-completed/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -620,10 +620,10 @@ function closeLightbox() {
 
 function downloadFile(url, filename) {
     let dl = url;
-    if (url.includes('/media/gifs/')) dl = url.replace('/media/gifs/', '/converter/download/gifs/');
-    else if (url.includes('/media/images/')) dl = url.replace('/media/images/', '/converter/download/images/');
-    else if (url.includes('/media/videos/')) dl = url.replace('/media/videos/', '/converter/download/videos/');
-    else if (url.includes('/media/audio/')) dl = url.replace('/media/audio/', '/converter/download/audio/');
+    if (url.includes('/media/gifs/')) dl = url.replace('/media/gifs/', `${window.APP_BASE}/converter/download/gifs/`);
+    else if (url.includes('/media/images/')) dl = url.replace('/media/images/', `${window.APP_BASE}/converter/download/images/`);
+    else if (url.includes('/media/videos/')) dl = url.replace('/media/videos/', `${window.APP_BASE}/converter/download/videos/`);
+    else if (url.includes('/media/audio/')) dl = url.replace('/media/audio/', `${window.APP_BASE}/converter/download/audio/`);
     const a = document.createElement('a');
     a.href = dl;
     a.download = filename;
@@ -644,7 +644,7 @@ async function deleteResult(resultId) {
     if (!confirm('Удалить этот результат?')) return;
     
     try {
-        const response = await fetch(`/api/conversion/results/${resultId}/`, {
+        const response = await fetch(`${window.APP_BASE}/api/conversion/results/${resultId}/`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
